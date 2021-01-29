@@ -16,17 +16,20 @@ package jodelle.powermining.handlers;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.crafting.CraftItemExcavator;
 import jodelle.powermining.crafting.CraftItemHammer;
+import jodelle.powermining.crafting.CraftItemHoe;
 import jodelle.powermining.listeners.CraftItemListener;
 
 public class CraftItemHandler {
 	public CraftItemHandler() {};
 	public CraftItemHammer HammerClass;
 	public CraftItemExcavator ExcavatorClass;
+	public CraftItemHoe HoeClass;
 	public CraftItemListener listener;
 
 	public void Init(PowerMining plugin) {
 		HammerClass = new CraftItemHammer(plugin);
 		ExcavatorClass = new CraftItemExcavator(plugin);
+		HoeClass = new CraftItemHoe(plugin);
 		listener = new CraftItemListener(plugin);
 	}
 
@@ -35,6 +38,9 @@ public class CraftItemHandler {
 	}
 	public CraftItemHammer getHammerClass() {
 		return HammerClass;
+	}
+	public CraftItemHoe getHoeClass() {
+		return HoeClass;
 	}
 
 	public CraftItemExcavator getExcavatorClass() {

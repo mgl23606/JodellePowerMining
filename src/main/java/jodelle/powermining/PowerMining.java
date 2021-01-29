@@ -12,21 +12,25 @@
 
 package jodelle.powermining;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-
-import jodelle.powermining.handlers.*;
-import jodelle.powermining.lib.Reference;
-import org.bukkit.Material;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import me.ryanhamshire.GriefPrevention.GriefPrevention;
-
 import com.palmergames.bukkit.towny.Towny;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
+import jodelle.powermining.enchantment.Glow;
+import jodelle.powermining.handlers.*;
+import jodelle.powermining.lib.Reference;
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+
 public final class PowerMining extends JavaPlugin {
+	public JavaPlugin plugin;
 	PlayerInteractHandler handlerPlayerInteract;
 	BlockBreakHandler handlerBlockBreak;
 	CraftItemHandler handlerCraftItem;
@@ -58,9 +62,10 @@ public final class PowerMining extends JavaPlugin {
 		this.saveDefaultConfig();
 
 		getLogger().info("PowerMining plugin was enabled.");
-
+		registerGlow();
 		processConfig();
 		getLogger().info("Finished processing config file.");
+
 	}
 
 	@Override
@@ -151,5 +156,25 @@ public final class PowerMining extends JavaPlugin {
 
 	public Towny getTowny() {
 		return (Towny) towny;
+	}
+
+	public void registerGlow() {
+		try {
+			Field f = Enchantment.class.getDeclaredField("acceptingNew");
+			f.setAccessible(true);
+			f.set(null, true);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			Glow glow = new Glow(new NamespacedKey(plugin, "glow"));
+			Enchantment.registerEnchantment(glow);
+		}
+		catch (IllegalArgumentException e){
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 }

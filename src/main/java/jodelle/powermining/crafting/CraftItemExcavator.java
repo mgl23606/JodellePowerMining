@@ -12,6 +12,7 @@
 
 package jodelle.powermining.crafting;
 
+import jodelle.powermining.enchantment.Glow;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -55,6 +56,7 @@ public class CraftItemExcavator {
 
 	// Get metadata for all excavator types, add lore and change the names to identify them as excavators
 	public void modifyItemMeta() {
+
 		ItemMeta WoodExcavatorMeta = WoodExcavator.getItemMeta();
 		ItemMeta StoneExcavatorMeta = StoneExcavator.getItemMeta();
 		ItemMeta IronExcavatorMeta = IronExcavator.getItemMeta();
@@ -73,11 +75,22 @@ public class CraftItemExcavator {
 		NetheriteExcavatorMeta.setDisplayName("Netherite Excavator");
 
 		WoodExcavatorMeta.setLore(lore);
+		WoodExcavatorMeta.addEnchant(new Glow(new NamespacedKey(plugin,"WoodExcavator")),  1, false);
+
 		StoneExcavatorMeta.setLore(lore);
+		StoneExcavatorMeta.addEnchant(new Glow(new NamespacedKey(plugin,"StoneExcavator")),  1, false);
+
 		IronExcavatorMeta.setLore(lore);
+		IronExcavatorMeta.addEnchant(new Glow(new NamespacedKey(plugin,"IronExcavator")),  1, false);
+
 		GoldExcavatorMeta.setLore(lore);
+		GoldExcavatorMeta.addEnchant(new Glow(new NamespacedKey(plugin,"GoldExcavator")),  1, false);
+
 		DiamondExcavatorMeta.setLore(lore);
+		DiamondExcavatorMeta.addEnchant(new Glow(new NamespacedKey(plugin,"DiamondExcavator")),  1, false);
+
 		NetheriteExcavatorMeta.setLore(lore);
+		NetheriteExcavatorMeta.addEnchant(new Glow(new NamespacedKey(plugin,"NetheriteExcavator")),  1, false);
 
 		WoodExcavator.setItemMeta(WoodExcavatorMeta);
 		StoneExcavator.setItemMeta(StoneExcavatorMeta);

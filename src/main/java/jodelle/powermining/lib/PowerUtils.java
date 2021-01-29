@@ -289,7 +289,11 @@ public class PowerUtils {
 					canCraft = true;
 
 				break;
+			case NETHERITE_HOE:
+				if (player.hasPermission("powermining.craft.hoe.netherite"))
+					canCraft = true;
 
+				break;
 			default:
 				break;
 		}
@@ -357,7 +361,12 @@ public class PowerUtils {
 
 				break;
 			case NETHERITE_SHOVEL:
-				if (player.hasPermission("powermining.enchant.excavator.netherite"))
+				if (player.hasPermission("powermining.use.excavator.netherite"))
+					canUse = true;
+
+				break;
+			case NETHERITE_HOE:
+				if (player.hasPermission("powermining.use.hoe.netherite"))
 					canUse = true;
 
 				break;
@@ -430,6 +439,12 @@ public class PowerUtils {
 				break;
 			case NETHERITE_SHOVEL:
 				if (player.hasPermission("powermining.enchant.excavator.netherite"))
+					canEnchant = true;
+
+				break;
+
+			case NETHERITE_HOE:
+				if (player.hasPermission("powermining.enchant.hoe.netherite"))
 					canEnchant = true;
 
 				break;

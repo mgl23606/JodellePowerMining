@@ -12,6 +12,8 @@
 
 package jodelle.powermining.crafting;
 
+
+import jodelle.powermining.enchantment.Glow;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -72,11 +74,22 @@ public class CraftItemHammer {
 		NetheriteHammerMeta.setDisplayName("Netherite Hammer");
 
 		WoodHammerMeta.setLore(lore);
+		WoodHammerMeta.addEnchant(new Glow(new NamespacedKey(plugin,"WoodHammer")),  1, false);
+
 		StoneHammerMeta.setLore(lore);
+		StoneHammerMeta.addEnchant(new Glow(new NamespacedKey(plugin,"StoneHammer")),  1, false);
+
 		IronHammerMeta.setLore(lore);
+		IronHammerMeta.addEnchant(new Glow(new NamespacedKey(plugin,"IronHammer")),  1, false);
+
 		GoldHammerMeta.setLore(lore);
+		GoldHammerMeta.addEnchant(new Glow(new NamespacedKey(plugin,"GoldHammer")),  1, false);
+
 		DiamondHammerMeta.setLore(lore);
+		DiamondHammerMeta.addEnchant(new Glow(new NamespacedKey(plugin,"DiamondHammer")),  1, false);
+
 		NetheriteHammerMeta.setLore(lore);
+		NetheriteHammerMeta.addEnchant(new Glow(new NamespacedKey(plugin,"NetheriteHammer")),  1, false);
 
 		WoodHammer.setItemMeta(WoodHammerMeta);
 		StoneHammer.setItemMeta(StoneHammerMeta);
