@@ -17,17 +17,24 @@ import java.util.Map;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.PowerUtils;
+import net.md_5.bungee.api.chat.ClickEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+
+import static com.palmergames.bukkit.towny.TownyLogger.log;
 
 public class BlockBreakListener implements Listener {
 	public PowerMining plugin;
@@ -87,11 +94,14 @@ public class BlockBreakListener implements Listener {
 
 				boolean useHammer = false;
 				boolean useExcavator = false;
+				//boolean useHoe = false;
 
 				// This bit is necessary to guarantee we only get one or the other as true, otherwise it might break blocks with the wrong tool
 				if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat));
 				else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat));
+				//else if (useHoe = PowerUtils.validateHoe(handItem.getType(),blockMat));
 
+				//if (useHammer || useExcavator || useHoe) {
 				if (useHammer || useExcavator) {
 
 					// Check if player has permission to break the block

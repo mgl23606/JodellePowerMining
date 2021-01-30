@@ -12,6 +12,7 @@
 
 package jodelle.powermining.lib;
 
+import com.sk89q.worldguard.blacklist.target.MaterialTarget;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -22,6 +23,11 @@ public class Reference {
 	public static HashMap<Material, ArrayList<Material>> MINABLE = new HashMap<Material, ArrayList<Material>>();
 
 	public static ArrayList<Material> DIGGABLE = new ArrayList<Material>();
+
+	public static ArrayList<Material> HOE = new ArrayList<Material>(Arrays.asList(
+			Material.GRASS_BLOCK,
+			Material.DIRT
+	));
 
 	public static ArrayList<Material> MINABLE_SILKTOUCH =  new ArrayList<Material>(Arrays.asList(
 		Material.STONE,
@@ -82,5 +88,9 @@ public class Reference {
 		Material.GOLDEN_SHOVEL,
 		Material.DIAMOND_SHOVEL,
 		Material.NETHERITE_SHOVEL
+	));
+
+	public static ArrayList<Material> HOES = new ArrayList<Material>(Arrays.asList(
+			Material.NETHERITE_HOE
 	));
 }

@@ -18,6 +18,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import jodelle.powermining.enchantment.Glow;
 import jodelle.powermining.handlers.*;
 import jodelle.powermining.lib.Reference;
+import jodelle.powermining.listeners.ClickPlayerListener;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -36,6 +37,7 @@ public final class PowerMining extends JavaPlugin {
 	CraftItemHandler handlerCraftItem;
 	EnchantItemHandler handlerEnchantItem;
 	InventoryClickHandler handlerInventoryClick;
+	ClickPlayerHandler handlerClickPlayer;
 
 	Plugin worldguard;
 	Plugin griefprevention;
@@ -48,12 +50,14 @@ public final class PowerMining extends JavaPlugin {
 		handlerCraftItem = new CraftItemHandler();
 		handlerEnchantItem = new EnchantItemHandler();
 		handlerInventoryClick = new InventoryClickHandler();
+		handlerClickPlayer = new ClickPlayerHandler();
 
 		handlerPlayerInteract.Init(this);
 		handlerBlockBreak.Init(this);
 		handlerCraftItem.Init(this);
 		handlerEnchantItem.Init(this);
 		handlerInventoryClick.Init(this);
+		handlerClickPlayer.Init(this);
 
 		worldguard = getServer().getPluginManager().getPlugin("WorldGuard");
 		griefprevention = getServer().getPluginManager().getPlugin("GriefPrevention");
@@ -132,6 +136,10 @@ public final class PowerMining extends JavaPlugin {
 
 	public BlockBreakHandler getBlockBreakHandler() {
 		return handlerBlockBreak;
+	}
+
+	public ClickPlayerHandler getHandlerClickPlayer() {
+		return handlerClickPlayer;
 	}
 
 	public CraftItemHandler getCraftItemHandler() {

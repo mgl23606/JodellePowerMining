@@ -8,23 +8,30 @@
 
 package jodelle.powermining.lib;
 
+import com.palmergames.bukkit.towny.TownyMessaging;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.crafting.CraftItemExcavator;
 import jodelle.powermining.crafting.CraftItemHammer;
+import jodelle.powermining.crafting.CraftItemHoe;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class PowerUtils {
+	private static TownyMessaging console;
 	public static double CHANCE_FORTUNE_I = 0.33;
 	public static double CHANCE_FORTUNE_II = 0.25;
 	public static double CHANCE_FORTUNE_III = 0.20;
@@ -41,8 +48,8 @@ public class PowerUtils {
 		if (lore == null)
 			return false;
 
-		return (Reference.PICKAXES.contains(item.getType()) || Reference.SPADES.contains(item.getType()) &&
-				(lore.contains(CraftItemHammer.loreString) || lore.contains(CraftItemExcavator.loreString)));
+		return (Reference.PICKAXES.contains(item.getType()) || Reference.SPADES.contains(item.getType())|| Reference.HOES.contains(item.getType()) &&
+				(lore.contains(CraftItemHammer.loreString) || lore.contains(CraftItemExcavator.loreString) || lore.contains(CraftItemHoe.loreString)));
 	}
 
 	// This method returns the total amount to be dropped based on fortune level and the normal drop amount
@@ -106,6 +113,10 @@ public class PowerUtils {
 	// This method returns if the block is digable
 	public static boolean isDigable(Material blockType) {
 		return Reference.DIGGABLE.contains(blockType);
+	}
+	// This method returns if the block is digable
+	public static boolean isFarm(Material blockType) {
+		return Reference.HOE.contains(blockType);
 	}
 
 	// This method will process the enchantment information and apply to to create the appropriate drop
@@ -223,6 +234,43 @@ public class PowerUtils {
 		blocks.removeAll(Collections.singleton(null));
 		return blocks;
 	}
+
+	// This method returns a list of surrounding (3x3) blocks given a block face and target block
+	public static ArrayList<Block> getSurroundingBlocksFarm(BlockFace blockFace, Block targetBlock) {
+		ArrayList<Block> blocks = new ArrayList<Block>();
+		World world = targetBlock.getWorld();
+		int x, y, z;
+		x = targetBlock.getX();
+		y = targetBlock.getY();
+		z = targetBlock.getZ();
+
+		// Check the block face from which the block is being broken in order to get the correct surrounding blocks
+		switch(blockFace) {
+			case UP:
+				blocks.add(world.getBlockAt(x+1, y, z));
+				blocks.add(world.getBlockAt(x-1, y, z));
+				blocks.add(world.getBlockAt(x, y, z+1));
+				blocks.add(world.getBlockAt(x, y, z-1));
+				blocks.add(world.getBlockAt(x+1, y, z+1));
+				blocks.add(world.getBlockAt(x-1, y, z-1));
+				blocks.add(world.getBlockAt(x+1, y, z-1));
+				blocks.add(world.getBlockAt(x-1, y, z+1));
+				break;
+			default:
+				break;
+		}
+
+		// Trim the nulls from the list
+		blocks.removeAll(Collections.singleton(null));
+		return blocks;
+	}
+
+
+
+
+
+
+
 
 	// This method returns if the player can craft the target item
 	public static boolean checkCraftPermission(Player player, Material itemType) {
@@ -457,8 +505,6 @@ public class PowerUtils {
 
 	// This method returns if the player can destroy the target block
 	public static boolean canBreak(PowerMining plugin, Player player, Block block) {
-
-
 		return true;
 	}
 
@@ -471,5 +517,9 @@ public class PowerUtils {
 	// Returns if the tool is a valid excavator against certain block
 	public static boolean validateExcavator(Material excavatorType, Material blockType) {
 		return (isDigable(blockType) && Reference.SPADES.contains(excavatorType));
+	}
+
+	public static boolean validateHoe(Material hoeType, Material blockType){
+		return (isFarm(blockType) && Reference.HOES.contains(hoeType));
 	}
 }
