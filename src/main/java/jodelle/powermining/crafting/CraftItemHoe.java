@@ -1,11 +1,13 @@
 package jodelle.powermining.crafting;
 
+import jodelle.powermining.PowerMining;
 import jodelle.powermining.enchantment.Glow;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -28,6 +30,10 @@ public class CraftItemHoe {
     // Get metadata for all hammer types, add lore and change the names to identify them as hammers
     public void modifyItemMeta() {
         ItemMeta NetheriteHoeMeta = NetheriteHoe.getItemMeta();
+
+        NamespacedKey isPowerTool = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
+        NetheriteHoeMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+
 
         ArrayList<String> lore = new ArrayList<String>();
         lore.add(loreString);

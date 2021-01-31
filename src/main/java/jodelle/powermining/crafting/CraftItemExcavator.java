@@ -12,6 +12,7 @@
 
 package jodelle.powermining.crafting;
 
+import jodelle.powermining.PowerMining;
 import jodelle.powermining.enchantment.Glow;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
