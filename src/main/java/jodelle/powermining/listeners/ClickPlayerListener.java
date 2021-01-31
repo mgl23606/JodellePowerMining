@@ -18,8 +18,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class ClickPlayerListener implements Listener
-{
+public class ClickPlayerListener implements Listener {
     public PowerMining plugin;
     public boolean useDurabilityPerBlock;
 
@@ -31,8 +30,8 @@ public class ClickPlayerListener implements Listener
         useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
     }
 
-    @EventHandler(priority= EventPriority.HIGH)
-    public void onPlayerUse(PlayerInteractEvent event){
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerUse(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         ItemStack handItem = player.getItemInHand();
         Material handItemType = handItem.getType();
@@ -58,13 +57,13 @@ public class ClickPlayerListener implements Listener
                 short curDur = handItem.getDurability();
                 short maxDur = handItem.getType().getMaxDurability();
 
-                for (Block e: PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.HOE_RADIUS)) {
+                for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.HOE_RADIUS)) {
                     Material blockMat = e.getType();
                     Location blockLoc = e.getLocation();
 
                     boolean useHoe = false;
-                    if (useHoe = PowerUtils.validateHoe(handItem.getType(),blockMat));
-                    if (useHoe){
+                    if (useHoe = PowerUtils.validateHoe(handItem.getType(), blockMat)) ;
+                    if (useHoe) {
                         //e.breakNaturally(handItem);
                         e.setType(Material.FARMLAND);
                         // If this is set, durability will be reduced from the tool for each broken block
@@ -76,7 +75,27 @@ public class ClickPlayerListener implements Listener
                         }
                     }
                 }
+
+                for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.HOE_RADIUS)) {
+                    Material blockMat = e.getType();
+                    Location blockLoc = e.getLocation();
+
+                    e.setType(Material.GRASS_PATH);
+
+                    boolean useShovel = false;
+                    if (useShovel = PowerUtils.validateShovel(handItem.getType(), blockMat)) ;
+                    if (useShovel) {
+                        if (useDurabilityPerBlock || !player.hasPermission("powermining.highdurability")) {
+                            if (curDur++ < maxDur)
+                                handItem.setDurability(curDur);
+                            else
+                                break;
+                        }
+                    }
+                }
             }
-        } catch (Exception e ){ }
+        } catch (Exception e) {
+
+        }
     }
 }

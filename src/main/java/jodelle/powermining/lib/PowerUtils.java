@@ -116,7 +116,10 @@ public class PowerUtils {
 	}
 	// This method returns if the block is digable
 	public static boolean isFarm(Material blockType) {
-		return Reference.HOE.contains(blockType);
+		return Reference.FARM.contains(blockType);
+	}
+	public static boolean isPath(Material blockType) {
+		return Reference.PATH.contains(blockType);
 	}
 
 	// This method will process the enchantment information and apply to to create the appropriate drop
@@ -182,7 +185,7 @@ public class PowerUtils {
 	}
 
 	// This method returns a list of surrounding (3x3) blocks given a block face and target block
-	public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock, Integer raidus) {
+	public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock, Integer raidus, Integer deep) {
 		ArrayList<Block> blocks = new ArrayList<Block>();
 		World world = targetBlock.getWorld();
 
@@ -196,7 +199,7 @@ public class PowerUtils {
 			case UP:
 			case DOWN:
 				for(int x = bx - raidus; x <= bx + raidus; x++) {
-					for(int y = by - raidus; y <= by + raidus; y++) {
+					for(int y = by - deep; y <= by + deep; y++) {
 						for(int z = bz - raidus; z <= bz + raidus; z++) {
 							blocks.add(world.getBlockAt(x, by, z));
 						}
@@ -205,7 +208,7 @@ public class PowerUtils {
 				break;
 			case EAST:
 			case WEST:
-				for(int x = bx - raidus; x <= bx + raidus; x++) {
+				for(int x = bx - deep; x <= bx + deep; x++) {
 					for(int y = by - raidus; y <= by + raidus; y++) {
 						for(int z = bz - raidus; z <= bz + raidus; z++) {
 							blocks.add(world.getBlockAt(bx, y, z));
@@ -217,7 +220,7 @@ public class PowerUtils {
 			case SOUTH:
 				for(int x = bx - raidus; x <= bx + raidus; x++) {
 					for(int y = by - raidus; y <= by + raidus; y++) {
-						for(int z = bz - raidus; z <= bz + raidus; z++) {
+						for(int z = bz - deep; z <= bz + deep; z++) {
 							blocks.add(world.getBlockAt(x, y, bz));
 						}
 					}
@@ -261,13 +264,6 @@ public class PowerUtils {
 		blocks.removeAll(Collections.singleton(null));
 		return blocks;
 	}
-
-
-
-
-
-
-
 
 	// This method returns if the player can craft the target item
 	public static boolean checkCraftPermission(Player player, Material itemType) {
@@ -518,5 +514,9 @@ public class PowerUtils {
 
 	public static boolean validateHoe(Material hoeType, Material blockType){
 		return (isFarm(blockType) && Reference.HOES.contains(hoeType));
+	}
+
+	public static boolean validateShovel(Material excavatorType, Material blockType){
+		return (isPath(blockType) && Reference.SPADES.contains(excavatorType));
 	}
 }

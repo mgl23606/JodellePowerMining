@@ -89,7 +89,7 @@ public class BlockBreakListener implements Listener {
 			short maxDur = handItem.getType().getMaxDurability();
 
 			// Breaks surrounding blocks as long as they match the corresponding tool
-			for (Block e: PowerUtils.getSurroundingBlocks(blockFace, block, Reference.HAMMER_RADIUS)) {
+			for (Block e: PowerUtils.getSurroundingBlocks(blockFace, block, Reference.HAMMER_RADIUS, Reference.HAMMER_DEEP)) {
 				Material blockMat = e.getType();
 				Location blockLoc = e.getLocation();
 

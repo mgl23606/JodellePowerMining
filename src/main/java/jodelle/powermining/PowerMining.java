@@ -130,10 +130,11 @@ public final class PowerMining extends JavaPlugin {
 		}
 
 
-		//Register radius for tools
+		//Register for tools
 		try	{
 			Reference.HOE_RADIUS = getConfig().getInt("hoeRadius");
 			Reference.HAMMER_RADIUS = getConfig().getInt("hammerRadius");
+			Reference.HAMMER_DEEP = getConfig().getInt("hammerDeep");
 		}catch (NullPointerException e){
 			getLogger().info("HOE, check if hoes radius is currectly added.");
 		}
