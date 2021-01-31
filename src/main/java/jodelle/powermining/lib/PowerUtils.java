@@ -12,10 +12,8 @@ import com.palmergames.bukkit.towny.TownyMessaging;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.crafting.CraftItemExcavator;
 import jodelle.powermining.crafting.CraftItemHammer;
-import jodelle.powermining.crafting.CraftItemHoe;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -23,15 +21,15 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.io.Console;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 public class PowerUtils {
-	private static TownyMessaging console;
 	public static double CHANCE_FORTUNE_I = 0.33;
 	public static double CHANCE_FORTUNE_II = 0.25;
 	public static double CHANCE_FORTUNE_III = 0.20;
@@ -39,18 +37,19 @@ public class PowerUtils {
 	public PowerUtils() {}
 
 	// This method checks if the item is a power tool
+	// It checks the PersistantDataContainer of the item for a key
+	// set specifically for the powertools
 	public static boolean isPowerTool(ItemStack item) {
-		if (item == null || !item.hasItemMeta())
-			return false;
 
-		List<String> lore = item.getItemMeta().getLore();
+		PowerMining plugin = PowerMining.getInstance();
 
-		if (lore == null)
-			return false;
-
-		return (Reference.PICKAXES.contains(item.getType()) || Reference.SPADES.contains(item.getType())|| Reference.HOES.contains(item.getType()) &&
-				(lore.contains(CraftItemHammer.loreString) || lore.contains(CraftItemExcavator.loreString) || lore.contains(CraftItemHoe.loreString)));
-	}
+		PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
+		if(container.has(isPowerTool, PersistentDataType.INTEGER)) {
+			return true;
+		}
+		return false;
+}
 
 	// This method returns the total amount to be dropped based on fortune level and the normal drop amount
 	public static int getAmountPerFortune(int level, int amount) {

@@ -43,8 +43,13 @@ public final class PowerMining extends JavaPlugin {
 	Plugin griefprevention;
 	Plugin towny;
 
-	@Override
+    private static PowerMining plugin;
+
+    @Override
 	public void onEnable(){
+
+        plugin = this;
+
 		handlerPlayerInteract = new PlayerInteractHandler();
 		handlerBlockBreak = new BlockBreakHandler();
 		handlerCraftItem = new CraftItemHandler();
@@ -185,4 +190,8 @@ public final class PowerMining extends JavaPlugin {
 			e.printStackTrace();
 		}
 	}
+
+    public static PowerMining getInstance() {
+        return plugin;
+    }
 }

@@ -19,6 +19,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -72,6 +73,14 @@ public class CraftItemHammer {
 		GoldHammerMeta.setDisplayName("Golden Hammer");
 		DiamondHammerMeta.setDisplayName("Diamond Hammer");
 		NetheriteHammerMeta.setDisplayName("Netherite Hammer");
+
+		NamespacedKey isPowerTool = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
+		WoodHammerMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		StoneHammerMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		IronHammerMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		GoldHammerMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		DiamondHammerMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		NetheriteHammerMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
 
 		WoodHammerMeta.setLore(lore);
 		WoodHammerMeta.addEnchant(new Glow(new NamespacedKey(plugin,"WoodHammer")),  1, false);
