@@ -182,49 +182,46 @@ public class PowerUtils {
 	}
 
 	// This method returns a list of surrounding (3x3) blocks given a block face and target block
-	public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock) {
+	public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock, Integer raidus) {
 		ArrayList<Block> blocks = new ArrayList<Block>();
 		World world = targetBlock.getWorld();
 
-		int x, y, z;
-		x = targetBlock.getX();
-		y = targetBlock.getY();
-		z = targetBlock.getZ();
+		int bx, by, bz;
+		bx = targetBlock.getX();
+		by = targetBlock.getY();
+		bz = targetBlock.getZ();
 
 		// Check the block face from which the block is being broken in order to get the correct surrounding blocks
 		switch(blockFace) {
 			case UP:
 			case DOWN:
-				blocks.add(world.getBlockAt(x+1, y, z));
-				blocks.add(world.getBlockAt(x-1, y, z));
-				blocks.add(world.getBlockAt(x, y, z+1));
-				blocks.add(world.getBlockAt(x, y, z-1));
-				blocks.add(world.getBlockAt(x+1, y, z+1));
-				blocks.add(world.getBlockAt(x-1, y, z-1));
-				blocks.add(world.getBlockAt(x+1, y, z-1));
-				blocks.add(world.getBlockAt(x-1, y, z+1));
+				for(int x = bx - raidus; x <= bx + raidus; x++) {
+					for(int y = by - raidus; y <= by + raidus; y++) {
+						for(int z = bz - raidus; z <= bz + raidus; z++) {
+							blocks.add(world.getBlockAt(x, by, z));
+						}
+					}
+				}
 				break;
 			case EAST:
 			case WEST:
-				blocks.add(world.getBlockAt(x, y, z+1));
-				blocks.add(world.getBlockAt(x, y, z-1));
-				blocks.add(world.getBlockAt(x, y+1, z));
-				blocks.add(world.getBlockAt(x, y-1, z));
-				blocks.add(world.getBlockAt(x, y+1, z+1));
-				blocks.add(world.getBlockAt(x, y-1, z-1));
-				blocks.add(world.getBlockAt(x, y-1, z+1));
-				blocks.add(world.getBlockAt(x, y+1, z-1));
+				for(int x = bx - raidus; x <= bx + raidus; x++) {
+					for(int y = by - raidus; y <= by + raidus; y++) {
+						for(int z = bz - raidus; z <= bz + raidus; z++) {
+							blocks.add(world.getBlockAt(bx, y, z));
+						}
+					}
+				}
 				break;
 			case NORTH:
 			case SOUTH:
-				blocks.add(world.getBlockAt(x+1, y, z));
-				blocks.add(world.getBlockAt(x-1, y, z));
-				blocks.add(world.getBlockAt(x, y+1, z));
-				blocks.add(world.getBlockAt(x, y-1, z));
-				blocks.add(world.getBlockAt(x+1, y+1, z));
-				blocks.add(world.getBlockAt(x-1, y-1, z));
-				blocks.add(world.getBlockAt(x+1, y-1, z));
-				blocks.add(world.getBlockAt(x-1, y+1, z));
+				for(int x = bx - raidus; x <= bx + raidus; x++) {
+					for(int y = by - raidus; y <= by + raidus; y++) {
+						for(int z = bz - raidus; z <= bz + raidus; z++) {
+							blocks.add(world.getBlockAt(x, y, bz));
+						}
+					}
+				}
 				break;
 			default:
 				break;
@@ -236,25 +233,25 @@ public class PowerUtils {
 	}
 
 	// This method returns a list of surrounding (3x3) blocks given a block face and target block
-	public static ArrayList<Block> getSurroundingBlocksFarm(BlockFace blockFace, Block targetBlock) {
+	public static ArrayList<Block> getSurroundingBlocksFarm(BlockFace blockFace, Block targetBlock, Integer raidus) {
 		ArrayList<Block> blocks = new ArrayList<Block>();
 		World world = targetBlock.getWorld();
-		int x, y, z;
-		x = targetBlock.getX();
-		y = targetBlock.getY();
-		z = targetBlock.getZ();
+		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		int bx, by, bz;
+		bx = targetBlock.getX();
+		by = targetBlock.getY();
+		bz = targetBlock.getZ();
 
 		// Check the block face from which the block is being broken in order to get the correct surrounding blocks
 		switch(blockFace) {
 			case UP:
-				blocks.add(world.getBlockAt(x+1, y, z));
-				blocks.add(world.getBlockAt(x-1, y, z));
-				blocks.add(world.getBlockAt(x, y, z+1));
-				blocks.add(world.getBlockAt(x, y, z-1));
-				blocks.add(world.getBlockAt(x+1, y, z+1));
-				blocks.add(world.getBlockAt(x-1, y, z-1));
-				blocks.add(world.getBlockAt(x+1, y, z-1));
-				blocks.add(world.getBlockAt(x-1, y, z+1));
+				for(int x = bx - raidus; x <= bx + raidus; x++) {
+					for(int y = by - raidus; y <= by + raidus; y++) {
+						for(int z = bz - raidus; z <= bz + raidus; z++) {
+							blocks.add(world.getBlockAt(x, by, z));
+						}
+					}
+				}
 				break;
 			default:
 				break;

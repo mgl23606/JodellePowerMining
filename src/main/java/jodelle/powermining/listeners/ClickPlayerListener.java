@@ -2,6 +2,7 @@ package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.PowerUtils;
+import jodelle.powermining.lib.Reference;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -57,7 +58,7 @@ public class ClickPlayerListener implements Listener
                 short curDur = handItem.getDurability();
                 short maxDur = handItem.getType().getMaxDurability();
 
-                for (Block e: PowerUtils.getSurroundingBlocksFarm(blockFace, block)) {
+                for (Block e: PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.HOE_RADIUS)) {
                     Material blockMat = e.getType();
                     Location blockLoc = e.getLocation();
 

@@ -93,4 +93,9 @@ public class Reference {
 	public static ArrayList<Material> HOES = new ArrayList<Material>(Arrays.asList(
 			Material.NETHERITE_HOE
 	));
+
+	public static Integer HOE_RADIUS;
+
+	public static Integer HAMMER_RADIUS;
+
 }

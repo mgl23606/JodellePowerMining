@@ -128,6 +128,18 @@ public final class PowerMining extends JavaPlugin {
 		catch (NullPointerException e) {
 			getLogger().info("NPE when trying to read the Digable list from the config file, check if it's set correctly!");
 		}
+
+
+		//Register radius for tools
+		try	{
+			Reference.HOE_RADIUS = getConfig().getInt("hoeRadius");
+			Reference.HAMMER_RADIUS = getConfig().getInt("hammerRadius");
+		}catch (NullPointerException e){
+			getLogger().info("HOE, check if hoes radius is currectly added.");
+		}
+
+
+
 	}
 
 	public PlayerInteractHandler getPlayerInteractHandler() {

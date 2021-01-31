@@ -17,6 +17,7 @@ import java.util.Map;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.PowerUtils;
+import jodelle.powermining.lib.Reference;
 import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -88,7 +89,7 @@ public class BlockBreakListener implements Listener {
 			short maxDur = handItem.getType().getMaxDurability();
 
 			// Breaks surrounding blocks as long as they match the corresponding tool
-			for (Block e: PowerUtils.getSurroundingBlocks(blockFace, block)) {
+			for (Block e: PowerUtils.getSurroundingBlocks(blockFace, block, Reference.HAMMER_RADIUS)) {
 				Material blockMat = e.getType();
 				Location blockLoc = e.getLocation();
 
