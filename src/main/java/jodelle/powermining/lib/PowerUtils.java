@@ -333,8 +333,33 @@ public class PowerUtils {
 					canCraft = true;
 
 				break;
+			case WOODEN_HOE:
+				if (player.hasPermission("powermining.craft.plow.wood"))
+					canCraft = true;
+
+				break;
+			case STONE_HOE:
+				if (player.hasPermission("powermining.craft.plow.stone"))
+					canCraft = true;
+
+				break;
+			case IRON_HOE:
+				if (player.hasPermission("powermining.craft.plow.iron"))
+					canCraft = true;
+
+				break;
+			case GOLDEN_HOE:
+				if (player.hasPermission("powermining.craft.plow.gold"))
+					canCraft = true;
+
+				break;
+			case DIAMOND_HOE:
+				if (player.hasPermission("powermining.craft.plow.diamond"))
+					canCraft = true;
+
+				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.craft.hoe.netherite"))
+				if (player.hasPermission("powermining.craft.plow.netherite"))
 					canCraft = true;
 
 				break;
