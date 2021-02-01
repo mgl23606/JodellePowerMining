@@ -24,7 +24,7 @@ public class Reference {
 
 	public static ArrayList<Material> DIGGABLE = new ArrayList<Material>();
 
-	public static ArrayList<Material> HOE = new ArrayList<Material>(Arrays.asList(
+	public static ArrayList<Material> TILLABLE = new ArrayList<Material>(Arrays.asList(
 			Material.GRASS_BLOCK,
 			Material.DIRT
 	));
@@ -91,6 +91,11 @@ public class Reference {
 	));
 
 	public static ArrayList<Material> HOES = new ArrayList<Material>(Arrays.asList(
+			Material.WOODEN_HOE,
+			Material.STONE_HOE,
+			Material.IRON_HOE,
+			Material.GOLDEN_HOE,
+			Material.DIAMOND_HOE,
 			Material.NETHERITE_HOE
 	));
 }

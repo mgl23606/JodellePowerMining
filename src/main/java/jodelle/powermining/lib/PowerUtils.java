@@ -112,7 +112,7 @@ public class PowerUtils {
 	}
 	// This method returns if the block is digable
 	public static boolean isFarm(Material blockType) {
-		return Reference.HOE.contains(blockType);
+		return Reference.TILLABLE.contains(blockType);
 	}
 
 	// This method will process the enchantment information and apply to to create the appropriate drop
@@ -409,8 +409,33 @@ public class PowerUtils {
 					canUse = true;
 
 				break;
+			case WOODEN_HOE:
+				if (player.hasPermission("powermining.use.plow.wood"))
+					canUse = true;
+
+				break;
+			case STONE_HOE:
+				if (player.hasPermission("powermining.use.plow.stone"))
+					canUse = true;
+
+				break;
+			case IRON_HOE:
+				if (player.hasPermission("powermining.use.plow.iron"))
+					canUse = true;
+
+				break;
+			case GOLDEN_HOE:
+				if (player.hasPermission("powermining.use.plow.gold"))
+					canUse = true;
+
+				break;
+			case DIAMOND_HOE:
+				if (player.hasPermission("powermining.use.plow.diamond"))
+					canUse = true;
+
+				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.use.hoe.netherite"))
+				if (player.hasPermission("powermining.use.plow.netherite"))
 					canUse = true;
 
 				break;
@@ -487,8 +512,33 @@ public class PowerUtils {
 
 				break;
 
+			case WOODEN_HOE:
+				if (player.hasPermission("powermining.enchant.plow.wood"))
+					canEnchant = true;
+
+				break;
+			case STONE_HOE:
+				if (player.hasPermission("powermining.enchant.plow.stone"))
+					canEnchant = true;
+
+				break;
+			case IRON_HOE:
+				if (player.hasPermission("powermining.enchant.plow.iron"))
+					canEnchant = true;
+
+				break;
+			case GOLDEN_HOE:
+				if (player.hasPermission("powermining.enchant.plow.gold"))
+					canEnchant = true;
+
+				break;
+			case DIAMOND_HOE:
+				if (player.hasPermission("powermining.enchant.plow.diamond"))
+					canEnchant = true;
+
+				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.enchant.hoe.netherite"))
+				if (player.hasPermission("powermining.enchant.plow.netherite"))
 					canEnchant = true;
 
 				break;
@@ -515,7 +565,7 @@ public class PowerUtils {
 		return (isDigable(blockType) && Reference.SPADES.contains(excavatorType));
 	}
 
-	public static boolean validateHoe(Material hoeType, Material blockType){
+	public static boolean validatePlow(Material hoeType, Material blockType){
 		return (isFarm(blockType) && Reference.HOES.contains(hoeType));
 	}
 }
