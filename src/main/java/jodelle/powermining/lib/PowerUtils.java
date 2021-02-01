@@ -12,19 +12,15 @@ import com.palmergames.bukkit.towny.TownyMessaging;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.crafting.CraftItemExcavator;
 import jodelle.powermining.crafting.CraftItemHammer;
-import jodelle.powermining.crafting.CraftItemHoe;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
+import jodelle.powermining.crafting.CraftItemPlow;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +45,7 @@ public class PowerUtils {
 			return false;
 
 		return (Reference.PICKAXES.contains(item.getType()) || Reference.SPADES.contains(item.getType())|| Reference.HOES.contains(item.getType()) &&
-				(lore.contains(CraftItemHammer.loreString) || lore.contains(CraftItemExcavator.loreString) || lore.contains(CraftItemHoe.loreString)));
+				(lore.contains(CraftItemHammer.loreString) || lore.contains(CraftItemExcavator.loreString) || lore.contains(CraftItemPlow.loreString)));
 	}
 
 	// This method returns the total amount to be dropped based on fortune level and the normal drop amount
