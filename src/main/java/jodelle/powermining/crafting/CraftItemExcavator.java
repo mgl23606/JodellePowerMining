@@ -12,12 +12,14 @@
 
 package jodelle.powermining.crafting;
 
+import jodelle.powermining.PowerMining;
 import jodelle.powermining.enchantment.Glow;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -63,6 +65,14 @@ public class CraftItemExcavator {
 		ItemMeta GoldExcavatorMeta = GoldExcavator.getItemMeta();
 		ItemMeta DiamondExcavatorMeta = DiamondExcavator.getItemMeta();
 		ItemMeta NetheriteExcavatorMeta = NetheriteExcavator.getItemMeta();
+
+		NamespacedKey isPowerTool = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
+		WoodExcavatorMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		StoneExcavatorMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		IronExcavatorMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		GoldExcavatorMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		DiamondExcavatorMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+		NetheriteExcavatorMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
 
 		ArrayList<String> lore = new ArrayList<String>();
 		lore.add(loreString);

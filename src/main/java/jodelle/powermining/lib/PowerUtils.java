@@ -14,13 +14,18 @@ import jodelle.powermining.crafting.CraftItemExcavator;
 import jodelle.powermining.crafting.CraftItemHammer;
 import jodelle.powermining.crafting.CraftItemPlow;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
+import java.io.Console;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,18 +40,19 @@ public class PowerUtils {
 	public PowerUtils() {}
 
 	// This method checks if the item is a power tool
+	// It checks the PersistantDataContainer of the item for a key
+	// set specifically for the powertools
 	public static boolean isPowerTool(ItemStack item) {
-		if (item == null || !item.hasItemMeta())
-			return false;
 
-		List<String> lore = item.getItemMeta().getLore();
+		PowerMining plugin = PowerMining.getInstance();
 
-		if (lore == null)
-			return false;
-
-		return (Reference.PICKAXES.contains(item.getType()) || Reference.SPADES.contains(item.getType())|| Reference.HOES.contains(item.getType()) &&
-				(lore.contains(CraftItemHammer.loreString) || lore.contains(CraftItemExcavator.loreString) || lore.contains(CraftItemPlow.loreString)));
-	}
+		PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
+		if(container.has(isPowerTool, PersistentDataType.INTEGER)) {
+			return true;
+		}
+		return false;
+}
 
 	// This method returns the total amount to be dropped based on fortune level and the normal drop amount
 	public static int getAmountPerFortune(int level, int amount) {
@@ -112,7 +118,7 @@ public class PowerUtils {
 	}
 	// This method returns if the block is digable
 	public static boolean isFarm(Material blockType) {
-		return Reference.TILLABLE.contains(blockType);
+		return Reference.HOE.contains(blockType);
 	}
 
 	// This method will process the enchantment information and apply to to create the appropriate drop
@@ -359,7 +365,7 @@ public class PowerUtils {
 
 				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.craft.plow.netherite"))
+				if (player.hasPermission("powermining.craft.hoe.netherite"))
 					canCraft = true;
 
 				break;
@@ -460,7 +466,7 @@ public class PowerUtils {
 
 				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.use.plow.netherite"))
+				if (player.hasPermission("powermining.use.hoe.netherite"))
 					canUse = true;
 
 				break;
@@ -563,7 +569,7 @@ public class PowerUtils {
 
 				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.enchant.plow.netherite"))
+				if (player.hasPermission("powermining.enchant.hoe.netherite"))
 					canEnchant = true;
 
 				break;
@@ -590,7 +596,7 @@ public class PowerUtils {
 		return (isDigable(blockType) && Reference.SPADES.contains(excavatorType));
 	}
 
-	public static boolean validatePlow(Material hoeType, Material blockType){
+	public static boolean validateHoe(Material hoeType, Material blockType){
 		return (isFarm(blockType) && Reference.HOES.contains(hoeType));
 	}
 }
