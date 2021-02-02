@@ -267,13 +267,6 @@ public class PowerUtils {
 		return blocks;
 	}
 
-
-
-
-
-
-
-
 	// This method returns if the player can craft the target item
 	public static boolean checkCraftPermission(Player player, Material itemType) {
 		boolean canCraft = false;
@@ -365,7 +358,7 @@ public class PowerUtils {
 
 				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.craft.hoe.netherite"))
+				if (player.hasPermission("powermining.craft.plow.netherite"))
 					canCraft = true;
 
 				break;
@@ -466,7 +459,7 @@ public class PowerUtils {
 
 				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.use.hoe.netherite"))
+				if (player.hasPermission("powermining.use.plow.netherite"))
 					canUse = true;
 
 				break;
@@ -569,7 +562,7 @@ public class PowerUtils {
 
 				break;
 			case NETHERITE_HOE:
-				if (player.hasPermission("powermining.enchant.hoe.netherite"))
+				if (player.hasPermission("powermining.enchant.plow.netherite"))
 					canEnchant = true;
 
 				break;
