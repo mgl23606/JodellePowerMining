@@ -118,7 +118,7 @@ public class PowerUtils {
 	}
 	// This method returns if the block is digable
 	public static boolean isFarm(Material blockType) {
-		return Reference.HOE.contains(blockType);
+		return Reference.HOES.contains(blockType);
 	}
 
 	// This method will process the enchantment information and apply to to create the appropriate drop
@@ -596,7 +596,7 @@ public class PowerUtils {
 		return (isDigable(blockType) && Reference.SPADES.contains(excavatorType));
 	}
 
-	public static boolean validateHoe(Material hoeType, Material blockType){
+	public static boolean validatePlow(Material hoeType, Material blockType){
 		return (isFarm(blockType) && Reference.HOES.contains(hoeType));
 	}
 }

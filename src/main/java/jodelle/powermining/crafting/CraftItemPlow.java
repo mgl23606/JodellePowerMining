@@ -1,11 +1,13 @@
 package jodelle.powermining.crafting;
 
+import jodelle.powermining.PowerMining;
 import jodelle.powermining.enchantment.Glow;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -59,6 +61,14 @@ public class CraftItemPlow {
         GoldPlowMeta.setDisplayName("Golden Plow");
         DiamondPlowMeta.setDisplayName("Diamond Plow");
         NetheritePlowMeta.setDisplayName("Netherite Plow");
+
+        NamespacedKey isPowerTool = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
+        WoodPlowMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+        StonePlowMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+        IronPlowMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+        GoldPlowMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+        DiamondPlowMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
+        NetheritePlowMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.INTEGER, 1);
 
         WoodPlowMeta.setLore(lore);
         WoodPlowMeta.addEnchant(new Glow(new NamespacedKey(plugin,"WoodPlow")),  1, false);
