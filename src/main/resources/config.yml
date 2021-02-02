@@ -1,10 +1,10 @@
 # Enable this if you want the durability to be reduced for each broken block
 useDurabilityPerBlock: false
 #Define hummer radius and deep
-hammerRadius: 25
-hammerDeep: 2
+hammerRadius: 1
+hammerDeep: 0
 # Define hoe radius
-hoeRadius: 50
+hoeRadius: 1
 # These define the blocks that can be mined by the hammer, and which quality of base pickaxe is needed
 # (these are set according to the information on the minecraft wiki)
 Minable:
