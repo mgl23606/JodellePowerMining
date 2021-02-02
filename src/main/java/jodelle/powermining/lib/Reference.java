@@ -29,6 +29,10 @@ public class Reference {
 			Material.DIRT
 	));
 
+	public static ArrayList<Material> PATH = new ArrayList<Material>(Arrays.asList(
+			Material.GRASS_BLOCK
+	));
+
 	public static ArrayList<Material> MINABLE_SILKTOUCH =  new ArrayList<Material>(Arrays.asList(
 		Material.STONE,
 		Material.COAL_ORE,
@@ -98,4 +102,9 @@ public class Reference {
 			Material.DIAMOND_HOE,
 			Material.NETHERITE_HOE
 	));
+
+	public static Integer RADIUS;
+
+	public static Integer DEEP;
+
 }
