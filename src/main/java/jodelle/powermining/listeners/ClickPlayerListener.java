@@ -2,6 +2,7 @@ package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.PowerUtils;
+import jodelle.powermining.lib.Reference;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -55,15 +56,30 @@ public class ClickPlayerListener implements Listener {
             short curDur = handItem.getDurability();
             short maxDur = handItem.getType().getMaxDurability();
 
-            for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block)) {
+            for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.RADIUS)) {
                 Material blockMat = e.getType();
                 Location blockLoc = e.getLocation();
 
                 boolean usePlow = false;
+                boolean usePath = false;
+
                 if (usePlow = PowerUtils.validatePlow(handItem.getType(), blockMat)) ;
+                else if (usePath = PowerUtils.validatePath(handItem.getType(), blockMat));
+
                 if (usePlow) {
                     //e.breakNaturally(handItem);
                     e.setType(Material.FARMLAND);
+                    // If this is set, durability will be reduced from the tool for each broken block
+                    if (useDurabilityPerBlock || !player.hasPermission("powermining.highdurability")) {
+                        if (curDur++ < maxDur)
+                            handItem.setDurability(curDur);
+                        else
+                            break;
+                    }
+                }
+                else if (usePath){
+                    e.setType(Material.GRASS_PATH);
+
                     // If this is set, durability will be reduced from the tool for each broken block
                     if (useDurabilityPerBlock || !player.hasPermission("powermining.highdurability")) {
                         if (curDur++ < maxDur)
