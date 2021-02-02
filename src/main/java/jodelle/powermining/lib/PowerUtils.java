@@ -118,7 +118,7 @@ public class PowerUtils {
 	}
 	// This method returns if the block is digable
 	public static boolean isFarm(Material blockType) {
-		return Reference.HOES.contains(blockType);
+		return Reference.TILLABLE.contains(blockType);
 	}
 
 	// This method will process the enchantment information and apply to to create the appropriate drop
