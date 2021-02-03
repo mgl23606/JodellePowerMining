@@ -18,9 +18,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import jodelle.powermining.enchantment.Glow;
 import jodelle.powermining.handlers.*;
 import jodelle.powermining.lib.Reference;
-import jodelle.powermining.listeners.ClickPlayerListener;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import org.apache.commons.lang.ObjectUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -31,7 +29,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.naming.NameNotFoundException;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -103,6 +100,7 @@ public final class PowerMining extends JavaPlugin {
 		// Each element iterated is the name of the powertool, ex: POWER_HAMMER
 		for (Object x : (ArrayList<?>) getConfig().getList("Recipes")) {
 			try {
+
 				// This HashMap contains all the names of the blocks of the recipe
 				// as well as their quantities. Ex: DIAMOND*1
 				LinkedHashMap<String, ArrayList> l = (LinkedHashMap<String, ArrayList>) x;
@@ -111,8 +109,6 @@ public final class PowerMining extends JavaPlugin {
 					// This array is used to store all 9 itemstacks used in the recipe
 					// When an element is null signifies an empty slot in the crafting table
 					ItemStack[] craftingRecipe = new ItemStack[9];
-					craftingRecipes.put(toolName, craftingRecipe);
-
 					int i=0;
 					for (String material: (ArrayList<String>)l.get(toolName)) {
 						//console.sendMessage(ChatColor.AQUA + hammerType);
@@ -122,7 +118,6 @@ public final class PowerMining extends JavaPlugin {
 							i++;
 							continue;
 						}
-
 						// The material and the quantity are separated by '*'
 						int separator = material.indexOf('*');
 						Material materialName = Material.getMaterial(material.substring(0, separator));
@@ -135,6 +130,17 @@ public final class PowerMining extends JavaPlugin {
 						craftingRecipe[i] = new ItemStack(materialName, quantity);
 						i++;
 					}
+					if (Reference.HAMMERS.contains(toolName)) {
+						//craftingRecipes.put(toolName, craftingRecipe);
+						console.sendMessage(ChatColor.RED + "Found: " + toolName);
+						Reference.HAMMER_CRAFTING_RECIPES.put(toolName, craftingRecipe);
+					}else if(Reference.EXCAVATORS.contains(toolName)){
+						console.sendMessage(ChatColor.RED + "Found: " + toolName);
+						Reference.EXCAVATOR_CRAFTING_RECIPES.put(toolName, craftingRecipe);
+					}else if(Reference.PLOWS.contains(toolName)){
+						console.sendMessage(ChatColor.RED + "Found: " + toolName);
+						Reference.PLOW_CRAFTING_RECIPES.put(toolName, craftingRecipe);
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -144,7 +150,7 @@ public final class PowerMining extends JavaPlugin {
 
 
 
-		console.sendMessage(ChatColor.AQUA + Integer.toString(craftingRecipes.size()));
+		console.sendMessage(ChatColor.AQUA + Integer.toString(Reference.EXCAVATOR_CRAFTING_RECIPES.size()));
 
 //		for (ItemStack[] itemStacks : craftingRecipes.values()) {
 //			console.sendMessage(ChatColor.RED + "Item");
