@@ -14,12 +14,19 @@ package jodelle.powermining.lib;
 
 import com.sk89q.worldguard.blacklist.target.MaterialTarget;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
 public class Reference {
+
+	public static HashMap<String, ItemStack[]> CRAFTING_RECIPES = new HashMap<String, ItemStack[]>();
+	public static HashMap<String, ItemStack[]> HAMMER_CRAFTING_RECIPES = new HashMap<String, ItemStack[]>();
+	public static HashMap<String, ItemStack[]> EXCAVATOR_CRAFTING_RECIPES = new HashMap<String, ItemStack[]>();
+	public static HashMap<String, ItemStack[]> PLOW_CRAFTING_RECIPES = new HashMap<String, ItemStack[]>();
+
 	public static HashMap<Material, ArrayList<Material>> MINABLE = new HashMap<Material, ArrayList<Material>>();
 
 	public static ArrayList<Material> DIGGABLE = new ArrayList<Material>();
@@ -81,6 +88,16 @@ public class Reference {
 		Material.NETHERITE_PICKAXE
 	));
 
+	public static ArrayList<Material> SHOVELS =  new ArrayList<Material>(Arrays.asList(
+			Material.WOODEN_SHOVEL,
+			Material.STONE_SHOVEL,
+			Material.IRON_SHOVEL,
+			Material.GOLDEN_SHOVEL,
+			Material.DIAMOND_SHOVEL,
+			Material.NETHERITE_SHOVEL
+	));
+
+
 	public static ArrayList<Material> SPADES = new ArrayList<Material>(Arrays.asList(
 		Material.WOODEN_SHOVEL,
 		Material.STONE_SHOVEL,
@@ -97,5 +114,32 @@ public class Reference {
 			Material.GOLDEN_HOE,
 			Material.DIAMOND_HOE,
 			Material.NETHERITE_HOE
+	));
+
+	public static ArrayList<String> HAMMERS = new ArrayList<String>(Arrays.asList(
+			 "WOODEN_HAMMER",
+			 "STONE_HAMMER",
+			 "IRON_HAMMER",
+			 "GOLDEN_HAMMER",
+			 "DIAMOND_HAMMER",
+			 "NETHERITE_HAMMER"
+	));
+
+	public static ArrayList<String> EXCAVATORS = new ArrayList<String>(Arrays.asList(
+			"WOODEN_EXCAVATOR",
+			"STONE_EXCAVATOR",
+			"IRON_EXCAVATOR",
+			"GOLDEN_EXCAVATOR",
+			"DIAMOND_EXCAVATOR",
+			"NETHERITE_EXCAVATOR"
+	));
+
+	public static ArrayList<String> PLOWS = new ArrayList<String>(Arrays.asList(
+			"WOODEN_PLOW",
+			"STONE_PLOW",
+			"IRON_PLOW",
+			"GOLDEN_PLOW",
+			"DIAMOND_PLOW",
+			"NETHERITE_PLOW"
 	));
 }
