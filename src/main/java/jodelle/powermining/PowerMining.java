@@ -20,15 +20,20 @@ import jodelle.powermining.handlers.*;
 import jodelle.powermining.lib.Reference;
 import jodelle.powermining.listeners.ClickPlayerListener;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import org.apache.commons.lang.ObjectUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.naming.NameNotFoundException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 public final class PowerMining extends JavaPlugin {
 	public JavaPlugin plugin;
@@ -50,6 +55,13 @@ public final class PowerMining extends JavaPlugin {
 
 		instance = this;
 
+		this.saveDefaultConfig();
+		registerGlow();
+		processConfig();
+		processCraftingRecipes();
+		getLogger().info("Finished processing config file.");
+
+
 		handlerPlayerInteract = new PlayerInteractHandler();
 		handlerBlockBreak = new BlockBreakHandler();
 		handlerCraftItem = new CraftItemHandler();
@@ -68,12 +80,85 @@ public final class PowerMining extends JavaPlugin {
 		griefprevention = getServer().getPluginManager().getPlugin("GriefPrevention");
 		towny = getServer().getPluginManager().getPlugin("Towny");
 
-		this.saveDefaultConfig();
+
 
 		getLogger().info("PowerMining plugin was enabled.");
-		registerGlow();
-		processConfig();
-		getLogger().info("Finished processing config file.");
+
+
+
+
+
+
+	}
+
+	private void processCraftingRecipes() {
+		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+
+		//This hashmap is used to store all the information about the recipe
+		//The key is the name of the item, ex DIAMOND_HAMMER
+		//The value is an array of materials where each position refers to the crafting table matrix
+		HashMap<String, ItemStack[]> craftingRecipes = new HashMap<>();
+
+		// We start by getting the section recipes from the config file
+		// Each element iterated is the name of the powertool, ex: POWER_HAMMER
+		for (Object x : (ArrayList<?>) getConfig().getList("Recipes")) {
+			try {
+				// This HashMap contains all the names of the blocks of the recipe
+				// as well as their quantities. Ex: DIAMOND*1
+				LinkedHashMap<String, ArrayList> l = (LinkedHashMap<String, ArrayList>) x;
+				for (String toolName : l.keySet()) {
+					//console.sendMessage(ChatColor.RED + toolName);
+					// This array is used to store all 9 itemstacks used in the recipe
+					// When an element is null signifies an empty slot in the crafting table
+					ItemStack[] craftingRecipe = new ItemStack[9];
+					craftingRecipes.put(toolName, craftingRecipe);
+
+					int i=0;
+					for (String material: (ArrayList<String>)l.get(toolName)) {
+						//console.sendMessage(ChatColor.AQUA + hammerType);
+						// EMPTY means that the slot is empty, obviously
+						if (material.equals("EMPTY")){
+							craftingRecipe[i] = null;
+							i++;
+							continue;
+						}
+
+						// The material and the quantity are separated by '*'
+						int separator = material.indexOf('*');
+						Material materialName = Material.getMaterial(material.substring(0, separator));
+
+						int quantity = Integer.parseInt(material.substring(separator+1, material.length()));
+						if (quantity > 64){
+							throw new NumberFormatException("A full stack can contain a maximum of 64 items");
+						}
+
+						craftingRecipe[i] = new ItemStack(materialName, quantity);
+						i++;
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				getLogger().info("Error loading config file: " + e.getMessage());
+			}
+		}
+
+
+
+		console.sendMessage(ChatColor.AQUA + Integer.toString(craftingRecipes.size()));
+
+//		for (ItemStack[] itemStacks : craftingRecipes.values()) {
+//			console.sendMessage(ChatColor.RED + "Item");
+//			for (ItemStack stack : itemStacks) {
+//				if (stack != null) {
+//					console.sendMessage(ChatColor.AQUA + stack.getType().toString() + ": " + stack.getAmount());
+//				}else{
+//					console.sendMessage(ChatColor.AQUA + "Null");
+//				}
+//			}
+//		}
+
+		//Add the craftingRecipes hashmap to the Reference, so it can be accessed globally
+		Reference.CRAFTING_RECIPES = craftingRecipes;
 
 	}
 

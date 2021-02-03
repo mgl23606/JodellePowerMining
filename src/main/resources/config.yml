@@ -100,3 +100,16 @@ Diggable:
  - WARPED_WART_BLOCK
  - FARMLAND
  - GLOWSTONE
+ -
+
+#- Recipes
+# 1 2 3
+# 4 5 6
+# 7 8 9
+Recipes:
+ - DIAMOND_HAMMER: [EMPTY, DIAMOND*1, EMPTY,
+                    DIAMOND*1, DIAMOND_PICKAXE*1, DIAMOND*1,
+                    EMPTY, DIAMOND*1, EMPTY]
+ - DIAMOND_EXCAVATOR: [EMPTY, DIAMOND*1, EMPTY,
+                    DIAMOND*1, DIAMOND_SHOVEL*1, DIAMOND*1,
+                    EMPTY, DIAMOND*1, EMPTY]
