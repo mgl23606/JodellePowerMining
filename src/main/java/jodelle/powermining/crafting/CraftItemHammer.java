@@ -47,7 +47,7 @@ public class CraftItemHammer extends CraftItem{
 			ItemStack powerTool = new ItemStack(pickaxe, 1);
 			//powerTools.add(powerTool);
 
-			modifyItemMeta(powerTool, loreString);
+			modifyItemMeta(powerTool, loreString, key);
 
 			ShapedRecipe recipe = createRecipe(powerTool, key, value);
 
