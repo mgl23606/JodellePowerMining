@@ -48,7 +48,7 @@ public class PowerUtils {
 
 		PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
 		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
-		if(container.has(isPowerTool, PersistentDataType.INTEGER)) {
+		if(container.has(isPowerTool, PersistentDataType.STRING)) {
 			return true;
 		}
 		return false;
