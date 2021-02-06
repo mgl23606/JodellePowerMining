@@ -24,10 +24,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -70,18 +68,18 @@ public class CraftItemListener implements Listener {
 		CraftingInventory inventory = event.getInventory();
 		ItemStack[] matrix = inventory.getMatrix();
 
+	  	ItemStack[] expectedRecipe = Reference.HAMMER_CRAFTING_RECIPES.get(powerToolName);
 		boolean isRecipeOk = false;
 		newMatrix = new ItemStack[matrix.length];
 		// We start by searching the powertool in the Arraylists
 		// After finding it, we can check the correspondent HashMap which contains the recipes
 		if (Reference.HAMMERS.contains(powerToolName)){
-			ItemStack[] expectedRecipe = Reference.HAMMER_CRAFTING_RECIPES.get(powerToolName);
 			isRecipeOk = checkCraftingMatrix(inventory, matrix, expectedRecipe);
 		}else if(Reference.EXCAVATORS.contains(powerToolName)){
-			ItemStack[] expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
+			expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
 			isRecipeOk = checkCraftingMatrix(inventory, matrix, expectedRecipe);
 		}else if(Reference.PLOWS.contains(powerToolName)){
-			ItemStack[] expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
+			expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
 			isRecipeOk = checkCraftingMatrix(inventory, matrix, expectedRecipe);
 		}
 
@@ -91,10 +89,29 @@ public class CraftItemListener implements Listener {
 			return;
 		}
 
-		// If everything is ok, we clean the crafting matrix
-		// This is neede because when we take the item, it only removes 1 of each
+		// If everything is ok, we change crafting matrix amounts
+		// This is needed because when we take the item, it only removes 1 of each
 		// from the crafting table.
-		event.getInventory().setMatrix(newMatrix);
+		console.sendMessage(ChatColor.RED + "Matrix size" + matrix.length);
+	
+		for (int i = 0; i < matrix.length; i++) {
+			if (matrix[i] != null && expectedRecipe[i] != null){
+				matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount()+1);
+				//matrix[i].setAmount(63);
+				console.sendMessage(ChatColor.RED + "Quantity: " + matrix[i].getAmount());
+			}
+		}
+		
+
+		
+		//for (ItemStack itemStack : matrix) {
+			//if(itemStack != null){
+				//console.sendMessage(ChatColor.RED + "Item: " + itemStack.getType().toString() + "*" + itemStack.getAmount());
+			//}else{
+				//console.sendMessage(ChatColor.RED + "Null");
+			//}
+		//}
+		//event.getInventory().setMatrix(newMatrix);
 	}
 
 //	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -150,10 +167,12 @@ public class CraftItemListener implements Listener {
 					//inventory.setResult(null);
 					return false;
 				}
-				newMatrix[i] = matrix[i].clone();
-				newMatrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount());
+				//newMatrix[i] = matrix[i].clone();
+				//matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount());
 			}
 		}
+		
+		
 		return true;
 	}
 }
