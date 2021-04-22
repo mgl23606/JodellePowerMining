@@ -19,10 +19,11 @@ public class CraftItem {
     ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
     protected JavaPlugin plugin;
 
-    protected ItemStack modifyItemMeta(ItemStack powerTool, String loreString, String name){
+    protected void modifyItemMeta(ItemStack powerTool, String loreString, String name){
         ItemMeta powerToolMeta = powerTool.getItemMeta();
 
         NamespacedKey isPowerTool = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
+        assert powerToolMeta != null;
         powerToolMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.STRING, name);
 
         ArrayList<String> lore = new ArrayList<String>();
@@ -34,7 +35,6 @@ public class CraftItem {
 
         powerTool.setItemMeta(powerToolMeta);
 
-        return powerTool;
     }
 
     protected ShapedRecipe createRecipe(ItemStack powerTool, String name, ItemStack[] recipe){
