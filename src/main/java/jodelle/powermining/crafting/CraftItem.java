@@ -40,7 +40,7 @@ public class CraftItem {
     protected ShapedRecipe createRecipe(ItemStack powerTool, String name, ItemStack[] recipe){
         //Initialize the recipe
         ShapedRecipe toolRecipe = new ShapedRecipe(new NamespacedKey(plugin, name),powerTool);
-        console.sendMessage(ChatColor.AQUA + "NameSpacedKey:" + name);
+        //console.sendMessage(ChatColor.AQUA + "NameSpacedKey:" + name);
         char[] alphabet = new char[]{
                 'a','b','c','d','e','f','g','h','i'
         };
@@ -57,7 +57,7 @@ public class CraftItem {
     }
 
     protected void registerRecipes(ShapedRecipe recipe) {
-        console.sendMessage(ChatColor.AQUA + "Adding Recipe:" + recipe.getKey().getKey());
+        console.sendMessage(ChatColor.AQUA + "[JodellePowerMining] Adding Recipe:" + recipe.getKey().getKey());
         plugin.getServer().addRecipe(recipe);
     }
 

@@ -132,13 +132,13 @@ public final class PowerMining extends JavaPlugin {
 					}
 					if (Reference.HAMMERS.contains(toolName)) {
 						//craftingRecipes.put(toolName, craftingRecipe);
-						console.sendMessage(ChatColor.RED + "Found: " + toolName);
+						console.sendMessage(ChatColor.RED + "[JodellePowerMining] Found: " + toolName);
 						Reference.HAMMER_CRAFTING_RECIPES.put(toolName, craftingRecipe);
 					}else if(Reference.EXCAVATORS.contains(toolName)){
-						console.sendMessage(ChatColor.RED + "Found: " + toolName);
+						console.sendMessage(ChatColor.RED + "[JodellePowerMining] Found: " + toolName);
 						Reference.EXCAVATOR_CRAFTING_RECIPES.put(toolName, craftingRecipe);
 					}else if(Reference.PLOWS.contains(toolName)){
-						console.sendMessage(ChatColor.RED + "Found: " + toolName);
+						console.sendMessage(ChatColor.RED + "[JodellePowerMining] Found: " + toolName);
 						Reference.PLOW_CRAFTING_RECIPES.put(toolName, craftingRecipe);
 					}
 				}
@@ -150,18 +150,7 @@ public final class PowerMining extends JavaPlugin {
 
 
 
-		console.sendMessage(ChatColor.AQUA + Integer.toString(Reference.EXCAVATOR_CRAFTING_RECIPES.size()));
-
-//		for (ItemStack[] itemStacks : craftingRecipes.values()) {
-//			console.sendMessage(ChatColor.RED + "Item");
-//			for (ItemStack stack : itemStacks) {
-//				if (stack != null) {
-//					console.sendMessage(ChatColor.AQUA + stack.getType().toString() + ": " + stack.getAmount());
-//				}else{
-//					console.sendMessage(ChatColor.AQUA + "Null");
-//				}
-//			}
-//		}
+		//console.sendMessage(ChatColor.AQUA + Integer.toString(Reference.EXCAVATOR_CRAFTING_RECIPES.size()));
 
 		//Add the craftingRecipes hashmap to the Reference, so it can be accessed globally
 		Reference.CRAFTING_RECIPES = craftingRecipes;

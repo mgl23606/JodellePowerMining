@@ -57,14 +57,14 @@ public class CraftItemListener implements Listener {
 			event.setCancelled(true);
 		}
 
-		console.sendMessage(ChatColor.RED + "O gajo ta a craftar uma Powertool...");
+		//console.sendMessage(ChatColor.RED + "O gajo ta a craftar uma Powertool...");
 
 		// Get the name of the powertool stored in the persistentdatacontainer
 		PersistentDataContainer container = resultItem.getItemMeta().getPersistentDataContainer();
 		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
 		String powerToolName = container.get(isPowerTool, PersistentDataType.STRING);
-		console.sendMessage(ChatColor.RED + "You're crafting a: " + powerToolName);
 
+		//console.sendMessage(ChatColor.RED + "You're crafting a: " + powerToolName);
 		CraftingInventory inventory = event.getInventory();
 		ItemStack[] matrix = inventory.getMatrix();
 
@@ -92,83 +92,28 @@ public class CraftItemListener implements Listener {
 		// If everything is ok, we change crafting matrix amounts
 		// This is needed because when we take the item, it only removes 1 of each
 		// from the crafting table.
-		console.sendMessage(ChatColor.RED + "Matrix size" + matrix.length);
+		//console.sendMessage(ChatColor.RED + "Matrix size" + matrix.length);
 	
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount()+1);
 				//matrix[i].setAmount(63);
-				console.sendMessage(ChatColor.RED + "Quantity: " + matrix[i].getAmount());
+
+				//console.sendMessage(ChatColor.RED + "Quantity: " + matrix[i].getAmount());
 			}
 		}
-		
-
-		
-		//for (ItemStack itemStack : matrix) {
-			//if(itemStack != null){
-				//console.sendMessage(ChatColor.RED + "Item: " + itemStack.getType().toString() + "*" + itemStack.getAmount());
-			//}else{
-				//console.sendMessage(ChatColor.RED + "Null");
-			//}
-		//}
-		//event.getInventory().setMatrix(newMatrix);
 	}
 
-//	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-//	public void checkRecipe(PrepareItemCraftEvent event){
-//		PowerMining plugin = PowerMining.getInstance();
-//
-//		Recipe recipe = event.getRecipe();
-//
-//		if (recipe == null){
-//			return;
-//		}
-//		console.sendMessage(ChatColor.RED + "O gajo ta a craftar...");
-//		ItemStack result = recipe.getResult();
-//
-//		if (!PowerUtils.isPowerTool(result)){
-//			return;
-//		}
-//		console.sendMessage(ChatColor.RED + "O gajo ta a craftar uma Powertool...");
-//
-//
-//		PersistentDataContainer container = result.getItemMeta().getPersistentDataContainer();
-//		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
-//
-//		String powerToolName = container.get(isPowerTool, PersistentDataType.STRING);
-//
-//
-//		console.sendMessage(ChatColor.RED + "You're crafting a: " + powerToolName);
-//
-//		CraftingInventory inventory = event.getInventory();
-//		ItemStack[] matrix = inventory.getMatrix();
-//		if (Reference.HAMMERS.contains(powerToolName)){
-//			ItemStack[] expectedRecipe = Reference.HAMMER_CRAFTING_RECIPES.get(powerToolName);
-//			checkCraftingMatrix(inventory, matrix, expectedRecipe);
-//		}else if(Reference.EXCAVATORS.contains(powerToolName)){
-//			ItemStack[] expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
-//			checkCraftingMatrix(inventory, matrix, expectedRecipe);
-//		}else if(Reference.PLOWS.contains(powerToolName)){
-//			ItemStack[] expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
-//			checkCraftingMatrix(inventory, matrix, expectedRecipe);
-//		}
-//
-//
-//
-//
-//	}
 
 	private boolean checkCraftingMatrix(CraftingInventory inventory, ItemStack[] matrix, ItemStack[] expectedRecipe) {
 
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				if (matrix[i].getAmount() < expectedRecipe[i].getAmount()){
-					console.sendMessage(ChatColor.RED + "Nao meteste " + expectedRecipe[i].getType().toString() + " que chegue");
+					console.sendMessage(ChatColor.RED + "[JodellePowerMining] You didn't add enough" + expectedRecipe[i].getType().toString());
 					//inventory.setResult(null);
 					return false;
 				}
-				//newMatrix[i] = matrix[i].clone();
-				//matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount());
 			}
 		}
 		

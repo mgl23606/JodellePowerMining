@@ -37,11 +37,13 @@ public class CraftItemHammer extends CraftItem{
 			//value is an array containing the recipe
 			String key = tool.getKey();
 			ItemStack[] value = tool.getValue();
-			console.sendMessage(ChatColor.AQUA + "Creating: " + key);
+			//console.sendMessage(ChatColor.AQUA + "Creating: " + key);
+
 			//We start by finding the position of the name on the HAMMERS array
 			//With that position we can fetch the name of the minecraft item present in other array
 			int i = Reference.HAMMERS.indexOf(key);
-			console.sendMessage(ChatColor.AQUA + String.valueOf(i));
+
+			//console.sendMessage(ChatColor.AQUA + String.valueOf(i));
 			Material pickaxe = Reference.PICKAXES.get(i);
 
 			ItemStack powerTool = new ItemStack(pickaxe, 1);
