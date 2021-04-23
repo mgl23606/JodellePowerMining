@@ -1,3 +1,4 @@
+#VERSION 20
 # Enable this if you want the durability to be reduced for each broken block
 useDurabilityPerBlock: false
 
