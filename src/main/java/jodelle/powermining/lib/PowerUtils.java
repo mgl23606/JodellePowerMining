@@ -10,9 +10,6 @@ package jodelle.powermining.lib;
 
 import com.palmergames.bukkit.towny.TownyMessaging;
 import jodelle.powermining.PowerMining;
-import jodelle.powermining.crafting.CraftItemExcavator;
-import jodelle.powermining.crafting.CraftItemHammer;
-import jodelle.powermining.crafting.CraftItemPlow;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -26,10 +23,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class PowerUtils {
@@ -48,13 +44,16 @@ public class PowerUtils {
 
         PowerMining plugin = PowerMining.getInstance();
 
-		PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
-		if(container.has(isPowerTool, PersistentDataType.STRING)) {
-			return true;
-		}
-		return false;
-}
+        if (item == null)
+            return false;
+
+        PersistentDataContainer container = Objects.requireNonNull(item.getItemMeta()).getPersistentDataContainer();
+        NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
+        if (container.has(isPowerTool, PersistentDataType.STRING)) {
+            return true;
+        }
+        return false;
+    }
 
     // This method returns the total amount to be dropped based on fortune level and the normal drop amount
     public static int getAmountPerFortune(int level, int amount) {
@@ -191,7 +190,8 @@ public class PowerUtils {
     }
 
     // This method returns a list of surrounding (3x3) blocks given a block face and target block
-    public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock, Integer radius, Integer deep) {
+    public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock, Integer
+            radius, Integer deep) {
         ArrayList<Block> blocks = new ArrayList<Block>();
         World world = targetBlock.getWorld();
         ConsoleCommandSender logs = Bukkit.getServer().getConsoleSender();

@@ -1,6 +1,6 @@
-#VERSION 20
+#VERSION 20.01
 # Enable this if you want the durability to be reduced for each broken block
-useDurabilityPerBlock: false
+useDurabilityPerBlock: true
 
 #Define radius and deep
 Radius: 1
@@ -72,6 +72,7 @@ Minable:
   - PACKED_ICE: [ any ]
   - BASALT: [ any ]
   - MAGMA_BLOCK: [ any ]
+  - PRISMARINE: [ any ]
   - PURPUR_PILLAR: [ any ]
   - REDSTONE_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
   - GLOWING_REDSTONE_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
