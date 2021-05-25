@@ -40,6 +40,10 @@ public class PowerUtils {
     public static double CHANCE_FORTUNE_II = 0.25;
     public static double CHANCE_FORTUNE_III = 0.20;
 
+    public static double CHANCE_UNBREAKING_I = 0.50;
+    public static double CHANCE_UNBREAKING_II = 0.33;
+    public static double CHANCE_UNBREAKING_III = 0.25;
+
     public PowerUtils() {
     }
 
@@ -59,6 +63,21 @@ public class PowerUtils {
 }
 
     public static void reduceDurability(ItemStack item){
+
+        if(item.getEnchantments().containsKey(Enchantment.DURABILITY)){
+            Random rand = new Random();
+            Integer unbreakingLevel = item.getEnchantments().get(Enchantment.DURABILITY);
+
+            if (unbreakingLevel == 1 && rand.nextDouble() > CHANCE_UNBREAKING_I){
+                return;
+            }
+            if (unbreakingLevel == 2 && rand.nextDouble() > CHANCE_UNBREAKING_II){
+                return;
+            }
+            if (unbreakingLevel == 3 && rand.nextDouble() > CHANCE_UNBREAKING_III){
+                return;
+            }
+        }
         ItemMeta itemMeta = item.getItemMeta();
 
         if (itemMeta instanceof Damageable){

@@ -23,7 +23,8 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
       It has been updated to use the new way. Basically now we need to get the item meta and change the durability
       there. If we use the old method the changes are not applied.
       Created the method, on the PowerUtils class, reduceDurability(ItemStack) to be used by all powertools.
-    
+      Also implemented the unbreaking enchantment logic.    
+
     - Reviewed the BlockBreakListener code and removed useless code. 
       Before the method breakNaturally() didn't drop anything, so the dropping logic needed to be implemented 
       manually. This includes the enchants like the various fortune levels.
