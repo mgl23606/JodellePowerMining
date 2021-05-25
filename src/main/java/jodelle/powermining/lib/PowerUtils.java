@@ -23,6 +23,8 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -55,6 +57,16 @@ public class PowerUtils {
 		}
 		return false;
 }
+
+    public static void reduceDurability(ItemStack item){
+        ItemMeta itemMeta = item.getItemMeta();
+
+        if (itemMeta instanceof Damageable){
+            Damageable damageable = (Damageable) itemMeta;
+            damageable.setDamage(damageable.getDamage()+1);
+            item.setItemMeta(itemMeta);
+        }
+    }
 
     // This method returns the total amount to be dropped based on fortune level and the normal drop amount
     public static int getAmountPerFortune(int level, int amount) {

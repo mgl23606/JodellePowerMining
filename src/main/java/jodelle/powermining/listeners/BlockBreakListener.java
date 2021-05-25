@@ -102,14 +102,7 @@ public class BlockBreakListener implements Listener {
 					//When using breakNaturally the block is broken but the durability of the tool stays the same
 					//so it's necessary to update the damage manually
 					if(e.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)){
-						ItemMeta itemMeta = handItem.getItemMeta();
-
-						if (itemMeta instanceof Damageable){
-							Damageable damageable = (Damageable) itemMeta;
-							damageable.setDamage(damageable.getDamage()+1);
-							handItem.setItemMeta(itemMeta);
-						}
-
+						PowerUtils.reduceDurability(handItem);
 					}
 
 				}
