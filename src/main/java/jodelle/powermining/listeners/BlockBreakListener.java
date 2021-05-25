@@ -19,14 +19,12 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
 import net.md_5.bungee.api.chat.ClickEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -34,6 +32,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import static com.palmergames.bukkit.towny.TownyLogger.log;
 
@@ -50,9 +49,12 @@ public class BlockBreakListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void checkToolAndBreakBlocks(BlockBreakEvent event) {
+		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 		Player player = event.getPlayer();
-		ItemStack handItem = player.getItemInHand();
+		ItemStack handItem = player.getInventory().getItemInMainHand();
 		Material handItemType = handItem.getType();
+
+		console.sendMessage(ChatColor.RED + "[JodellePowerMining] Broke a block: ");
 
 		if (player != null && (player instanceof Player)) {
 			// If the player is sneaking, we want the tool to act like a normal pickaxe/shovel
@@ -73,21 +75,6 @@ public class BlockBreakListener implements Listener {
 			PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
 			BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
 
-			Map<Enchantment, Integer> enchants = handItem.getEnchantments();
-			Enchantment enchant = null;
-			int enchantLevel = 0;
-			if (enchants.get(Enchantment.SILK_TOUCH) != null) {
-				enchant = Enchantment.SILK_TOUCH;
-				enchantLevel = enchants.get(Enchantment.SILK_TOUCH);
-			}
-			else if (enchants.get(Enchantment.LOOT_BONUS_BLOCKS) != null) {
-				enchant = Enchantment.LOOT_BONUS_BLOCKS;
-				enchantLevel = enchants.get(Enchantment.LOOT_BONUS_BLOCKS);
-			}
-
-			short curDur = handItem.getDurability();
-			short maxDur = handItem.getType().getMaxDurability();
-
 			// Breaks surrounding blocks as long as they match the corresponding tool
 			for (Block e: PowerUtils.getSurroundingBlocks(blockFace, block, Reference.RADIUS, Reference.DEEP)) {
 				Material blockMat = e.getType();
@@ -95,49 +82,36 @@ public class BlockBreakListener implements Listener {
 
 				boolean useHammer = false;
 				boolean useExcavator = false;
-				//boolean useHoe = false;
+				boolean usePlow = false;
 
 				// This bit is necessary to guarantee we only get one or the other as true, otherwise it might break blocks with the wrong tool
 				if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat));
 				else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat));
-				//else if (useHoe = PowerUtils.validateHoe(handItem.getType(),blockMat));
+				else if (usePlow = PowerUtils.validatePlow(handItem.getType(),blockMat));
 
-				//if (useHammer || useExcavator || useHoe) {
-				if (useHammer || useExcavator) {
+//				//if (useHammer || useExcavator || usePlow) {
+				if (useHammer || useExcavator || usePlow) {
 
 					// Check if player has permission to break the block
 					if (!PowerUtils.canBreak(plugin, player, e))
 						continue;
 
-					// Snowballs do not drop if you just breakNaturally(), so this needs to be special parsed
-					if (blockMat == Material.SNOW && useExcavator) {
-						ItemStack snow = new ItemStack(Material.LEGACY_SNOW_BALL, 1 + e.getData());
-						e.getWorld().dropItemNaturally(blockLoc, snow);
-					}
 
-					// If there is no enchant on the item or the block is not on the effect lists, just break
-					if (enchant == null ||
-							((!PowerUtils.canSilkTouchMine(blockMat) || !PowerUtils.canFortuneMine(blockMat)) && useHammer) ||
-							((!PowerUtils.canFortuneDig(blockMat) || !PowerUtils.canFortuneDig(blockMat)) && useExcavator))
-						e.breakNaturally(handItem);
-					else {
-						ItemStack drop = PowerUtils.processEnchantsAndReturnItemStack(enchant, enchantLevel, e);
+					console.sendMessage(ChatColor.RED + "[JodellePowerMining] Breaking: " + e.getType().toString());
 
-						if (drop != null) {
-							e.getWorld().dropItemNaturally(blockLoc, drop);
-							e.setType(Material.AIR);
+					//When using breakNaturally the block is broken but the durability of the tool stays the same
+					//so it's necessary to update the damage manually
+					if(e.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)){
+						ItemMeta itemMeta = handItem.getItemMeta();
+
+						if (itemMeta instanceof Damageable){
+							Damageable damageable = (Damageable) itemMeta;
+							damageable.setDamage(damageable.getDamage()+1);
+							handItem.setItemMeta(itemMeta);
 						}
-						else
-							e.breakNaturally(handItem);
+
 					}
 
-					// If this is set, durability will be reduced from the tool for each broken block
-					if (useDurabilityPerBlock || !player.hasPermission("powermining.highdurability")) {
-						if (curDur++ < maxDur)
-							handItem.setDurability(curDur);
-						else
-							break;
-					}
 				}
 			}
 		}
