@@ -82,15 +82,12 @@ public class BlockBreakListener implements Listener {
 
 				boolean useHammer = false;
 				boolean useExcavator = false;
-				boolean usePlow = false;
 
 				// This bit is necessary to guarantee we only get one or the other as true, otherwise it might break blocks with the wrong tool
 				if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat));
 				else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat));
-				else if (usePlow = PowerUtils.validatePlow(handItem.getType(),blockMat));
 
-//				//if (useHammer || useExcavator || usePlow) {
-				if (useHammer || useExcavator || usePlow) {
+				if (useHammer || useExcavator) {
 
 					// Check if player has permission to break the block
 					if (!PowerUtils.canBreak(plugin, player, e))
