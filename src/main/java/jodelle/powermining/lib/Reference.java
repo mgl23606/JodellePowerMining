@@ -22,6 +22,10 @@ import java.util.HashMap;
 
 public class Reference {
 
+	public static HashMap<Material, String> CRAFT_PERMISSIONS = new HashMap<>();
+	public static HashMap<Material, String> USE_PERMISSIONS = new HashMap<>();
+	public static HashMap<Material, String> ENCHANT_PERMISSIONS = new HashMap<>();
+
 	public static HashMap<String, ItemStack[]> CRAFTING_RECIPES = new HashMap<String, ItemStack[]>();
 	public static HashMap<String, ItemStack[]> HAMMER_CRAFTING_RECIPES = new HashMap<String, ItemStack[]>();
 	public static HashMap<String, ItemStack[]> EXCAVATOR_CRAFTING_RECIPES = new HashMap<String, ItemStack[]>();

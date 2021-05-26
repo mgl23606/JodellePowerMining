@@ -13,10 +13,7 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.crafting.CraftItemExcavator;
 import jodelle.powermining.crafting.CraftItemHammer;
 import jodelle.powermining.crafting.CraftItemPlow;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.ConsoleCommandSender;
@@ -29,10 +26,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.io.Console;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class PowerUtils {
     private static TownyMessaging console;
@@ -335,308 +329,145 @@ public class PowerUtils {
 
     // This method returns if the player can craft the target item
     public static boolean checkCraftPermission(Player player, Material itemType) {
-        boolean canCraft = false;
-
-        switch (itemType) {
-            case WOODEN_PICKAXE:
-                if (player.hasPermission("powermining.craft.hammer.wood"))
-                    canCraft = true;
-
-                break;
-            case STONE_PICKAXE:
-                if (player.hasPermission("powermining.craft.hammer.stone"))
-                    canCraft = true;
-
-                break;
-            case IRON_PICKAXE:
-                if (player.hasPermission("powermining.craft.hammer.iron"))
-                    canCraft = true;
-
-                break;
-            case GOLDEN_PICKAXE:
-                if (player.hasPermission("powermining.craft.hammer.gold"))
-                    canCraft = true;
-
-                break;
-            case DIAMOND_PICKAXE:
-                if (player.hasPermission("powermining.craft.hammer.diamond"))
-                    canCraft = true;
-
-                break;
-            case NETHERITE_PICKAXE:
-                if (player.hasPermission("powermining.craft.hammer.netherite"))
-                    canCraft = true;
-
-                break;
-            case WOODEN_SHOVEL:
-                if (player.hasPermission("powermining.craft.excavator.wood"))
-                    canCraft = true;
-
-                break;
-            case STONE_SHOVEL:
-                if (player.hasPermission("powermining.craft.excavator.stone"))
-                    canCraft = true;
-
-                break;
-            case IRON_SHOVEL:
-                if (player.hasPermission("powermining.craft.excavator.iron"))
-                    canCraft = true;
-
-                break;
-            case GOLDEN_SHOVEL:
-                if (player.hasPermission("powermining.craft.excavator.gold"))
-                    canCraft = true;
-
-                break;
-            case DIAMOND_SHOVEL:
-                if (player.hasPermission("powermining.craft.excavator.diamond"))
-                    canCraft = true;
-
-                break;
-            case NETHERITE_SHOVEL:
-                if (player.hasPermission("powermining.craft.excavator.netherite"))
-                    canCraft = true;
-
-                break;
-            case WOODEN_HOE:
-                if (player.hasPermission("powermining.craft.plow.wood"))
-                    canCraft = true;
-
-                break;
-            case STONE_HOE:
-                if (player.hasPermission("powermining.craft.plow.stone"))
-                    canCraft = true;
-
-                break;
-            case IRON_HOE:
-                if (player.hasPermission("powermining.craft.plow.iron"))
-                    canCraft = true;
-
-                break;
-            case GOLDEN_HOE:
-                if (player.hasPermission("powermining.craft.plow.gold"))
-                    canCraft = true;
-
-                break;
-            case DIAMOND_HOE:
-                if (player.hasPermission("powermining.craft.plow.diamond"))
-                    canCraft = true;
-
-                break;
-            case NETHERITE_HOE:
-                if (player.hasPermission("powermining.craft.plow.netherite"))
-                    canCraft = true;
-
-                break;
-            default:
-                break;
+        if (!Reference.CRAFT_PERMISSIONS.containsKey(itemType)){
+            throw new NoSuchElementException();
         }
-        return canCraft;
+
+        String perm = Reference.CRAFT_PERMISSIONS.get(itemType);
+
+        if (player.hasPermission(perm)){
+            return true;
+        }
+
+        return false;
+
+//        boolean canCraft = false;
+//
+//        switch (itemType) {
+//            case WOODEN_PICKAXE:
+//                if (player.hasPermission("powermining.craft.hammer.wood"))
+//                    canCraft = true;
+//
+//                break;
+//            case STONE_PICKAXE:
+//                if (player.hasPermission("powermining.craft.hammer.stone"))
+//                    canCraft = true;
+//
+//                break;
+//            case IRON_PICKAXE:
+//                if (player.hasPermission("powermining.craft.hammer.iron"))
+//                    canCraft = true;
+//
+//                break;
+//            case GOLDEN_PICKAXE:
+//                if (player.hasPermission("powermining.craft.hammer.gold"))
+//                    canCraft = true;
+//
+//                break;
+//            case DIAMOND_PICKAXE:
+//                if (player.hasPermission("powermining.craft.hammer.diamond"))
+//                    canCraft = true;
+//
+//                break;
+//            case NETHERITE_PICKAXE:
+//                if (player.hasPermission("powermining.craft.hammer.netherite"))
+//                    canCraft = true;
+//
+//                break;
+//            case WOODEN_SHOVEL:
+//                if (player.hasPermission("powermining.craft.excavator.wood"))
+//                    canCraft = true;
+//
+//                break;
+//            case STONE_SHOVEL:
+//                if (player.hasPermission("powermining.craft.excavator.stone"))
+//                    canCraft = true;
+//
+//                break;
+//            case IRON_SHOVEL:
+//                if (player.hasPermission("powermining.craft.excavator.iron"))
+//                    canCraft = true;
+//
+//                break;
+//            case GOLDEN_SHOVEL:
+//                if (player.hasPermission("powermining.craft.excavator.gold"))
+//                    canCraft = true;
+//
+//                break;
+//            case DIAMOND_SHOVEL:
+//                if (player.hasPermission("powermining.craft.excavator.diamond"))
+//                    canCraft = true;
+//
+//                break;
+//            case NETHERITE_SHOVEL:
+//                if (player.hasPermission("powermining.craft.excavator.netherite"))
+//                    canCraft = true;
+//
+//                break;
+//            case WOODEN_HOE:
+//                if (player.hasPermission("powermining.craft.plow.wood"))
+//                    canCraft = true;
+//
+//                break;
+//            case STONE_HOE:
+//                if (player.hasPermission("powermining.craft.plow.stone"))
+//                    canCraft = true;
+//
+//                break;
+//            case IRON_HOE:
+//                if (player.hasPermission("powermining.craft.plow.iron"))
+//                    canCraft = true;
+//
+//                break;
+//            case GOLDEN_HOE:
+//                if (player.hasPermission("powermining.craft.plow.gold"))
+//                    canCraft = true;
+//
+//                break;
+//            case DIAMOND_HOE:
+//                if (player.hasPermission("powermining.craft.plow.diamond"))
+//                    canCraft = true;
+//
+//                break;
+//            case NETHERITE_HOE:
+//                if (player.hasPermission("powermining.craft.plow.netherite"))
+//                    canCraft = true;
+//
+//                break;
+//            default:
+//                break;
+//        }
+//        return canCraft;
     }
 
     // This method returns if the player can use the target item
     public static boolean checkUsePermission(Player player, Material itemType) {
-        boolean canUse = false;
-
-        switch (player.getInventory().getItemInMainHand().getType()) {
-            case WOODEN_PICKAXE:
-                if (player.hasPermission("powermining.use.hammer.wood"))
-                    canUse = true;
-
-                break;
-            case STONE_PICKAXE:
-                if (player.hasPermission("powermining.use.hammer.stone"))
-                    canUse = true;
-
-                break;
-            case IRON_PICKAXE:
-                if (player.hasPermission("powermining.use.hammer.iron"))
-                    canUse = true;
-
-                break;
-            case GOLDEN_PICKAXE:
-                if (player.hasPermission("powermining.use.hammer.gold"))
-                    canUse = true;
-
-                break;
-            case DIAMOND_PICKAXE:
-                if (player.hasPermission("powermining.use.hammer.diamond"))
-                    canUse = true;
-
-                break;
-            case NETHERITE_PICKAXE:
-                if (player.hasPermission("powermining.use.hammer.netherite"))
-                    canUse = true;
-
-                break;
-            case WOODEN_SHOVEL:
-                if (player.hasPermission("powermining.use.excavator.wood"))
-                    canUse = true;
-
-                break;
-            case STONE_SHOVEL:
-                if (player.hasPermission("powermining.use.excavator.stone"))
-                    canUse = true;
-
-                break;
-            case IRON_SHOVEL:
-                if (player.hasPermission("powermining.use.excavator.iron"))
-                    canUse = true;
-
-                break;
-            case GOLDEN_SHOVEL:
-                if (player.hasPermission("powermining.use.excavator.gold"))
-                    canUse = true;
-
-                break;
-            case DIAMOND_SHOVEL:
-                if (player.hasPermission("powermining.use.excavator.diamond"))
-                    canUse = true;
-
-                break;
-            case NETHERITE_SHOVEL:
-                if (player.hasPermission("powermining.use.excavator.netherite"))
-                    canUse = true;
-
-                break;
-            case WOODEN_HOE:
-                if (player.hasPermission("powermining.use.plow.wood"))
-                    canUse = true;
-
-                break;
-            case STONE_HOE:
-                if (player.hasPermission("powermining.use.plow.stone"))
-                    canUse = true;
-
-                break;
-            case IRON_HOE:
-                if (player.hasPermission("powermining.use.plow.iron"))
-                    canUse = true;
-
-                break;
-            case GOLDEN_HOE:
-                if (player.hasPermission("powermining.use.plow.gold"))
-                    canUse = true;
-
-                break;
-            case DIAMOND_HOE:
-                if (player.hasPermission("powermining.use.plow.diamond"))
-                    canUse = true;
-
-                break;
-            case NETHERITE_HOE:
-                if (player.hasPermission("powermining.use.plow.netherite"))
-                    canUse = true;
-
-                break;
-            default:
-                break;
+        if (!Reference.USE_PERMISSIONS.containsKey(itemType)){
+            throw new NoSuchElementException();
         }
 
-        return canUse;
+        String perm = Reference.USE_PERMISSIONS.get(itemType);
+
+        if (player.hasPermission(perm)){
+            return true;
+        }
+
+        return false;
     }
 
     // This method returns if the player can enchant the target item
     public static boolean checkEnchantPermission(Player player, Material itemType) {
-        boolean canEnchant = false;
-
-        switch (itemType) {
-            case WOODEN_PICKAXE:
-                if (player.hasPermission("powermining.enchant.hammer.wood"))
-                    canEnchant = true;
-
-                break;
-            case STONE_PICKAXE:
-                if (player.hasPermission("powermining.enchant.hammer.stone"))
-                    canEnchant = true;
-
-                break;
-            case IRON_PICKAXE:
-                if (player.hasPermission("powermining.enchant.hammer.iron"))
-                    canEnchant = true;
-
-                break;
-            case GOLDEN_PICKAXE:
-                if (player.hasPermission("powermining.enchant.hammer.gold"))
-                    canEnchant = true;
-
-                break;
-            case DIAMOND_PICKAXE:
-                if (player.hasPermission("powermining.enchant.hammer.diamond"))
-                    canEnchant = true;
-
-                break;
-            case NETHERITE_PICKAXE:
-                if (player.hasPermission("powermining.craft.hammer.netherite"))
-                    canEnchant = true;
-
-                break;
-            case WOODEN_SHOVEL:
-                if (player.hasPermission("powermining.enchant.excavator.wood"))
-                    canEnchant = true;
-
-                break;
-            case STONE_SHOVEL:
-                if (player.hasPermission("powermining.enchant.excavator.stone"))
-                    canEnchant = true;
-
-                break;
-            case IRON_SHOVEL:
-                if (player.hasPermission("powermining.enchant.excavator.iron"))
-                    canEnchant = true;
-
-                break;
-            case GOLDEN_SHOVEL:
-                if (player.hasPermission("powermining.enchant.excavator.gold"))
-                    canEnchant = true;
-
-                break;
-            case DIAMOND_SHOVEL:
-                if (player.hasPermission("powermining.enchant.excavator.diamond"))
-                    canEnchant = true;
-
-                break;
-            case NETHERITE_SHOVEL:
-                if (player.hasPermission("powermining.enchant.excavator.netherite"))
-                    canEnchant = true;
-
-                break;
-
-            case WOODEN_HOE:
-                if (player.hasPermission("powermining.enchant.plow.wood"))
-                    canEnchant = true;
-
-                break;
-            case STONE_HOE:
-                if (player.hasPermission("powermining.enchant.plow.stone"))
-                    canEnchant = true;
-
-                break;
-            case IRON_HOE:
-                if (player.hasPermission("powermining.enchant.plow.iron"))
-                    canEnchant = true;
-
-                break;
-            case GOLDEN_HOE:
-                if (player.hasPermission("powermining.enchant.plow.gold"))
-                    canEnchant = true;
-
-                break;
-            case DIAMOND_HOE:
-                if (player.hasPermission("powermining.enchant.plow.diamond"))
-                    canEnchant = true;
-
-                break;
-            case NETHERITE_HOE:
-                if (player.hasPermission("powermining.enchant.plow.netherite"))
-                    canEnchant = true;
-
-                break;
-            default:
-                break;
+        if (!Reference.ENCHANT_PERMISSIONS.containsKey(itemType)){
+            throw new NoSuchElementException();
+        }
+        ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+        String perm = Reference.ENCHANT_PERMISSIONS.get(itemType);
+        console.sendMessage(ChatColor.GOLD+ perm);
+        if (player.hasPermission(perm)){
+            return true;
         }
 
-        return canEnchant;
+        return false;
     }
 
     // This method returns if the player can destroy the target block

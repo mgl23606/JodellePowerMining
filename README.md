@@ -18,6 +18,10 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
 
 
 ## Change log
+##### 26 may 2021
+    - Changed the way permissions are checked. Instead of having all the permissions hardcoded on each method 
+      they are now created while the plugin is loaded. HashMaps are used to store each type of permission which 
+      are later used to check if the player has the specific permissions.
 ##### 25 may 2021
     - When using a powertool the durability wasn't updated. That's due to a deprecated method being used.
       It has been updated to use the new way. Basically now we need to get the item meta and change the durability

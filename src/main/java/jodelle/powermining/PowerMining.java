@@ -40,14 +40,15 @@ public final class PowerMining extends JavaPlugin {
 	EnchantItemHandler handlerEnchantItem;
 	InventoryClickHandler handlerInventoryClick;
 	ClickPlayerHandler handlerClickPlayer;
+	ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
 	Plugin worldguard;
 	Plugin griefprevention;
 	Plugin towny;
 
-    private static PowerMining instance;
+	private static PowerMining instance;
 
-    @Override
+	@Override
 	public void onEnable(){
 
 		instance = this;
@@ -56,6 +57,7 @@ public final class PowerMining extends JavaPlugin {
 		registerGlow();
 		processConfig();
 		processCraftingRecipes();
+		processPermissions();
 		getLogger().info("Finished processing config file.");
 
 
@@ -77,15 +79,47 @@ public final class PowerMining extends JavaPlugin {
 		griefprevention = getServer().getPluginManager().getPlugin("GriefPrevention");
 		towny = getServer().getPluginManager().getPlugin("Towny");
 
-
-
 		getLogger().info("PowerMining plugin was enabled.");
 
 
+	}
 
+	private void processPermissions() {
+		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		console.sendMessage(ChatColor.GOLD + "[JodellePowerMining] - Setting up Permissions");
+		//Hashmap to store the permission
+		// WOODEN_PICKAXE -> powermining.craft.hammer.wooden
+		generatePermission(Reference.HAMMERS, Reference.PICKAXES);
+		generatePermission(Reference.EXCAVATORS, Reference.SHOVELS);
+		generatePermission(Reference.PLOWS, Reference.HOES);
 
+		console.sendMessage(String.valueOf(Reference.CRAFT_PERMISSIONS.size()));
 
+		for (Map.Entry<Material, String> materialStringEntry : Reference.ENCHANT_PERMISSIONS.entrySet()) {
+			console.sendMessage(ChatColor.GOLD + "Material: " + materialStringEntry.getKey().toString() + " - Permission " + materialStringEntry.getValue());
+		}
 
+	}
+
+	protected void generatePermission(ArrayList<String> powerToolNames, ArrayList<Material> items){
+		//HashMap<Material, String> craftPermHashMap = new HashMap<>(100);
+		//HashMap<Material, String> usePermHashMap = new HashMap<>(100);
+		int i = 0;
+		for (String tool : powerToolNames) {
+			String craftPermission = "powermining.craft." + tool.substring(tool.indexOf("_")+1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
+			String usePermission = "powermining.use." + tool.substring(tool.indexOf("_")+1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
+			String enchantPermission = "powermining.enchant." + tool.substring(tool.indexOf("_")+1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
+
+			Reference.CRAFT_PERMISSIONS.put(items.get(i), craftPermission);
+			Reference.USE_PERMISSIONS.put(items.get(i), usePermission);
+			Reference.ENCHANT_PERMISSIONS.put(items.get(i), enchantPermission);
+//			console.sendMessage(items.get(i).toString());
+//			console.sendMessage(ChatColor.GOLD + "[JodellePowerMining] - Generated permission: " + craftPermission);
+			//console.sendMessage(ChatColor.GOLD + "[JodellePowerMining] - Generated permission: " + usePermission);
+			i++;
+		}
+		//Reference.CRAFT_PERMISSIONS = craftPermHashMap;
+		//Reference.USE_PERMISSIONS = usePermHashMap;
 	}
 
 	private void processCraftingRecipes() {
@@ -279,7 +313,7 @@ public final class PowerMining extends JavaPlugin {
 		}
 	}
 
-    public static PowerMining getInstance() {
-        return instance;
-    }
+	public static PowerMining getInstance() {
+		return instance;
+	}
 }
