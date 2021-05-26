@@ -30,7 +30,7 @@ public class ClickPlayerListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerUse(PlayerInteractEvent event) {
         Player player = event.getPlayer();
-        ItemStack handItem = player.getItemInHand();
+        ItemStack handItem = player.getInventory().getItemInMainHand();
         Material handItemType = handItem.getType();
         ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
@@ -44,9 +44,11 @@ public class ClickPlayerListener implements Listener {
             return;
         if (player.isSneaking())
             return;
-        if (!PowerUtils.checkUsePermission(player, handItemType))
+        if(handItem.getType().equals(Material.AIR))
             return;
         if (!PowerUtils.isPowerTool(handItem))
+            return;
+        if (!PowerUtils.checkUsePermission(player, handItemType))
             return;
 
         Block block = event.getClickedBlock();
