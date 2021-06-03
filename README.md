@@ -10,6 +10,7 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
 - Mining one block makes the other blocks around to be broken, a 3x3 hole.
 - All mineble/diggable blocks can be configured in the confile file.
 - Configurable recipes for the powertools. (Finished, maybe...)
+- Commands to check the version and give a power tool
 
 ## Todo List
 - Test the recipes...
@@ -20,6 +21,11 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
 ## Change log
 ##### 3 june 2021
     - Added the command "jpm give" and " jpm version"
+      Enchantments of items from the recipe on the crafting table are now passed onto
+      the crafted PowerTool.
+      Max stack size is now verified when loading the custom recipes. This prevents, for example, more
+      setting more than one pickaxe per slot, which is impossible to make in survival.
+      Little optimizations on the code.
 
 ##### 26 may 2021
     - Changed the way permissions are checked. Instead of having all the permissions hardcoded on each method 
