@@ -19,6 +19,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,6 +29,8 @@ import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.Map;
 
 public class CraftItemListener implements Listener {
 	PowerMining plugin;
@@ -92,16 +95,24 @@ public class CraftItemListener implements Listener {
 		// If everything is ok, we change crafting matrix amounts
 		// This is needed because when we take the item, it only removes 1 of each
 		// from the crafting table.
+		// Also checks if the item on the slot has some kind of enchantments and passes
+		// them to the result item upon crafting.
 		//console.sendMessage(ChatColor.RED + "Matrix size" + matrix.length);
 	
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount()+1);
+				Map<Enchantment, Integer> enchantments = matrix[i].getEnchantments();
+				if (enchantments != null){
+					event.getInventory().getResult().addEnchantments(enchantments);
+				}
 				//matrix[i].setAmount(63);
 
 				//console.sendMessage(ChatColor.RED + "Quantity: " + matrix[i].getAmount());
 			}
 		}
+
+
 	}
 
 
