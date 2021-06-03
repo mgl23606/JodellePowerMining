@@ -18,6 +18,9 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
 
 
 ## Change log
+##### 3 june 2021
+    - Added the command "jpm give" and " jpm version"
+
 ##### 26 may 2021
     - Changed the way permissions are checked. Instead of having all the permissions hardcoded on each method 
       they are now created while the plugin is loaded. HashMaps are used to store each type of permission which 
