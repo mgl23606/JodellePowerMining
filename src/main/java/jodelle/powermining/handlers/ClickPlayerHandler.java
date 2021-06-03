@@ -5,7 +5,7 @@ import jodelle.powermining.listeners.ClickPlayerListener;
 
 public class ClickPlayerHandler {
 
-    public ClickPlayerHandler() {};
+    public ClickPlayerHandler() {}
     public ClickPlayerListener listener;
 
     public void Init(PowerMining plugin) {

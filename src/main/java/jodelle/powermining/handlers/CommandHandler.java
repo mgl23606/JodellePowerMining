@@ -4,8 +4,7 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.listeners.CommandListener;
 
 public class CommandHandler {
-    public CommandHandler() {
-    }
+    public CommandHandler() {}
     public CommandListener listener;
 
     public void Init(PowerMining plugin){

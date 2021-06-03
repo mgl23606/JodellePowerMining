@@ -20,7 +20,7 @@ import jodelle.powermining.crafting.CraftItemPlow;
 import jodelle.powermining.listeners.CraftItemListener;
 
 public class CraftItemHandler {
-	public CraftItemHandler() {};
+	public CraftItemHandler() {}
 	public CraftItemHammer HammerClass;
 	public CraftItemExcavator ExcavatorClass;
 	public CraftItemPlow HoeClass;
@@ -35,15 +35,5 @@ public class CraftItemHandler {
 
 	public CraftItemListener getListener() {
 		return listener;
-	}
-	public CraftItemHammer getHammerClass() {
-		return HammerClass;
-	}
-	public CraftItemPlow getHoeClass() {
-		return HoeClass;
-	}
-
-	public CraftItemExcavator getExcavatorClass() {
-		return ExcavatorClass;
 	}
 }

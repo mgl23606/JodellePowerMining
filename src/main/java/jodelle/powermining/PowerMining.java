@@ -105,7 +105,7 @@ public final class PowerMining extends JavaPlugin {
 
         debugggingMessages.sendConsoleMessage(String.valueOf(Reference.CRAFT_PERMISSIONS.size()));
 
-        for (Map.Entry<Material, String> materialStringEntry : Reference.ENCHANT_PERMISSIONS.entrySet()) {
+        for (Map.Entry<Material, String> materialStringEntry : Reference.USE_PERMISSIONS.entrySet()) {
             debugggingMessages.sendConsoleMessage(ChatColor.GOLD + "Material: " + materialStringEntry.getKey().toString() + " - Permission " + materialStringEntry.getValue());
         }
 

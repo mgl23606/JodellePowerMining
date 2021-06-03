@@ -1,10 +1,7 @@
 package jodelle.powermining.crafting;
 
 import jodelle.powermining.lib.Reference;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,7 +13,8 @@ public class CraftItemPlow extends CraftItem {
     public static String loreString = "PLOW!";
 
     public CraftItemPlow(JavaPlugin plugin) {
-        ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+        super(plugin);
+
         this.plugin = plugin;
         for(Map.Entry<String, ItemStack[]> tool : Reference.PLOW_CRAFTING_RECIPES.entrySet()){
 

@@ -1,6 +1,7 @@
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
+import jodelle.powermining.lib.DebugggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
 import org.bukkit.*;
@@ -18,10 +19,12 @@ import org.bukkit.inventory.ItemStack;
 public class ClickPlayerListener implements Listener {
     public PowerMining plugin;
     public boolean useDurabilityPerBlock;
+    private final DebugggingMessages debugggingMessages;
 
 
     public ClickPlayerListener(PowerMining plugin) {
         this.plugin = plugin;
+        debugggingMessages = new DebugggingMessages();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
         useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
@@ -33,9 +36,8 @@ public class ClickPlayerListener implements Listener {
         ItemStack handItem = player.getInventory().getItemInMainHand();
         Material handItemType = handItem.getType();
         ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+        Block block = event.getClickedBlock();
 
-        if (player == null && !(player instanceof Player))
-            return;
         if (event.getAction() == Action.LEFT_CLICK_BLOCK)
             return;
         if (event.getAction() == Action.LEFT_CLICK_AIR)
@@ -50,29 +52,29 @@ public class ClickPlayerListener implements Listener {
             return;
         if (!PowerUtils.checkUsePermission(player, handItemType))
             return;
+        if (block == null){
+            return;
+        }
 
-        Block block = event.getClickedBlock();
+
         String playerName = player.getName();
 
         PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
         BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
 
-        short curDur = handItem.getDurability();
-        short maxDur = handItem.getType().getMaxDurability();
 
         for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.RADIUS)) {
             Material blockMat = e.getType();
-            Location blockLoc = e.getLocation();
-            console.sendMessage(ChatColor.RED + "[JodellePowerMining] block: " + e.getType().toString());
+            console.sendMessage(ChatColor.RED + "[JodellePowerMining] block: " + e.getType());
 
-            boolean usePlow = false;
+            boolean usePlow;
             boolean usePath = false;
 
             if (usePlow = PowerUtils.validatePlow(handItem.getType(), blockMat)) ;
             else if (usePath = PowerUtils.validatePath(handItem.getType(), blockMat)) ;
 
             if (usePlow) {
-                console.sendMessage(ChatColor.RED + "[JodellePowerMining] Tilling: " + e.getType().toString());
+                debugggingMessages.sendConsoleMessage(ChatColor.RED + "Tilling: " + e.getType());
 
                 e.setType(Material.FARMLAND);
                 // Reduce durability for each block
@@ -89,7 +91,6 @@ public class ClickPlayerListener implements Listener {
                 if (player.getGameMode().equals(GameMode.SURVIVAL)) {
                     PowerUtils.reduceDurability(handItem);
                 }
-                continue;
             }
         }
 

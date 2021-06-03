@@ -24,7 +24,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class PlayerInteractListener implements Listener {
 	public PowerMining plugin;
-	private HashMap<String, BlockFace> faces = new HashMap<String, BlockFace>();
+	private final HashMap<String, BlockFace> faces = new HashMap<>();
 
 	public PlayerInteractListener(PowerMining plugin) {
 		this.plugin = plugin;
@@ -36,10 +36,8 @@ public class PlayerInteractListener implements Listener {
 		Player player = event.getPlayer();
 		BlockFace bf = event.getBlockFace();
 
-		if (player != null && bf != null) {
-			String name = player.getName();
-			faces.put(name, bf);
-		}
+		String name = player.getName();
+		faces.put(name, bf);
 	}
 
 

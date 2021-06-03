@@ -13,12 +13,11 @@
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
+import jodelle.powermining.lib.DebugggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -34,10 +34,13 @@ import java.util.Map;
 
 public class CraftItemListener implements Listener {
 	PowerMining plugin;
-	ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+
 	ItemStack[] newMatrix;
+	DebugggingMessages debugggingMessages;
+
 	public CraftItemListener(PowerMining plugin) {
 		this.plugin = plugin;
+		debugggingMessages = new DebugggingMessages();
 
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
@@ -63,7 +66,13 @@ public class CraftItemListener implements Listener {
 		//console.sendMessage(ChatColor.RED + "O gajo ta a craftar uma Powertool...");
 
 		// Get the name of the powertool stored in the persistentdatacontainer
-		PersistentDataContainer container = resultItem.getItemMeta().getPersistentDataContainer();
+		ItemMeta itemMeta = resultItem.getItemMeta();
+
+		if (itemMeta == null){
+			return;
+		}
+
+		PersistentDataContainer container = itemMeta.getPersistentDataContainer();
 		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
 		String powerToolName = container.get(isPowerTool, PersistentDataType.STRING);
 
@@ -77,13 +86,13 @@ public class CraftItemListener implements Listener {
 		// We start by searching the powertool in the Arraylists
 		// After finding it, we can check the correspondent HashMap which contains the recipes
 		if (Reference.HAMMERS.contains(powerToolName)){
-			isRecipeOk = checkCraftingMatrix(inventory, matrix, expectedRecipe);
+			isRecipeOk = checkCraftingMatrix(matrix, expectedRecipe);
 		}else if(Reference.EXCAVATORS.contains(powerToolName)){
 			expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
-			isRecipeOk = checkCraftingMatrix(inventory, matrix, expectedRecipe);
+			isRecipeOk = checkCraftingMatrix(matrix, expectedRecipe);
 		}else if(Reference.PLOWS.contains(powerToolName)){
 			expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
-			isRecipeOk = checkCraftingMatrix(inventory, matrix, expectedRecipe);
+			isRecipeOk = checkCraftingMatrix(matrix, expectedRecipe);
 		}
 
 		// If the recipe is not ok, the player can't take the item out of the crafted slot
@@ -103,12 +112,11 @@ public class CraftItemListener implements Listener {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount()+1);
 				Map<Enchantment, Integer> enchantments = matrix[i].getEnchantments();
-				if (enchantments != null){
-					event.getInventory().getResult().addEnchantments(enchantments);
-				}
-				//matrix[i].setAmount(63);
 
-				//console.sendMessage(ChatColor.RED + "Quantity: " + matrix[i].getAmount());
+				ItemStack result = inventory.getResult();
+				if (result != null){
+					result.addEnchantments(enchantments);
+				}
 			}
 		}
 
@@ -116,12 +124,12 @@ public class CraftItemListener implements Listener {
 	}
 
 
-	private boolean checkCraftingMatrix(CraftingInventory inventory, ItemStack[] matrix, ItemStack[] expectedRecipe) {
+	private boolean checkCraftingMatrix(ItemStack[] matrix, ItemStack[] expectedRecipe) {
 
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				if (matrix[i].getAmount() < expectedRecipe[i].getAmount()){
-					console.sendMessage(ChatColor.RED + "[JodellePowerMining] You didn't add enough" + expectedRecipe[i].getType().toString());
+					debugggingMessages.sendConsoleMessage(ChatColor.RED + "You didn't add enough" + expectedRecipe[i].getType());
 					//inventory.setResult(null);
 					return false;
 				}

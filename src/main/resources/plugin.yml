@@ -35,7 +35,7 @@ permissions:
         children:
             powermining.craft.hammer.all: true
             powermining.craft.excavator.all: true
-            powermining.craft.hoe.all: true
+            powermining.craft.plow.all: true
 
     powermining.craft.hammer.*:
         description: Allows players to craft all hammers

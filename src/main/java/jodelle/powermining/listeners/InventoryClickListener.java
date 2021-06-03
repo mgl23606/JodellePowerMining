@@ -46,11 +46,14 @@ public class InventoryClickListener implements Listener {
 		ItemStack item = event.getInventory().getItem(0);
 		ItemStack item2 = event.getInventory().getItem(1);
 
-		// Ignore event if the first item is not a power tool
-		if (!PowerUtils.isPowerTool(item))
+		if (item == null){
+			return;
+		}
+		if (item2 == null)
 			return;
 
-		if (item2 == null)
+		// Ignore event if the first item is not a power tool
+		if (!PowerUtils.isPowerTool(item))
 			return;
 
 		// If this is not an enchanted book we need to check if it another power tool or allowed ingot

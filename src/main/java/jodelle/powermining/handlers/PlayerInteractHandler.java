@@ -17,7 +17,7 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.listeners.PlayerInteractListener;
 
 public class PlayerInteractHandler {
-	public PlayerInteractHandler() {};
+	public PlayerInteractHandler() {}
 	public PlayerInteractListener listener;
 
 	public void Init(PowerMining plugin) {

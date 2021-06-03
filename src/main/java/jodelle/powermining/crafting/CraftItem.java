@@ -2,10 +2,9 @@ package jodelle.powermining.crafting;
 
 
 import jodelle.powermining.PowerMining;
-import org.bukkit.Bukkit;
+import jodelle.powermining.lib.DebugggingMessages;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -16,8 +15,13 @@ import java.util.ArrayList;
 
 public class CraftItem {
 
-    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+    private final DebugggingMessages debugggingMessages;
     protected JavaPlugin plugin;
+
+    public CraftItem(JavaPlugin plugin) {
+        this.plugin = plugin;
+        debugggingMessages = new DebugggingMessages();
+    }
 
     protected void modifyItemMeta(ItemStack powerTool, String loreString, String name){
         ItemMeta powerToolMeta = powerTool.getItemMeta();
@@ -26,7 +30,7 @@ public class CraftItem {
         assert powerToolMeta != null;
         powerToolMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.STRING, name);
 
-        ArrayList<String> lore = new ArrayList<String>();
+        ArrayList<String> lore = new ArrayList<>();
         lore.add(loreString);
 
         powerToolMeta.setDisplayName(loreString);
@@ -57,7 +61,7 @@ public class CraftItem {
     }
 
     protected void registerRecipes(ShapedRecipe recipe) {
-        console.sendMessage(ChatColor.AQUA + "[JodellePowerMining] Adding Recipe:" + recipe.getKey().getKey());
+        debugggingMessages.sendConsoleMessage(ChatColor.AQUA + "Adding Recipe:" + recipe.getKey().getKey());
         plugin.getServer().addRecipe(recipe);
     }
 

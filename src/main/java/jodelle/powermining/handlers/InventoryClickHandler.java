@@ -16,7 +16,7 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.listeners.InventoryClickListener;
 
 public class InventoryClickHandler {
-	public InventoryClickHandler() {};
+	public InventoryClickHandler() {}
 	public InventoryClickListener listener;
 
 	public void Init(PowerMining plugin) {

@@ -8,11 +8,7 @@
 
 package jodelle.powermining.lib;
 
-import com.palmergames.bukkit.towny.TownyMessaging;
 import jodelle.powermining.PowerMining;
-import jodelle.powermining.crafting.CraftItemExcavator;
-import jodelle.powermining.crafting.CraftItemHammer;
-import jodelle.powermining.crafting.CraftItemPlow;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -25,14 +21,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.io.Console;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
 public class PowerUtils {
-    private static TownyMessaging console;
-    public static double CHANCE_FORTUNE_I = 0.33;
-    public static double CHANCE_FORTUNE_II = 0.25;
-    public static double CHANCE_FORTUNE_III = 0.20;
 
     public static double CHANCE_UNBREAKING_I = 0.50;
     public static double CHANCE_UNBREAKING_II = 0.33;
@@ -47,13 +41,16 @@ public class PowerUtils {
     public static boolean isPowerTool(ItemStack item) {
 
         PowerMining plugin = PowerMining.getInstance();
+        ItemMeta itemMeta = item.getItemMeta();
 
-		PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+        if(itemMeta == null){
+            return false;
+        }
+
+		PersistentDataContainer container = itemMeta.getPersistentDataContainer();
 		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
-		if(container.has(isPowerTool, PersistentDataType.STRING)) {
-			return true;
-		}
-		return false;
+
+		return container.has(isPowerTool, PersistentDataType.STRING);
 }
 
     public static void reduceDurability(ItemStack item){
@@ -80,61 +77,7 @@ public class PowerUtils {
             item.setItemMeta(itemMeta);
         }
     }
-
-    // This method returns the total amount to be dropped based on fortune level and the normal drop amount
-    public static int getAmountPerFortune(int level, int amount) {
-        Random rand = new Random();
-
-        if (level == 1 && rand.nextDouble() <= CHANCE_FORTUNE_I)
-            return amount * 2;
-        else if (level == 2) {
-            if (rand.nextDouble() <= CHANCE_FORTUNE_II)
-                return amount * 3;
-            if (rand.nextDouble() <= CHANCE_FORTUNE_II)
-                return amount * 2;
-        } else if (level == 3) {
-            if (rand.nextDouble() <= CHANCE_FORTUNE_III)
-                return amount * 4;
-            if (rand.nextDouble() <= CHANCE_FORTUNE_III)
-                return amount * 3;
-            if (rand.nextDouble() <= CHANCE_FORTUNE_III)
-                return amount * 2;
-        }
-
-        return amount;
-    }
-
-    // This method calculates and returns the chance of flint dropping from breaking gravel based on fortune level
-    public static double getFlintDropChance(int level) {
-        double chance = 0.10;
-
-        if (level == 1)
-            chance = 0.14;
-        else if (level == 2)
-            chance = 0.25;
-        else if (level == 3)
-            chance = 1.0;
-
-        return chance;
-    }
-
-    // This method returns if you can use silk-touch on the block
-    public static boolean canSilkTouchMine(Material blockType) {
-        return Reference.MINABLE_SILKTOUCH.contains(blockType);
-    }
-
-    public static boolean canSilkTouchDig(Material blockType) {
-        return Reference.DIGGABLE_SILKTOUCH.contains(blockType);
-    }
-
-    // This method returns if you can use fortune on the block
-    public static boolean canFortuneMine(Material blockType) {
-        return Reference.MINABLE_FORTUNE.get(blockType) != null;
-    }
-
-    public static boolean canFortuneDig(Material blockType) {
-        return Reference.DIGGABLE_FORTUNE.get(blockType) != null;
-    }
+    
 
     // This method returns if the block is mineable
     public static boolean isMineable(Material blockType) {
@@ -155,71 +98,10 @@ public class PowerUtils {
         return Reference.PATH.contains(blockType);
     }
 
-    // This method will process the enchantment information and apply to to create the appropriate drop
-    public static ItemStack processEnchantsAndReturnItemStack(Enchantment enchant, int enchantLevel, Block block) {
-        Material blockType = block.getType();
-        ItemStack drop = null;
-
-        if (enchant == Enchantment.SILK_TOUCH)
-            drop = new ItemStack(blockType, 1);
-        else if (enchant == Enchantment.LOOT_BONUS_BLOCKS) {
-            int amount = 0;
-            Random rand = new Random();
-
-            if (Reference.MINABLE_FORTUNE.get(blockType) != null) {
-                switch (blockType) {
-                    case GLOWSTONE: // Glowstone drops 2-4 dust, up to 4 max
-                        amount = Math.min((rand.nextInt(5) + 2) + enchantLevel, 4);
-
-                        break;
-                    case REDSTONE_ORE: // Redstone Ore drops 4-5 dust, up to 8 max (case LEGACY_GLOWING_REDSTONE_ORE:)
-                        amount = Math.min((rand.nextInt(2) + 4) + enchantLevel, 8);
-
-                        break;
-                    case COAL_ORE: // All these ores drop only 1 item
-                    case DIAMOND_ORE:
-                    case ANCIENT_DEBRIS:
-                    case EMERALD_ORE:
-                    case NETHER_QUARTZ_ORE:
-                        amount = getAmountPerFortune(enchantLevel, 1);
-                        break;
-                    case LAPIS_ORE: // Lapis Ore drops 4-8 lapis, up to 32 max
-                        amount = Math.min(getAmountPerFortune(enchantLevel, (rand.nextInt(5) + 4)), 32);
-                        break;
-                    default:
-                        break;
-                }
-
-                if (amount > 0) {
-                    // Lapis needs to be special parsed since it's actually just a DYE with damage value of 4
-                    if (blockType == Material.LAPIS_ORE)
-                        //	drop = new ItemStack(Reference.MINABLE_FORTUNE.get(blockType), amount, (short)4);
-                        drop = new ItemStack(Reference.MINABLE_FORTUNE.get(blockType), amount, (short) 4);
-                    else
-                        drop = new ItemStack(Reference.MINABLE_FORTUNE.get(blockType), amount);
-                }
-            } else if (Reference.DIGGABLE_FORTUNE.get(blockType) != null) {
-                if (blockType == Material.GLOWSTONE) { // Glowstone drops 2-4 dust, up to 4 max
-                    amount = Math.min((rand.nextInt(5) + 2) + enchantLevel, 4);
-
-                    drop = new ItemStack(Reference.DIGGABLE_FORTUNE.get(blockType), amount);
-                } else if (blockType == Material.GRAVEL) {
-                    if (rand.nextDouble() <= getFlintDropChance(enchantLevel))
-                        drop = new ItemStack(Reference.DIGGABLE_FORTUNE.get(blockType), 1);
-                    else // If no flint is going to be dropped, drop gravel instead
-                        drop = new ItemStack(blockType, 1);
-                }
-            }
-        }
-
-        return drop;
-    }
-
     // This method returns a list of surrounding (3x3) blocks given a block face and target block
     public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock, Integer radius, Integer deep) {
-        ArrayList<Block> blocks = new ArrayList<Block>();
+        ArrayList<Block> blocks = new ArrayList<>();
         World world = targetBlock.getWorld();
-        ConsoleCommandSender logs = Bukkit.getServer().getConsoleSender();
         int bx, by, bz;
         bx = targetBlock.getX();
         by = targetBlock.getY();
@@ -228,8 +110,6 @@ public class PowerUtils {
         // Check the block face from which the block is being broken in order to get the correct surrounding blocks
         switch (blockFace) {
             case UP:
-                //logs.sendMessage(ChatColor.DARK_PURPLE + "FACING: " + blockFace);
-                //logs.sendMessage(ChatColor.AQUA + "UP");
                 for (int x = bx - radius; x <= bx + radius; x++) {
                     for (int y = by - deep; y <= by; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
@@ -239,8 +119,6 @@ public class PowerUtils {
                 }
                 break;
             case DOWN:
-                //logs.sendMessage(ChatColor.DARK_PURPLE + "FACING: " + blockFace);
-                //logs.sendMessage(ChatColor.AQUA + "DOWN");
                 for (int x = bx - radius; x <= bx + radius; x++) {
                     for (int y = by; y <= by + deep; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
@@ -250,8 +128,6 @@ public class PowerUtils {
                 }
                 break;
             case EAST:
-                //logs.sendMessage(ChatColor.DARK_PURPLE + "FACING: " + blockFace);
-                //logs.sendMessage(ChatColor.AQUA + "CADE EAST");
                 for (int x = bx - deep; x <= bx; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
@@ -261,8 +137,6 @@ public class PowerUtils {
                 }
                 break;
             case WEST:
-                //logs.sendMessage(ChatColor.DARK_PURPLE + "FACING: " + blockFace);
-                //logs.sendMessage(ChatColor.AQUA + "WEST");
                 for (int x = bx; x <= bx + deep; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
@@ -272,7 +146,6 @@ public class PowerUtils {
                 }
                 break;
             case NORTH:
-                //logs.sendMessage(ChatColor.AQUA + "NORTH");
                 for (int x = bx - radius; x <= bx + radius; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
                         for (int z = bz; z <= bz + deep; z++) {
@@ -302,7 +175,7 @@ public class PowerUtils {
 
     // This method returns a list of surrounding (3x3) blocks given a block face and target block
     public static ArrayList<Block> getSurroundingBlocksFarm(BlockFace blockFace, Block targetBlock, Integer radius) {
-        ArrayList<Block> blocks = new ArrayList<Block>();
+        ArrayList<Block> blocks = new ArrayList<>();
         World world = targetBlock.getWorld();
         int bx, by, bz;
         bx = targetBlock.getX();
@@ -310,16 +183,12 @@ public class PowerUtils {
         bz = targetBlock.getZ();
 
         // Check the block face from which the block is being broken in order to get the correct surrounding blocks
-        switch (blockFace) {
-            case UP:
-                for (int x = bx - radius; x <= bx + radius; x++) {
-                    for (int z = bz - radius; z <= bz + radius; z++) {
-                        blocks.add(world.getBlockAt(x, by, z));
-                    }
+        if (blockFace == BlockFace.UP) {
+            for (int x = bx - radius; x <= bx + radius; x++) {
+                for (int z = bz - radius; z <= bz + radius; z++) {
+                    blocks.add(world.getBlockAt(x, by, z));
                 }
-                break;
-            default:
-                break;
+            }
         }
 
         // Trim the nulls from the list
@@ -335,109 +204,7 @@ public class PowerUtils {
 
         String perm = Reference.CRAFT_PERMISSIONS.get(itemType);
 
-        if (player.hasPermission(perm)){
-            return true;
-        }
-
-        return false;
-
-//        boolean canCraft = false;
-//
-//        switch (itemType) {
-//            case WOODEN_PICKAXE:
-//                if (player.hasPermission("powermining.craft.hammer.wood"))
-//                    canCraft = true;
-//
-//                break;
-//            case STONE_PICKAXE:
-//                if (player.hasPermission("powermining.craft.hammer.stone"))
-//                    canCraft = true;
-//
-//                break;
-//            case IRON_PICKAXE:
-//                if (player.hasPermission("powermining.craft.hammer.iron"))
-//                    canCraft = true;
-//
-//                break;
-//            case GOLDEN_PICKAXE:
-//                if (player.hasPermission("powermining.craft.hammer.gold"))
-//                    canCraft = true;
-//
-//                break;
-//            case DIAMOND_PICKAXE:
-//                if (player.hasPermission("powermining.craft.hammer.diamond"))
-//                    canCraft = true;
-//
-//                break;
-//            case NETHERITE_PICKAXE:
-//                if (player.hasPermission("powermining.craft.hammer.netherite"))
-//                    canCraft = true;
-//
-//                break;
-//            case WOODEN_SHOVEL:
-//                if (player.hasPermission("powermining.craft.excavator.wood"))
-//                    canCraft = true;
-//
-//                break;
-//            case STONE_SHOVEL:
-//                if (player.hasPermission("powermining.craft.excavator.stone"))
-//                    canCraft = true;
-//
-//                break;
-//            case IRON_SHOVEL:
-//                if (player.hasPermission("powermining.craft.excavator.iron"))
-//                    canCraft = true;
-//
-//                break;
-//            case GOLDEN_SHOVEL:
-//                if (player.hasPermission("powermining.craft.excavator.gold"))
-//                    canCraft = true;
-//
-//                break;
-//            case DIAMOND_SHOVEL:
-//                if (player.hasPermission("powermining.craft.excavator.diamond"))
-//                    canCraft = true;
-//
-//                break;
-//            case NETHERITE_SHOVEL:
-//                if (player.hasPermission("powermining.craft.excavator.netherite"))
-//                    canCraft = true;
-//
-//                break;
-//            case WOODEN_HOE:
-//                if (player.hasPermission("powermining.craft.plow.wood"))
-//                    canCraft = true;
-//
-//                break;
-//            case STONE_HOE:
-//                if (player.hasPermission("powermining.craft.plow.stone"))
-//                    canCraft = true;
-//
-//                break;
-//            case IRON_HOE:
-//                if (player.hasPermission("powermining.craft.plow.iron"))
-//                    canCraft = true;
-//
-//                break;
-//            case GOLDEN_HOE:
-//                if (player.hasPermission("powermining.craft.plow.gold"))
-//                    canCraft = true;
-//
-//                break;
-//            case DIAMOND_HOE:
-//                if (player.hasPermission("powermining.craft.plow.diamond"))
-//                    canCraft = true;
-//
-//                break;
-//            case NETHERITE_HOE:
-//                if (player.hasPermission("powermining.craft.plow.netherite"))
-//                    canCraft = true;
-//
-//                break;
-//            default:
-//                break;
-//        }
-//        return canCraft;
+        return player.hasPermission(perm);
     }
 
     // This method returns if the player can use the target item
@@ -448,11 +215,7 @@ public class PowerUtils {
 
         String perm = Reference.USE_PERMISSIONS.get(itemType);
 
-        if (player.hasPermission(perm)){
-            return true;
-        }
-
-        return false;
+        return player.hasPermission(perm);
     }
 
     // This method returns if the player can enchant the target item
@@ -463,11 +226,9 @@ public class PowerUtils {
         ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
         String perm = Reference.ENCHANT_PERMISSIONS.get(itemType);
         console.sendMessage(ChatColor.GOLD+ perm);
-        if (player.hasPermission(perm)){
-            return true;
-        }
 
-        return false;
+        return player.hasPermission(perm);
+
     }
 
     // This method returns if the player can destroy the target block
