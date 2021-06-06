@@ -1,7 +1,7 @@
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
-import jodelle.powermining.lib.DebugggingMessages;
+import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
 import org.bukkit.*;
@@ -19,12 +19,12 @@ import org.bukkit.inventory.ItemStack;
 public class ClickPlayerListener implements Listener {
     public PowerMining plugin;
     public boolean useDurabilityPerBlock;
-    private final DebugggingMessages debugggingMessages;
+    private final DebuggingMessages debuggingMessages;
 
 
     public ClickPlayerListener(PowerMining plugin) {
         this.plugin = plugin;
-        debugggingMessages = new DebugggingMessages();
+        debuggingMessages = plugin.getDebuggingMessages();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
         useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
@@ -48,13 +48,17 @@ public class ClickPlayerListener implements Listener {
             return;
         if(handItem.getType().equals(Material.AIR))
             return;
+        if (block == null){
+            return;
+        }
+        if (!PowerUtils.isFarm(block.getType())){
+            return;
+        }
         if (!PowerUtils.isPowerTool(handItem))
             return;
         if (!PowerUtils.checkUsePermission(player, handItemType))
             return;
-        if (block == null){
-            return;
-        }
+
 
 
         String playerName = player.getName();
@@ -74,12 +78,12 @@ public class ClickPlayerListener implements Listener {
             else if (usePath = PowerUtils.validatePath(handItem.getType(), blockMat)) ;
 
             if (usePlow) {
-                debugggingMessages.sendConsoleMessage(ChatColor.RED + "Tilling: " + e.getType());
+                debuggingMessages.sendConsoleMessage(ChatColor.RED + "Tilling: " + e.getType());
 
                 e.setType(Material.FARMLAND);
                 // Reduce durability for each block
                 if (player.getGameMode().equals(GameMode.SURVIVAL)) {
-                    PowerUtils.reduceDurability(handItem);
+                    PowerUtils.reduceDurability(player, handItem);
                 }
                 continue;
             }
@@ -89,7 +93,7 @@ public class ClickPlayerListener implements Listener {
 
                 // Reduce durability for each block
                 if (player.getGameMode().equals(GameMode.SURVIVAL)) {
-                    PowerUtils.reduceDurability(handItem);
+                    PowerUtils.reduceDurability(player, handItem);
                 }
             }
         }

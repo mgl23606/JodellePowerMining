@@ -2,7 +2,7 @@ package jodelle.powermining.crafting;
 
 
 import jodelle.powermining.PowerMining;
-import jodelle.powermining.lib.DebugggingMessages;
+import jodelle.powermining.lib.DebuggingMessages;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -15,12 +15,12 @@ import java.util.ArrayList;
 
 public class CraftItem {
 
-    private final DebugggingMessages debugggingMessages;
+    private final DebuggingMessages debuggingMessages;
     protected JavaPlugin plugin;
 
-    public CraftItem(JavaPlugin plugin) {
+    public CraftItem(PowerMining plugin) {
         this.plugin = plugin;
-        debugggingMessages = new DebugggingMessages();
+        debuggingMessages = plugin.getDebuggingMessages();
     }
 
     protected void modifyItemMeta(ItemStack powerTool, String loreString, String name){
@@ -61,7 +61,7 @@ public class CraftItem {
     }
 
     protected void registerRecipes(ShapedRecipe recipe) {
-        debugggingMessages.sendConsoleMessage(ChatColor.AQUA + "Adding Recipe:" + recipe.getKey().getKey());
+        debuggingMessages.sendConsoleMessage(ChatColor.AQUA + "Adding Recipe:" + recipe.getKey().getKey());
         plugin.getServer().addRecipe(recipe);
     }
 

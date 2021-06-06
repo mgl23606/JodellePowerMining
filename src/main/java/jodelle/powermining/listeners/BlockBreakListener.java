@@ -13,12 +13,14 @@
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
+import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,34 +31,40 @@ import org.bukkit.inventory.ItemStack;
 public class BlockBreakListener implements Listener {
 	public PowerMining plugin;
 	public boolean useDurabilityPerBlock;
+	public DebuggingMessages debuggingMessages;
 
 	public BlockBreakListener(PowerMining plugin) {
 		this.plugin = plugin;
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+
+		debuggingMessages = plugin.getDebuggingMessages();
 
 		useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void checkToolAndBreakBlocks(BlockBreakEvent event) {
-		ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
+		boolean debugging = true;
 		Player player = event.getPlayer();
 		ItemStack handItem = player.getInventory().getItemInMainHand();
 		Material handItemType = handItem.getType();
 
-		console.sendMessage(ChatColor.RED + "[JodellePowerMining] Broke a block: ");
+		debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "Broke a block: ");
 
 		// If the player is sneaking, we want the tool to act like a normal pickaxe/shovel
-		if (player.isSneaking())
+		if (player.isSneaking()) {
 			return;
+		}
 
 		// If the player does not have permission to use the tool, acts like a normal pickaxe/shovel
-		if (!PowerUtils.checkUsePermission(player, handItemType))
+		if (!PowerUtils.checkUsePermission(player, handItemType)) {
 			return;
+		}
 
 		// If this is not a power tool, acts like a normal pickaxe
-		if (!PowerUtils.isPowerTool(handItem))
+		if (!PowerUtils.isPowerTool(handItem)) {
 			return;
+		}
 
 		Block block = event.getBlock();
 		String playerName = player.getName();
@@ -78,16 +86,17 @@ public class BlockBreakListener implements Listener {
 			if (useHammer || useExcavator) {
 
 				// Check if player has permission to break the block
-				if (!PowerUtils.canBreak(plugin, player, e))
+				if (!PowerUtils.canBreak(plugin, player, e)) {
 					continue;
+				}
 
 
-				console.sendMessage(ChatColor.RED + "[JodellePowerMining] Breaking: " + e.getType());
+				debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "Breaking: " + e.getType());
 
 				//When using breakNaturally the block is broken but the durability of the tool stays the same
 				//so it's necessary to update the damage manually
 				if(e.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)){
-					PowerUtils.reduceDurability(handItem);
+					PowerUtils.reduceDurability(player, handItem);
 				}
 
 			}

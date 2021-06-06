@@ -4,12 +4,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 
-public class DebugggingMessages {
+public class DebuggingMessages {
 
     protected boolean debugginOn = true;
     protected ConsoleCommandSender console;
 
-    public DebugggingMessages() {
+    public DebuggingMessages() {
         if (debugginOn){
             console = Bukkit.getServer().getConsoleSender();
             sendConsoleMessage("Debugging is On");

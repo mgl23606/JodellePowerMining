@@ -13,7 +13,7 @@
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
-import jodelle.powermining.lib.DebugggingMessages;
+import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
 import org.bukkit.ChatColor;
@@ -36,11 +36,11 @@ public class CraftItemListener implements Listener {
 	PowerMining plugin;
 
 	ItemStack[] newMatrix;
-	DebugggingMessages debugggingMessages;
+	DebuggingMessages debuggingMessages;
 
 	public CraftItemListener(PowerMining plugin) {
 		this.plugin = plugin;
-		debugggingMessages = new DebugggingMessages();
+		debuggingMessages = plugin.getDebuggingMessages();
 
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
@@ -129,7 +129,7 @@ public class CraftItemListener implements Listener {
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				if (matrix[i].getAmount() < expectedRecipe[i].getAmount()){
-					debugggingMessages.sendConsoleMessage(ChatColor.RED + "You didn't add enough" + expectedRecipe[i].getType());
+					debuggingMessages.sendConsoleMessage(ChatColor.RED + "You didn't add enough" + expectedRecipe[i].getType());
 					//inventory.setResult(null);
 					return false;
 				}

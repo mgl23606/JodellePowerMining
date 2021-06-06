@@ -13,6 +13,7 @@
 package jodelle.powermining.crafting;
 
 
+import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.Reference;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +26,7 @@ public class CraftItemHammer extends CraftItem{
 
 	public static String loreString = "SMASH!";
 
-	public CraftItemHammer(JavaPlugin plugin) {
+	public CraftItemHammer(PowerMining plugin) {
 		super(plugin);
 
 		for(Map.Entry<String, ItemStack[]> tool : Reference.HAMMER_CRAFTING_RECIPES.entrySet()){

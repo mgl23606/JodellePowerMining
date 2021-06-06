@@ -17,7 +17,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 import jodelle.powermining.enchantment.Glow;
 import jodelle.powermining.handlers.*;
-import jodelle.powermining.lib.DebugggingMessages;
+import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.Reference;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.Bukkit;
@@ -27,11 +27,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.naming.NameNotFoundException;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -44,7 +42,7 @@ public final class PowerMining extends JavaPlugin {
     InventoryClickHandler handlerInventoryClick;
     ClickPlayerHandler handlerClickPlayer;
     CommandHandler commandHandler;
-    DebugggingMessages debugggingMessages;
+    DebuggingMessages debuggingMessages;
     ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
     Plugin worldguard;
@@ -58,7 +56,7 @@ public final class PowerMining extends JavaPlugin {
 
         instance = this;
 
-        debugggingMessages = new DebugggingMessages();
+        debuggingMessages = new DebuggingMessages();
 
         this.saveDefaultConfig();
         registerGlow();
@@ -96,17 +94,17 @@ public final class PowerMining extends JavaPlugin {
     private void processPermissions() {
 
         ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-        debugggingMessages.sendConsoleMessage(ChatColor.GOLD + "[JodellePowerMining] - Setting up Permissions");
+        debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "[JodellePowerMining] - Setting up Permissions");
         //Hashmap to store the permission
         // WOODEN_PICKAXE -> powermining.craft.hammer.wooden
         generatePermission(Reference.HAMMERS, Reference.PICKAXES);
         generatePermission(Reference.EXCAVATORS, Reference.SHOVELS);
         generatePermission(Reference.PLOWS, Reference.HOES);
 
-        debugggingMessages.sendConsoleMessage(String.valueOf(Reference.CRAFT_PERMISSIONS.size()));
+        debuggingMessages.sendConsoleMessage(String.valueOf(Reference.CRAFT_PERMISSIONS.size()));
 
         for (Map.Entry<Material, String> materialStringEntry : Reference.USE_PERMISSIONS.entrySet()) {
-            debugggingMessages.sendConsoleMessage(ChatColor.GOLD + "Material: " + materialStringEntry.getKey().toString() + " - Permission " + materialStringEntry.getValue());
+            debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "Material: " + materialStringEntry.getKey().toString() + " - Permission " + materialStringEntry.getValue());
         }
 
     }
@@ -145,7 +143,7 @@ public final class PowerMining extends JavaPlugin {
             // as well as their quantities. Ex: DIAMOND*1
             LinkedHashMap<String, ArrayList> l = (LinkedHashMap<String, ArrayList>) x;
             for (String toolName : l.keySet()) {
-                debugggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.BLUE + "Processing " + toolName + " recipe");
+                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.BLUE + "Processing " + toolName + " recipe");
                 // This array is used to store all 9 itemstacks used in the recipe
                 // When an element is null signifies an empty slot in the crafting table
                 ItemStack[] craftingRecipe = new ItemStack[9];
@@ -171,24 +169,24 @@ public final class PowerMining extends JavaPlugin {
                         throw new NumberFormatException("A full stack of " + material + " can only contain " + itemStack.getMaxStackSize());
                     }
                     craftingRecipe[i] = itemStack;
-                    debugggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Material: " + material);
-                    debugggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Max stack size: " + String.valueOf(craftingRecipe[i].getMaxStackSize()));
-                    debugggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "ConfigFile stack size: " + quantity);
+                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Material: " + material);
+                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Max stack size: " + String.valueOf(craftingRecipe[i].getMaxStackSize()));
+                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "ConfigFile stack size: " + quantity);
                     i++;
                 }
                 if (Reference.HAMMERS.contains(toolName)) {
                     Reference.HAMMER_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                    debugggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
+                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
                     continue;
                 }
                 if (Reference.EXCAVATORS.contains(toolName)) {
                     Reference.EXCAVATOR_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                    debugggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
+                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
                     continue;
                 }
                 if (Reference.PLOWS.contains(toolName)) {
                     Reference.PLOW_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                    debugggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
+                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
                     continue;
                 }
             }
@@ -301,6 +299,10 @@ public final class PowerMining extends JavaPlugin {
 
     public Towny getTowny() {
         return (Towny) towny;
+    }
+
+    public DebuggingMessages getDebuggingMessages() {
+        return debuggingMessages;
     }
 
     public void registerGlow() {

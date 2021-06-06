@@ -1,5 +1,6 @@
 package jodelle.powermining.crafting;
 
+import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.Reference;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -12,7 +13,7 @@ public class CraftItemPlow extends CraftItem {
 
     public static String loreString = "PLOW!";
 
-    public CraftItemPlow(JavaPlugin plugin) {
+    public CraftItemPlow(PowerMining plugin) {
         super(plugin);
 
         this.plugin = plugin;
