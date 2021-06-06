@@ -53,7 +53,7 @@ public class PowerUtils {
 		return container.has(isPowerTool, PersistentDataType.STRING);
 }
 
-    public static void reduceDurability(ItemStack item){
+    public static void reduceDurability(Player player, ItemStack item){
 
         if(item.getEnchantments().containsKey(Enchantment.DURABILITY)){
             Random rand = new Random();
@@ -71,11 +71,28 @@ public class PowerUtils {
         }
         ItemMeta itemMeta = item.getItemMeta();
 
-        if (itemMeta instanceof Damageable){
-            Damageable damageable = (Damageable) itemMeta;
-            damageable.setDamage(damageable.getDamage()+1);
-            item.setItemMeta(itemMeta);
+        if (!(itemMeta instanceof Damageable)){
+            return;
         }
+
+        Damageable damageable = (Damageable) itemMeta;
+
+        //increasing the damage by one reduces the durability by one
+        damageable.setDamage(damageable.getDamage()+1);
+        item.setItemMeta(itemMeta);
+
+        /*Reducing the durability doesn't cause the item to be broken when it gets below zero.
+        * That said, it is needed to implement this behavior manually.
+        * If the damage is higher than the item durability, the item is remover from
+        * the player inventory and a breaking sound is played*/
+        if (damageable.getDamage() > item.getType().getMaxDurability()){
+            player.getInventory().remove(item);
+
+            Location loc = player.getEyeLocation();
+            loc.getWorld().playSound(loc, Sound.ENTITY_ITEM_BREAK, 1.0F, 1.0F);
+        }
+
+
     }
     
 
