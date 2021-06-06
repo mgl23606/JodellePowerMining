@@ -19,13 +19,16 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
 
 
 ## Change log
+##### 6 june 2021
+    - Implemented the logic that removes the item from the player inventory as soons as the 
+      durability reaches a value below zero. Also plays a breaking sound.
 ##### 3 june 2021
     - Added the command "jpm give" and " jpm version"
-      Enchantments of items from the recipe on the crafting table are now passed onto
+    - Enchantments of items from the recipe on the crafting table are now passed onto
       the crafted PowerTool.
-      Max stack size is now verified when loading the custom recipes. This prevents, for example, more
+    - Max stack size is now verified when loading the custom recipes. This prevents, for example, more
       setting more than one pickaxe per slot, which is impossible to make in survival.
-      Little optimizations on the code.
+    - Little optimizations on the code.
 
 ##### 26 may 2021
     - Changed the way permissions are checked. Instead of having all the permissions hardcoded on each method 
