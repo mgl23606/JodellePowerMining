@@ -8,6 +8,13 @@
 
 package jodelle.powermining.lib;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 import jodelle.powermining.PowerMining;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -250,6 +257,22 @@ public class PowerUtils {
 
     // This method returns if the player can destroy the target block
     public static boolean canBreak(PowerMining plugin, Player player, Block block) {
+
+        if (plugin.getWorldGuard() == null){
+            return true;
+        }
+
+        LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+        com.sk89q.worldedit.util.Location loc = BukkitAdapter.adapt(block.getLocation());
+        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        RegionQuery query = container.createQuery();
+
+        if (!query.testBuild(loc, localPlayer, Flags.BUILD)) {
+            plugin.getDebuggingMessages().sendConsoleMessage("Can't build");
+            return false;
+        }
+
+        plugin.getDebuggingMessages().sendConsoleMessage("Can build");
         return true;
     }
 

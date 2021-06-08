@@ -56,6 +56,10 @@ public class BlockBreakListener implements Listener {
 			return;
 		}
 
+		if(handItemType.equals(Material.AIR)) {
+			return;
+		}
+
 		// If the player does not have permission to use the tool, acts like a normal pickaxe/shovel
 		if (!PowerUtils.checkUsePermission(player, handItemType)) {
 			return;

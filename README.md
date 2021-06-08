@@ -19,6 +19,10 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
 
 
 ## Change log
+##### 8 june 2021
+    - Worldguard support added. It is not required to have the plugintho. It checks each block 
+      to see if they are build protected.
+    - Added dependencies to the pom.xml
 ##### 6 june 2021
     - Implemented the logic that removes the item from the player inventory as soons as the 
       durability reaches a value below zero. Also plays a breaking sound.

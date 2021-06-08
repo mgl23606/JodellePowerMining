@@ -71,6 +71,11 @@ public class ClickPlayerListener implements Listener {
             Material blockMat = e.getType();
             console.sendMessage(ChatColor.RED + "[JodellePowerMining] block: " + e.getType());
 
+            // Check if player has permission to break the block
+            if (!PowerUtils.canBreak(plugin, player, e)) {
+                continue;
+            }
+
             boolean usePlow;
             boolean usePath = false;
 

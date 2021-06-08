@@ -14,24 +14,23 @@ package jodelle.powermining;
 
 import com.palmergames.bukkit.towny.Towny;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-
 import jodelle.powermining.enchantment.Glow;
 import jodelle.powermining.handlers.*;
 import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.Reference;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public final class PowerMining extends JavaPlugin {
     public JavaPlugin plugin;
@@ -43,9 +42,8 @@ public final class PowerMining extends JavaPlugin {
     ClickPlayerHandler handlerClickPlayer;
     CommandHandler commandHandler;
     DebuggingMessages debuggingMessages;
-    ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
 
-    Plugin worldguard;
+    WorldGuardPlugin worldguard;
     Plugin griefprevention;
     Plugin towny;
 
@@ -64,6 +62,7 @@ public final class PowerMining extends JavaPlugin {
         processCraftingRecipes();
         processPermissions();
         getLogger().info("Finished processing config file.");
+        loadDependencies();
 
 
         handlerPlayerInteract = new PlayerInteractHandler();
@@ -82,18 +81,29 @@ public final class PowerMining extends JavaPlugin {
         handlerClickPlayer.Init(this);
         commandHandler.Init(this);
 
-        worldguard = getServer().getPluginManager().getPlugin("WorldGuard");
-        griefprevention = getServer().getPluginManager().getPlugin("GriefPrevention");
-        towny = getServer().getPluginManager().getPlugin("Towny");
 
         getLogger().info("PowerMining plugin was enabled.");
 
 
     }
 
+    private void loadDependencies() {
+        boolean debugging = true;
+        String[] pluginList = {"WorldGuard"};
+
+        debuggingMessages.sendConsoleMessage(debugging, ChatColor.YELLOW + "Loading dependencies...");
+
+        for (String pluginName : pluginList) {
+            Plugin plugin = getServer().getPluginManager().getPlugin(pluginName);
+            if (plugin instanceof WorldGuardPlugin){
+                debuggingMessages.sendConsoleMessage(debugging, ChatColor.YELLOW + pluginName + " Found!");
+                worldguard = (WorldGuardPlugin) plugin;
+            }
+        }
+    }
+
     private void processPermissions() {
 
-        ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
         debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "[JodellePowerMining] - Setting up Permissions");
         //Hashmap to store the permission
         // WOODEN_PICKAXE -> powermining.craft.hammer.wooden
@@ -205,7 +215,6 @@ public final class PowerMining extends JavaPlugin {
     public void onDisable() {
         getLogger().info("PowerMining plugin was disabled.");
     }
-
 
     public void processConfig() {
         try {

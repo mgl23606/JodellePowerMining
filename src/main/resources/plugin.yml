@@ -1,6 +1,6 @@
 name: JodellePowerMining
 main: jodelle.powermining.PowerMining
-version: 21.06
+version: 21.06.08
 author: JodelleLover
 description: Implements Hammer and Excavator tools for faster mining, version updated from BloodyShade. 
 api-version: 1.16
