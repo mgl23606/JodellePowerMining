@@ -201,35 +201,35 @@ permissions:
         children:
             powermining.use.plow.all: true
 
-        powermining.use.plow.all:
-            description: Allows players to use all Plows
-            default: op
-            children:
-                powermining.use.plow.wood: true
-                powermining.use.plow.stone: true
-                powermining.use.plow.iron: true
-                powermining.use.plow.gold: true
-                powermining.use.plow.diamond: true
-                powermining.use.plow.netherite: true
+    powermining.use.plow.all:
+        description: Allows players to use all Plows
+        default: op
+        children:
+            powermining.use.plow.wood: true
+            powermining.use.plow.stone: true
+            powermining.use.plow.iron: true
+            powermining.use.plow.gold: true
+            powermining.use.plow.diamond: true
+            powermining.use.plow.netherite: true
 
-        powermining.use.plow.wood:
-            description: Allows players to use the Wooden Plow
-            default: false
-        powermining.use.plow.stone:
-            description: Allows players to use the Stone Plow
-            default: false
-        powermining.use.plow.iron:
-            description: Allows players to use the Iron Plow
-            default: false
-        powermining.use.plow.gold:
-            description: Allows players to use the Golden Plow
-            default: false
-        powermining.use.plow.diamond:
-            description: Allows players to use the Diamond Plow
-            default: false
-        powermining.use.plow.netherite:
-            description: Allows players to use the Netherite Plow
-            default: false
+    powermining.use.plow.wood:
+        description: Allows players to use the Wooden Plow
+        default: false
+    powermining.use.plow.stone:
+        description: Allows players to use the Stone Plow
+        default: false
+    powermining.use.plow.iron:
+        description: Allows players to use the Iron Plow
+        default: false
+    powermining.use.plow.gold:
+        description: Allows players to use the Golden Plow
+        default: false
+    powermining.use.plow.diamond:
+        description: Allows players to use the Diamond Plow
+        default: false
+    powermining.use.plow.netherite:
+        description: Allows players to use the Netherite Plow
+        default: false
 
     powermining.use.excavator.*:
         description: Allows players to use all excavators
