@@ -17,23 +17,23 @@ import jodelle.powermining.lib.Reference;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
-import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class CraftItemExcavator extends CraftItem {
 
-	public static String loreString = "POUND!";
+	public static final String loreString = "POUND!";
 
-	public CraftItemExcavator(PowerMining plugin) {
+	public CraftItemExcavator(@Nonnull PowerMining plugin) {
 		super(plugin);
 
 		for(Map.Entry<String, ItemStack[]> tool : Reference.EXCAVATOR_CRAFTING_RECIPES.entrySet()){
 
 			//key is the name of the powertool. Ex: DIAMOND_HAMMER
 			//value is an array containing the recipe
-			String key = tool.getKey();
-			ItemStack[] value = tool.getValue();
+			final String key = tool.getKey();
+			final ItemStack[] value = tool.getValue();
 			//console.sendMessage(ChatColor.AQUA + "Creating: " + key);
 
 			//We start by finding the position of the name on the HAMMERS array
@@ -41,14 +41,14 @@ public class CraftItemExcavator extends CraftItem {
 			int i = Reference.EXCAVATORS.indexOf(key);
 
 			//console.sendMessage(ChatColor.AQUA + String.valueOf(i));
-			Material pickaxe = Reference.SHOVELS.get(i);
+			final Material pickaxe = Reference.SHOVELS.get(i);
 
-			ItemStack powerTool = new ItemStack(pickaxe, 1);
+			final ItemStack powerTool = new ItemStack(pickaxe, 1);
 			//powerTools.add(powerTool);
 
 			modifyItemMeta(powerTool, loreString, key);
 
-			ShapedRecipe recipe = createRecipe(powerTool, key, value);
+			final ShapedRecipe recipe = createRecipe(powerTool, key, value);
 
 			registerRecipes(recipe);
 

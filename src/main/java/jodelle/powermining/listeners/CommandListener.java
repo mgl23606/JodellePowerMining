@@ -9,6 +9,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Recipe;
 
+import javax.annotation.Nonnull;
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +29,7 @@ public class CommandListener implements Listener, CommandExecutor, TabExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
 
         if (args.length == 0){
             return versionCommand(sender);
@@ -93,7 +95,7 @@ public class CommandListener implements Listener, CommandExecutor, TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete( @Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, String[] args) {
 
         List<String> arguments = new ArrayList<>();
 

@@ -1,6 +1,6 @@
 name: JodellePowerMining
 main: jodelle.powermining.PowerMining
-version: 21.06.08
+version: 21.06.15
 author: JodelleLover
 description: Implements Hammer and Excavator tools for faster mining, version updated from BloodyShade. 
 api-version: 1.16
@@ -29,7 +29,7 @@ permissions:
         description: Allows player to receive a Powertool of his choice
         default: op
 
-    powermining.craft.*:
+    powermining.craft.all:
         description: Allows players to craft all PowerTools
         default: op
         children:
@@ -47,14 +47,14 @@ permissions:
         description: Allows players to craft all hammers
         default: op
         children:
-            powermining.craft.hammer.wood: true
+            powermining.craft.hammer.wooden: true
             powermining.craft.hammer.stone: true
             powermining.craft.hammer.iron: true
-            powermining.craft.hammer.gold: true
+            powermining.craft.hammer.golden: true
             powermining.craft.hammer.diamond: true
             powermining.craft.hammer.netherite: true
 
-    powermining.craft.hammer.wood:
+    powermining.craft.hammer.wooden:
         description: Allows players to craft the Wooden Hammer
         default: false
     powermining.craft.hammer.stone:
@@ -63,7 +63,7 @@ permissions:
     powermining.craft.hammer.iron:
         description: Allows players to craft the Iron Hammer
         default: false
-    powermining.craft.hammer.gold:
+    powermining.craft.hammer.golden:
         description: Allows players to craft the Golden Hammer
         default: false
     powermining.craft.hammer.diamond:
@@ -83,14 +83,14 @@ permissions:
         description: Allows players to craft all Plows
         default: op
         children:
-            powermining.craft.plow.wood: true
+            powermining.craft.plow.wooden: true
             powermining.craft.plow.stone: true
             powermining.craft.plow.iron: true
-            powermining.craft.plow.gold: true
+            powermining.craft.plow.golden: true
             powermining.craft.plow.diamond: true
             powermining.craft.plow.netherite: true
 
-    powermining.craft.plow.wood:
+    powermining.craft.plow.wooden:
         description: Allows players to craft the Wooden Plow
         default: false
     powermining.craft.plow.stone:
@@ -99,7 +99,7 @@ permissions:
     powermining.craft.plow.iron:
         description: Allows players to craft the Iron Plow
         default: false
-    powermining.craft.plow.gold:
+    powermining.craft.plow.golden:
         description: Allows players to craft the Golden Plow
         default: false
     powermining.craft.plow.diamond:
@@ -119,14 +119,14 @@ permissions:
         description: Allows players to craft all Excavators
         default: op
         children:
-            powermining.craft.excavator.wood: true
+            powermining.craft.excavator.wooden: true
             powermining.craft.excavator.stone: true
             powermining.craft.excavator.iron: true
-            powermining.craft.excavator.gold: true
+            powermining.craft.excavator.golden: true
             powermining.craft.excavator.diamond: true
             powermining.craft.excavator.netherite: true
 
-    powermining.craft.excavator.wood:
+    powermining.craft.excavator.wooden:
         description: Allows players to craft the Wooden Excavator
         default: false
     powermining.craft.excavator.stone:
@@ -135,7 +135,7 @@ permissions:
     powermining.craft.excavator.iron:
         description: Allows players to craft the Iron Excavator
         default: false
-    powermining.craft.excavator.gold:
+    powermining.craft.excavator.golden:
         description: Allows players to craft the Golden Excavator
         default: false
     powermining.craft.excavator.diamond:
@@ -169,14 +169,14 @@ permissions:
         description: Allows players to use all hammers
         default: op
         children:
-            powermining.use.hammer.wood: true
+            powermining.use.hammer.wooden: true
             powermining.use.hammer.stone: true
             powermining.use.hammer.iron: true
-            powermining.use.hammer.gold: true
+            powermining.use.hammer.golden: true
             powermining.use.hammer.diamond: true
             powermining.use.hammer.netherite: true
 
-    powermining.use.hammer.wood:
+    powermining.use.hammer.wooden:
         description: Allows players to use the Wooden Hammer
         default: false
     powermining.use.hammer.stone:
@@ -185,7 +185,7 @@ permissions:
     powermining.use.hammer.iron:
         description: Allows players to use the Iron Hammer
         default: false
-    powermining.use.hammer.gold:
+    powermining.use.hammer.golden:
         description: Allows players to use the Golden Hammer
         default: false
     powermining.use.hammer.diamond:
@@ -205,14 +205,14 @@ permissions:
         description: Allows players to use all Plows
         default: op
         children:
-            powermining.use.plow.wood: true
+            powermining.use.plow.wooden: true
             powermining.use.plow.stone: true
             powermining.use.plow.iron: true
-            powermining.use.plow.gold: true
+            powermining.use.plow.golden: true
             powermining.use.plow.diamond: true
             powermining.use.plow.netherite: true
 
-    powermining.use.plow.wood:
+    powermining.use.plow.wooden:
         description: Allows players to use the Wooden Plow
         default: false
     powermining.use.plow.stone:
@@ -221,7 +221,7 @@ permissions:
     powermining.use.plow.iron:
         description: Allows players to use the Iron Plow
         default: false
-    powermining.use.plow.gold:
+    powermining.use.plow.golden:
         description: Allows players to use the Golden Plow
         default: false
     powermining.use.plow.diamond:
@@ -241,14 +241,14 @@ permissions:
         description: Allows players to use all excavators
         default: op
         children:
-            powermining.use.excavator.wood: true
+            powermining.use.excavator.wooden: true
             powermining.use.excavator.stone: true
             powermining.use.excavator.iron: true
-            powermining.use.excavator.gold: true
+            powermining.use.excavator.golden: true
             powermining.use.excavator.diamond: true
             powermining.use.excavator.netherite: true
 
-    powermining.use.excavator.wood:
+    powermining.use.excavator.wooden:
         description: Allows players to use the Wooden Excavator
         default: false
     powermining.use.excavator.stone:
@@ -257,7 +257,7 @@ permissions:
     powermining.use.excavator.iron:
         description: Allows players to use the Iron Excavator
         default: false
-    powermining.use.excavator.gold:
+    powermining.use.excavator.golden:
         description: Allows players to use the Golden Excavator
         default: false
     powermining.use.excavator.diamond:
@@ -291,14 +291,14 @@ permissions:
         description: Allows players to enchant all hammers
         default: op
         children:
-            powermining.enchant.hammer.wood: true
+            powermining.enchant.hammer.wooden: true
             powermining.enchant.hammer.stone: true
             powermining.enchant.hammer.iron: true
-            powermining.enchant.hammer.gold: true
+            powermining.enchant.hammer.golden: true
             powermining.enchant.hammer.diamond: true
             powermining.enchant.hammer.netherite: true
 
-    powermining.enchant.hammer.wood:
+    powermining.enchant.hammer.wooden:
         description: Allows players to enchant the Wooden Hammer
         default: false
     powermining.enchant.hammer.stone:
@@ -307,7 +307,7 @@ permissions:
     powermining.enchant.hammer.iron:
         description: Allows players to enchant the Iron Hammer
         default: false
-    powermining.enchant.hammer.gold:
+    powermining.enchant.hammer.golden:
         description: Allows players to enchant the Golden Hammer
         default: false
     powermining.enchant.hammer.diamond:
@@ -327,14 +327,14 @@ permissions:
         description: Allows players to enchant all Plows
         default: op
         children:
-            powermining.enchant.plow.wood: true
+            powermining.enchant.plow.wooden: true
             powermining.enchant.plow.stone: true
             powermining.enchant.plow.iron: true
-            powermining.enchant.plow.gold: true
+            powermining.enchant.plow.golden: true
             powermining.enchant.plow.diamond: true
             powermining.enchant.plow.netherite: true
 
-    powermining.enchant.plow.wood:
+    powermining.enchant.plow.wooden:
             description: Allows players to enchant the Wooden Plow
             default: false
     powermining.enchant.plow.stone:
@@ -343,7 +343,7 @@ permissions:
     powermining.enchant.plow.iron:
             description: Allows players to enchant the Iron Plow
             default: false
-    powermining.enchant.plow.gold:
+    powermining.enchant.plow.golden:
             description: Allows players to enchant the Golden Plow
             default: false
     powermining.enchant.plow.diamond:
@@ -363,14 +363,14 @@ permissions:
         description: Allows players to enchant all excavators
         default: op
         children:
-            powermining.enchant.excavator.wood: true
+            powermining.enchant.excavator.wooden: true
             powermining.enchant.excavator.stone: true
             powermining.enchant.excavator.iron: true
-            powermining.enchant.excavator.gold: true
+            powermining.enchant.excavator.golden: true
             powermining.enchant.excavator.diamond: true
             powermining.enchant.excavator.netherite: true
 
-    powermining.enchant.excavator.wood:
+    powermining.enchant.excavator.wooden:
         description: Allows players to enchant the Wooden Excavator
         default: false
     powermining.enchant.excavator.stone:
@@ -379,7 +379,7 @@ permissions:
     powermining.enchant.excavator.iron:
         description: Allows players to enchant the Iron Excavator
         default: false
-    powermining.enchant.excavator.gold:
+    powermining.enchant.excavator.golden:
         description: Allows players to enchant the Golden Excavator
         default: false
     powermining.enchant.excavator.diamond:

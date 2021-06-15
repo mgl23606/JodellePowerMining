@@ -22,11 +22,13 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import javax.annotation.Nonnull;
+
 public class PlayerInteractListener implements Listener {
-	public PowerMining plugin;
+	private final PowerMining plugin;
 	private final HashMap<String, BlockFace> faces = new HashMap<>();
 
-	public PlayerInteractListener(PowerMining plugin) {
+	public PlayerInteractListener(@Nonnull PowerMining plugin) {
 		this.plugin = plugin;
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
@@ -42,7 +44,7 @@ public class PlayerInteractListener implements Listener {
 
 
 
-	public BlockFace getBlockFaceByPlayerName(String name) {
+	public BlockFace getBlockFaceByPlayerName(@Nonnull final String name) {
 		return faces.get(name);
 	}
 }

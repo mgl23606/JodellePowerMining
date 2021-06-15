@@ -15,14 +15,17 @@ package jodelle.powermining.handlers;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.listeners.InventoryClickListener;
 
+import javax.annotation.Nonnull;
+
 public class InventoryClickHandler {
 	public InventoryClickHandler() {}
 	public InventoryClickListener listener;
 
-	public void Init(PowerMining plugin) {
+	public void Init(@Nonnull PowerMining plugin) {
 		listener = new InventoryClickListener(plugin);
 	}
 
+	@Nonnull
 	public InventoryClickListener getListener() {
 		return listener;
 	}

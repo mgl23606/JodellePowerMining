@@ -15,14 +15,17 @@ package jodelle.powermining.handlers;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.listeners.EnchantItemListener;
 
+import javax.annotation.Nonnull;
+
 public class EnchantItemHandler {
 	public EnchantItemHandler() {}
 	public EnchantItemListener listener;
 
-	public void Init(PowerMining plugin) {
+	public void Init(@Nonnull PowerMining plugin) {
 		listener = new EnchantItemListener(plugin);
 	}
 
+	@Nonnull
 	public EnchantItemListener getListener() {
 		return listener;
 	}

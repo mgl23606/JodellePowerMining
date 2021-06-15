@@ -16,14 +16,17 @@ package jodelle.powermining.handlers;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.listeners.BlockBreakListener;
 
+import javax.annotation.Nonnull;
+
 public class BlockBreakHandler {
 	public BlockBreakHandler() {}
 	public BlockBreakListener listener;
 
-	public void Init(PowerMining plugin) {
+	public void Init(@Nonnull PowerMining plugin) {
 		listener = new BlockBreakListener(plugin);
 	}
 
+	@Nonnull
 	public BlockBreakListener getListener() {
 		return listener;
 	}

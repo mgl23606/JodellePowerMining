@@ -21,23 +21,25 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class EnchantItemListener implements Listener {
-	PowerMining plugin;
+import javax.annotation.Nonnull;
 
-	public EnchantItemListener(PowerMining plugin) {
-		this.plugin = plugin;
+public class EnchantItemListener implements Listener {
+
+	public EnchantItemListener(@Nonnull PowerMining plugin) {
 
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void canEnchant(EnchantItemEvent event) {
-		ItemStack item = event.getItem();
+		final ItemStack item = event.getItem();
 
-		if (!PowerUtils.isPowerTool(item))
+		if (!PowerUtils.isPowerTool(item)) {
 			return;
+		}
 
-		if (!PowerUtils.checkEnchantPermission(event.getEnchanter(), item.getType()))
+		if (!PowerUtils.checkEnchantPermission(event.getEnchanter(), item.getType())) {
 			event.setCancelled(true);
+		}
 	}
 }

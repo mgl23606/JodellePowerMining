@@ -22,6 +22,8 @@ import java.util.HashMap;
 
 public class Reference {
 
+	public static final String[] dependencies = {"WorldGuard"};
+
 	public static HashMap<Material, String> CRAFT_PERMISSIONS = new HashMap<>();
 	public static HashMap<Material, String> USE_PERMISSIONS = new HashMap<>();
 	public static HashMap<Material, String> ENCHANT_PERMISSIONS = new HashMap<>();
@@ -40,7 +42,7 @@ public class Reference {
 			Material.DIRT
 	));
 
-	public static ArrayList<Material> PATH = new ArrayList<>(Collections.singletonList(
+	public static ArrayList<Material> PATHABLE = new ArrayList<>(Collections.singletonList(
 			Material.GRASS_BLOCK
 	));
 

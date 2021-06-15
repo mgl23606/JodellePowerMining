@@ -19,6 +19,8 @@ import jodelle.powermining.crafting.CraftItemHammer;
 import jodelle.powermining.crafting.CraftItemPlow;
 import jodelle.powermining.listeners.CraftItemListener;
 
+import javax.annotation.Nonnull;
+
 public class CraftItemHandler {
 	public CraftItemHandler() {}
 	public CraftItemHammer HammerClass;
@@ -26,13 +28,14 @@ public class CraftItemHandler {
 	public CraftItemPlow HoeClass;
 	public CraftItemListener listener;
 
-	public void Init(PowerMining plugin) {
+	public void Init(@Nonnull PowerMining plugin) {
 		HammerClass = new CraftItemHammer(plugin);
 		ExcavatorClass = new CraftItemExcavator(plugin);
 		HoeClass = new CraftItemPlow(plugin);
 		listener = new CraftItemListener(plugin);
 	}
 
+	@Nonnull
 	public CraftItemListener getListener() {
 		return listener;
 	}

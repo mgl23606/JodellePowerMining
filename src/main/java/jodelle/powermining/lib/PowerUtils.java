@@ -28,6 +28,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.NoSuchElementException;
@@ -42,10 +43,14 @@ public class PowerUtils {
     public PowerUtils() {
     }
 
-    // This method checks if the item is a power tool
-    // It checks the PersistantDataContainer of the item for a key
-    // set specifically for the powertools
-    public static boolean isPowerTool(ItemStack item) {
+    /**
+     * This method validates if the item is a PowerTool
+     * It checks the PersistantDataContainer of the item for a key
+     * set specifically for the PowerTools
+     * @param item The item to test
+     * @return True if the item is a PowerTool
+     */
+    public static boolean isPowerTool(@Nonnull ItemStack item) {
 
         PowerMining plugin = PowerMining.getInstance();
         ItemMeta itemMeta = item.getItemMeta();
@@ -60,7 +65,12 @@ public class PowerUtils {
 		return container.has(isPowerTool, PersistentDataType.STRING);
 }
 
-    public static void reduceDurability(Player player, ItemStack item){
+    /**
+     * Reduces the durability of a tool
+     * @param player Player who used the tool
+     * @param item Item used by the player
+     */
+    public static void reduceDurability(@Nonnull Player player, @Nonnull ItemStack item){
 
         if(item.getEnchantments().containsKey(Enchantment.DURABILITY)){
             Random rand = new Random();
@@ -96,36 +106,66 @@ public class PowerUtils {
             player.getInventory().remove(item);
 
             Location loc = player.getEyeLocation();
-            loc.getWorld().playSound(loc, Sound.ENTITY_ITEM_BREAK, 1.0F, 1.0F);
+            World world = loc.getWorld();
+            if (world != null) {
+                world.playSound(loc, Sound.ENTITY_ITEM_BREAK, 1.0F, 1.0F);
+            }
         }
 
 
     }
-    
 
-    // This method returns if the block is mineable
-    public static boolean isMineable(Material blockType) {
+
+    /**
+     * Returns if the block is present on the minable list
+     * @param blockType Block to be verified
+     * @return True if the block is minable
+     */
+    public static boolean isMineable(@Nonnull Material blockType) {
         return Reference.MINABLE.containsKey(blockType);
     }
 
-    // This method returns if the block is digable
-    public static boolean isDigable(Material blockType) {
+    /**
+     * Returns if the block is present on the digable list
+     * @param blockType Block to be verified
+     * @return True if the block is digable
+     */
+    public static boolean isDigable(@Nonnull Material blockType) {
         return Reference.DIGGABLE.contains(blockType);
     }
 
-    // This method returns if the block is digable
-    public static boolean isFarm(Material blockType) {
+    /**
+     * Returns if the block is present on the tillable list
+     * @param blockType Block to be verified
+     * @return True if the block is tillable
+     */
+    public static boolean isTillable(@Nonnull Material blockType) {
         return Reference.TILLABLE.contains(blockType);
     }
 
-    public static boolean isPath(Material blockType) {
-        return Reference.PATH.contains(blockType);
+    /**
+     * Returns if the block is present on the pathable list
+     * @param blockType Block to be verified
+     * @return True if the block is pathable
+     */
+    public static boolean isPathable(@Nonnull Material blockType) {
+        return Reference.PATHABLE.contains(blockType);
     }
 
-    // This method returns a list of surrounding (3x3) blocks given a block face and target block
-    public static ArrayList<Block> getSurroundingBlocks(BlockFace blockFace, Block targetBlock, Integer radius, Integer deep) {
-        ArrayList<Block> blocks = new ArrayList<>();
+    /**
+     * Returns a lif of the surrounding blocks given a block face, a target block, a radius and a depth
+     * @param blockFace Face of the block where the player clicked
+     * @param targetBlock Block broke by the player
+     * @param radius Radius of the hole
+     * @param depth Depth of the hole
+     * @return Array containing all the blocks surrounding the target block
+     */
+    @Nonnull
+    public static ArrayList<Block> getSurroundingBlocks(@Nonnull BlockFace blockFace, @Nonnull Block targetBlock, @Nonnull Integer radius, @Nonnull Integer depth) {
+        //Array that will store the blocks surrounding the center block
+        final ArrayList<Block> blocks = new ArrayList<>();
         World world = targetBlock.getWorld();
+
         int bx, by, bz;
         bx = targetBlock.getX();
         by = targetBlock.getY();
@@ -135,7 +175,7 @@ public class PowerUtils {
         switch (blockFace) {
             case UP:
                 for (int x = bx - radius; x <= bx + radius; x++) {
-                    for (int y = by - deep; y <= by; y++) {
+                    for (int y = by - depth; y <= by; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
                             blocks.add(world.getBlockAt(x, y, z));
                         }
@@ -144,7 +184,7 @@ public class PowerUtils {
                 break;
             case DOWN:
                 for (int x = bx - radius; x <= bx + radius; x++) {
-                    for (int y = by; y <= by + deep; y++) {
+                    for (int y = by; y <= by + depth; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
                             blocks.add(world.getBlockAt(x, y, z));
                         }
@@ -152,7 +192,7 @@ public class PowerUtils {
                 }
                 break;
             case EAST:
-                for (int x = bx - deep; x <= bx; x++) {
+                for (int x = bx - depth; x <= bx; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
                             blocks.add(world.getBlockAt(x, y, z));
@@ -161,7 +201,7 @@ public class PowerUtils {
                 }
                 break;
             case WEST:
-                for (int x = bx; x <= bx + deep; x++) {
+                for (int x = bx; x <= bx + depth; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
                         for (int z = bz - radius; z <= bz + radius; z++) {
                             blocks.add(world.getBlockAt(x, y, z));
@@ -172,7 +212,7 @@ public class PowerUtils {
             case NORTH:
                 for (int x = bx - radius; x <= bx + radius; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
-                        for (int z = bz; z <= bz + deep; z++) {
+                        for (int z = bz; z <= bz + depth; z++) {
                             blocks.add(world.getBlockAt(x, y, z));
                         }
                     }
@@ -182,7 +222,7 @@ public class PowerUtils {
                 //logs.sendMessage(ChatColor.AQUA + "SOUTH");
                 for (int x = bx - radius; x <= bx + radius; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
-                        for (int z = bz - deep; z <= bz; z++) {
+                        for (int z = bz - depth; z <= bz; z++) {
                             blocks.add(world.getBlockAt(x, y, z));
                         }
                     }
@@ -197,7 +237,13 @@ public class PowerUtils {
         return blocks;
     }
 
-    // This method returns a list of surrounding (3x3) blocks given a block face and target block
+    /**
+     * Returns a lif of the surrounding blocks given a block face, a target block, a radius and a depth
+     * @param blockFace Face of the block where the player clicked
+     * @param targetBlock Block broke by the player
+     * @param radius Radius of the hole
+     * @return Array containing all the blocks surrounding the target block
+     */
     public static ArrayList<Block> getSurroundingBlocksFarm(BlockFace blockFace, Block targetBlock, Integer radius) {
         ArrayList<Block> blocks = new ArrayList<>();
         World world = targetBlock.getWorld();
@@ -220,8 +266,13 @@ public class PowerUtils {
         return blocks;
     }
 
-    // This method returns if the player can craft the target item
-    public static boolean checkCraftPermission(Player player, Material itemType) {
+    /**
+     * Checks if the player has permission to craft the PowerTool
+     * @param player Player who used the tool
+     * @param itemType Item used by the player
+     * @return True if the player has permission to craft the PowerTool
+     */
+    public static boolean checkCraftPermission(@Nonnull Player player, @Nonnull Material itemType) {
         if (!Reference.CRAFT_PERMISSIONS.containsKey(itemType)){
             throw new NoSuchElementException();
         }
@@ -231,8 +282,13 @@ public class PowerUtils {
         return player.hasPermission(perm);
     }
 
-    // This method returns if the player can use the target item
-    public static boolean checkUsePermission(Player player, Material itemType) {
+    /**
+     * Checks if the player has permission to use the PowerTool
+     * @param player Player who used the tool
+     * @param itemType Item used by the player
+     * @return True if the player has permission to use the PowerTool
+     */
+    public static boolean checkUsePermission(@Nonnull Player player, @Nonnull Material itemType) {
         if (!Reference.USE_PERMISSIONS.containsKey(itemType)){
             throw new NoSuchElementException();
         }
@@ -242,8 +298,13 @@ public class PowerUtils {
         return player.hasPermission(perm);
     }
 
-    // This method returns if the player can enchant the target item
-    public static boolean checkEnchantPermission(Player player, Material itemType) {
+    /**
+     * Checks if the player has permission to enchant the PowerTool
+     * @param player Player who used the tool
+     * @param itemType Item used by the player
+     * @return True if the player has permission to enchant the PowerTool
+     */
+    public static boolean checkEnchantPermission(@Nonnull Player player, @Nonnull Material itemType) {
         if (!Reference.ENCHANT_PERMISSIONS.containsKey(itemType)){
             throw new NoSuchElementException();
         }
@@ -252,11 +313,16 @@ public class PowerUtils {
         console.sendMessage(ChatColor.GOLD+ perm);
 
         return player.hasPermission(perm);
-
     }
 
-    // This method returns if the player can destroy the target block
-    public static boolean canBreak(PowerMining plugin, Player player, Block block) {
+    /**
+     * Checks if the player is allowed to destroy the target block
+     * @param plugin Instance of the plugin
+     * @param player Player who broke the block
+     * @param block Block broken
+     * @return True if the player is allowed to destroy the block
+     */
+    public static boolean canBreak(@Nonnull PowerMining plugin, @Nonnull Player player, @Nonnull Block block) {
 
         if (plugin.getWorldGuard() == null){
             return true;
@@ -276,22 +342,44 @@ public class PowerUtils {
         return true;
     }
 
-    // Returns if the tool is a valid hammer against certain block
-    public static boolean validateHammer(Material hammerType, Material blockType) {
+    /**
+     * Returns if the tool is a valid Hammer against certain block
+     * @param hammerType Type of the tool
+     * @param blockType Type of the block to be used on
+     * @return True if the Hammer is valid
+     */
+    public static boolean validateHammer(@Nonnull Material hammerType, @Nonnull Material blockType) {
         return (isMineable(blockType) && Reference.PICKAXES.contains(hammerType) &&
                 (Reference.MINABLE.get(blockType) == null || Reference.MINABLE.get(blockType).contains(hammerType)));
     }
 
-    // Returns if the tool is a valid excavator against certain block
-    public static boolean validateExcavator(Material excavatorType, Material blockType) {
+    /**
+     * Returns if the tool is a valid Excavator against certain block
+     * @param excavatorType Type of the tool
+     * @param blockType Type of the block to be used on
+     * @return True if the Excavator is valid
+     */
+    public static boolean validateExcavator(@Nonnull Material excavatorType, @Nonnull Material blockType) {
         return (isDigable(blockType) && Reference.SPADES.contains(excavatorType));
     }
 
-    public static boolean validatePlow(Material hoeType, Material blockType) {
-        return (isFarm(blockType) && Reference.HOES.contains(hoeType));
+    /**
+     * Returns if the tool is a valid Plow against certain block
+     * @param plowType Type of the tool
+     * @param blockType Type of the block to be used on
+     * @return True if the Plow is valid
+     */
+    public static boolean validatePlow(@Nonnull Material plowType, @Nonnull Material blockType) {
+        return (isTillable(blockType) && Reference.HOES.contains(plowType));
     }
 
-    public static boolean validatePath(Material excavatorType, Material blockType) {
-        return (isPath(blockType) && Reference.SPADES.contains(excavatorType));
+    /**
+     * Returns if the tool is a valid Excavator against certain block
+     * @param excavatorType Type of the tool
+     * @param blockType Type of the block to be used on
+     * @return True if the Excavator is valid
+     */
+    public static boolean validatePath(@Nonnull Material excavatorType, @Nonnull Material blockType) {
+        return (isPathable(blockType) && Reference.SPADES.contains(excavatorType));
     }
 }

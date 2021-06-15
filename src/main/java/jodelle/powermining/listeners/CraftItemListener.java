@@ -16,6 +16,7 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
+import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -29,16 +30,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class CraftItemListener implements Listener {
-	PowerMining plugin;
+	private final PowerMining plugin;
+	private final DebuggingMessages debuggingMessages;
+	private final boolean debugging = true;
 
-	ItemStack[] newMatrix;
-	DebuggingMessages debuggingMessages;
-
-	public CraftItemListener(PowerMining plugin) {
+	public CraftItemListener(@Nonnull PowerMining plugin) {
 		this.plugin = plugin;
 		debuggingMessages = plugin.getDebuggingMessages();
 
@@ -51,52 +53,26 @@ public class CraftItemListener implements Listener {
 	// One option is to check the quantity while he is crafting
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void canCraft(CraftItemEvent event) {
-		ItemStack resultItem = event.getRecipe().getResult();
+		final ItemStack resultItem = event.getRecipe().getResult();
+		final ItemMeta itemMeta = resultItem.getItemMeta();
 
-		// Check if the item is a power tool
-		if (!PowerUtils.isPowerTool(resultItem)) {
+		if (basicVerifications(event, resultItem, itemMeta)){
+			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE+"Verifications not ok");
 			return;
 		}
-
-		// Check if the player has crafting permission for this item type
-		if (!PowerUtils.checkCraftPermission((Player) event.getWhoClicked(), resultItem.getType())) {
-			event.setCancelled(true);
-		}
-
-		//console.sendMessage(ChatColor.RED + "O gajo ta a craftar uma Powertool...");
 
 		// Get the name of the powertool stored in the persistentdatacontainer
-		ItemMeta itemMeta = resultItem.getItemMeta();
+		String powerToolName = getPowerToolName(itemMeta);
 
-		if (itemMeta == null){
-			return;
-		}
-
-		PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
-		String powerToolName = container.get(isPowerTool, PersistentDataType.STRING);
-
-		//console.sendMessage(ChatColor.RED + "You're crafting a: " + powerToolName);
 		CraftingInventory inventory = event.getInventory();
 		ItemStack[] matrix = inventory.getMatrix();
 
-	  	ItemStack[] expectedRecipe = Reference.HAMMER_CRAFTING_RECIPES.get(powerToolName);
-		boolean isRecipeOk = false;
-		newMatrix = new ItemStack[matrix.length];
-		// We start by searching the powertool in the Arraylists
-		// After finding it, we can check the correspondent HashMap which contains the recipes
-		if (Reference.HAMMERS.contains(powerToolName)){
-			isRecipeOk = checkCraftingMatrix(matrix, expectedRecipe);
-		}else if(Reference.EXCAVATORS.contains(powerToolName)){
-			expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
-			isRecipeOk = checkCraftingMatrix(matrix, expectedRecipe);
-		}else if(Reference.PLOWS.contains(powerToolName)){
-			expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
-			isRecipeOk = checkCraftingMatrix(matrix, expectedRecipe);
-		}
+		//First we get the expected recipe so we can compare it with the current recipe
+		final ItemStack[] expectedRecipe = getExpectedRecipe(powerToolName);
 
 		// If the recipe is not ok, the player can't take the item out of the crafted slot
-		if (!isRecipeOk){
+		if (!checkCraftingMatrix(matrix, expectedRecipe)){
+			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE+"Recipe not ok");
 			event.setCancelled(true);
 			return;
 		}
@@ -106,37 +82,93 @@ public class CraftItemListener implements Listener {
 		// from the crafting table.
 		// Also checks if the item on the slot has some kind of enchantments and passes
 		// them to the result item upon crafting.
-		//console.sendMessage(ChatColor.RED + "Matrix size" + matrix.length);
-	
+		updateCraftingMatrix(inventory, matrix, expectedRecipe);
+
+
+	}
+
+	/**
+	 * Update the item amount on the crafting table. Also add the enchantments present
+	 * on the used items to the new PowerTool
+	 * @param inventory Inventory of the player
+	 * @param matrix Matrix of the crafting table
+	 * @param expectedRecipe Matrix of the expected recipe
+	 */
+	private void updateCraftingMatrix(@Nonnull final CraftingInventory inventory, @Nonnull final ItemStack[] matrix, @Nonnull final ItemStack[] expectedRecipe) {
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount()+1);
 				Map<Enchantment, Integer> enchantments = matrix[i].getEnchantments();
-
 				ItemStack result = inventory.getResult();
 				if (result != null){
 					result.addEnchantments(enchantments);
 				}
 			}
 		}
+	}
 
+	@NotNull
+	private ItemStack[] getExpectedRecipe(@Nonnull final String powerToolName){
+		ItemStack[] expectedRecipe = null;
 
+		if (Reference.HAMMERS.contains(powerToolName)){
+			expectedRecipe = Reference.HAMMER_CRAFTING_RECIPES.get(powerToolName);
+		}else if(Reference.EXCAVATORS.contains(powerToolName)){
+			expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
+		}else if(Reference.PLOWS.contains(powerToolName)){
+			expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
+		}
+
+		Validate.notNull(expectedRecipe);
+
+		return expectedRecipe;
+	}
+
+	/**
+	 * Accesses the PersistantDataContainer of the item and gets the name of the PowerTool
+	 * @param itemMeta Meta of the item
+	 * @return Returns the name of the PowerTool
+	 */
+	@NotNull
+	private String getPowerToolName(@Nonnull ItemMeta itemMeta) {
+		PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
+		String powerToolName = container.get(isPowerTool, PersistentDataType.STRING);
+
+		Validate.notNull(powerToolName);
+
+		return powerToolName;
+	}
+
+	private boolean basicVerifications(@Nonnull CraftItemEvent event, @Nonnull ItemStack resultItem, @Nonnull ItemMeta itemMeta) {
+		// Check if the item is a power tool
+		if (!PowerUtils.isPowerTool(resultItem)) {
+			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE + "The item is not a PowerTool.");
+			return true;
+		}
+
+		// Check if the player has crafting permission for this item type
+		if (!PowerUtils.checkCraftPermission((Player) event.getWhoClicked(), resultItem.getType())) {
+			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE + "The player doesn't have permissions");
+			event.setCancelled(true);
+		}
+
+		Validate.notNull(itemMeta);
+
+		return false;
 	}
 
 
 	private boolean checkCraftingMatrix(ItemStack[] matrix, ItemStack[] expectedRecipe) {
-
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				if (matrix[i].getAmount() < expectedRecipe[i].getAmount()){
-					debuggingMessages.sendConsoleMessage(ChatColor.RED + "You didn't add enough" + expectedRecipe[i].getType());
+					debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "You didn't add enough" + expectedRecipe[i].getType());
 					//inventory.setResult(null);
 					return false;
 				}
 			}
 		}
-		
-		
 		return true;
 	}
 }

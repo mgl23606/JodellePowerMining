@@ -16,14 +16,17 @@ package jodelle.powermining.handlers;
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.listeners.PlayerInteractListener;
 
+import javax.annotation.Nonnull;
+
 public class PlayerInteractHandler {
 	public PlayerInteractHandler() {}
 	public PlayerInteractListener listener;
 
-	public void Init(PowerMining plugin) {
+	public void Init(@Nonnull PowerMining plugin) {
 		listener = new PlayerInteractListener(plugin);
 	}
 
+	@Nonnull
 	public PlayerInteractListener getListener() {
 		return listener;
 	}

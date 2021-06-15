@@ -27,6 +27,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -34,18 +35,18 @@ import java.util.Map;
 
 public final class PowerMining extends JavaPlugin {
     public JavaPlugin plugin;
-    PlayerInteractHandler handlerPlayerInteract;
-    BlockBreakHandler handlerBlockBreak;
-    CraftItemHandler handlerCraftItem;
-    EnchantItemHandler handlerEnchantItem;
-    InventoryClickHandler handlerInventoryClick;
-    ClickPlayerHandler handlerClickPlayer;
-    CommandHandler commandHandler;
-    DebuggingMessages debuggingMessages;
+    private PlayerInteractHandler handlerPlayerInteract;
+    private BlockBreakHandler handlerBlockBreak;
+    private CraftItemHandler handlerCraftItem;
+    private EnchantItemHandler handlerEnchantItem;
+    private InventoryClickHandler handlerInventoryClick;
+    private ClickPlayerHandler handlerClickPlayer;
+    private CommandHandler commandHandler;
+    private DebuggingMessages debuggingMessages;
 
-    WorldGuardPlugin worldguard;
-    Plugin griefprevention;
-    Plugin towny;
+    private WorldGuardPlugin worldguard;
+    private Plugin griefprevention;
+    private Plugin towny;
 
     private static PowerMining instance;
 
@@ -87,13 +88,15 @@ public final class PowerMining extends JavaPlugin {
 
     }
 
+    /**
+     * Loads the dependencies that the plugin might require to properly function
+     */
     private void loadDependencies() {
         boolean debugging = true;
-        String[] pluginList = {"WorldGuard"};
 
         debuggingMessages.sendConsoleMessage(debugging, ChatColor.YELLOW + "Loading dependencies...");
 
-        for (String pluginName : pluginList) {
+        for (String pluginName : Reference.dependencies) {
             Plugin plugin = getServer().getPluginManager().getPlugin(pluginName);
             if (plugin instanceof WorldGuardPlugin){
                 debuggingMessages.sendConsoleMessage(debugging, ChatColor.YELLOW + pluginName + " Found!");
@@ -102,6 +105,9 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
+    /**
+     * Fills the permissions HashMaps with the available permissions.
+     */
     private void processPermissions() {
 
         debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "[JodellePowerMining] - Setting up Permissions");
@@ -119,9 +125,13 @@ public final class PowerMining extends JavaPlugin {
 
     }
 
-    protected void generatePermission(ArrayList<String> powerToolNames, ArrayList<Material> items) {
-        //HashMap<Material, String> craftPermHashMap = new HashMap<>(100);
-        //HashMap<Material, String> usePermHashMap = new HashMap<>(100);
+    /**
+     * Generates the permissions in form of a String
+     * @param powerToolNames Array containing the names of all the PowerTools
+     * @param items List of the items
+     */
+    protected void generatePermission(@Nonnull final ArrayList<String> powerToolNames, @Nonnull final ArrayList<Material> items) {
+
         int i = 0;
         for (String tool : powerToolNames) {
             String craftPermission = "powermining.craft." + tool.substring(tool.indexOf("_") + 1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
@@ -131,15 +141,14 @@ public final class PowerMining extends JavaPlugin {
             Reference.CRAFT_PERMISSIONS.put(items.get(i), craftPermission);
             Reference.USE_PERMISSIONS.put(items.get(i), usePermission);
             Reference.ENCHANT_PERMISSIONS.put(items.get(i), enchantPermission);
-//			console.sendMessage(items.get(i).toString());
-//			console.sendMessage(ChatColor.GOLD + "[JodellePowerMining] - Generated permission: " + craftPermission);
-            //console.sendMessage(ChatColor.GOLD + "[JodellePowerMining] - Generated permission: " + usePermission);
-            i++;
+             i++;
         }
-        //Reference.CRAFT_PERMISSIONS = craftPermHashMap;
-        //Reference.USE_PERMISSIONS = usePermHashMap;
+
     }
 
+    /**
+     * Reads the config file, processes each recipe and stores it on its respective HashMap
+     */
     private void processCraftingRecipes() {
         boolean showDebugMessage = false;
         //This hashmap is used to store all the information about the recipe
@@ -216,6 +225,9 @@ public final class PowerMining extends JavaPlugin {
         getLogger().info("PowerMining plugin was disabled.");
     }
 
+    /**
+     * Reads the config file and processes it
+     */
     public void processConfig() {
         try {
             for (Object x : (ArrayList<?>) getConfig().getList("Minable")) {

@@ -4,7 +4,10 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.ConsoleCommandSender;
@@ -16,13 +19,16 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public class ClickPlayerListener implements Listener {
-    public PowerMining plugin;
-    public boolean useDurabilityPerBlock;
+    private final PowerMining plugin;
+    private final boolean useDurabilityPerBlock; //TODO
     private final DebuggingMessages debuggingMessages;
 
 
-    public ClickPlayerListener(PowerMining plugin) {
+    public ClickPlayerListener(@Nonnull final PowerMining plugin) {
         this.plugin = plugin;
         debuggingMessages = plugin.getDebuggingMessages();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -32,76 +38,79 @@ public class ClickPlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerUse(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        ItemStack handItem = player.getInventory().getItemInMainHand();
-        Material handItemType = handItem.getType();
-        ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
-        Block block = event.getClickedBlock();
+        final Player player = event.getPlayer();
+        final ItemStack handItem = player.getInventory().getItemInMainHand();
+        final Material handItemType = handItem.getType();
+        final Block block = event.getClickedBlock();
 
-        if (event.getAction() == Action.LEFT_CLICK_BLOCK)
-            return;
-        if (event.getAction() == Action.LEFT_CLICK_AIR)
-            return;
-        if (event.getAction() == Action.RIGHT_CLICK_AIR)
-            return;
-        if (player.isSneaking())
-            return;
-        if(handItem.getType().equals(Material.AIR))
-            return;
-        if (block == null){
+        if (basicVerifications(event, player, handItem, handItemType, block)){
             return;
         }
-        if (!PowerUtils.isFarm(block.getType())){
-            return;
-        }
-        if (!PowerUtils.isPowerTool(handItem))
-            return;
-        if (!PowerUtils.checkUsePermission(player, handItemType))
-            return;
 
 
+        final String playerName = player.getName();
 
-        String playerName = player.getName();
-
-        PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
-        BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
-
+        final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
+        final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
 
         for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.RADIUS)) {
-            Material blockMat = e.getType();
-            console.sendMessage(ChatColor.RED + "[JodellePowerMining] block: " + e.getType());
+            final Material blockMat = e.getType();
 
             // Check if player has permission to break the block
             if (!PowerUtils.canBreak(plugin, player, e)) {
                 continue;
             }
 
-            boolean usePlow;
-            boolean usePath = false;
-
-            if (usePlow = PowerUtils.validatePlow(handItem.getType(), blockMat)) ;
-            else if (usePath = PowerUtils.validatePath(handItem.getType(), blockMat)) ;
-
-            if (usePlow) {
+            if (PowerUtils.validatePlow(handItem.getType(), blockMat)) {
                 debuggingMessages.sendConsoleMessage(ChatColor.RED + "Tilling: " + e.getType());
-
-                e.setType(Material.FARMLAND);
-                // Reduce durability for each block
-                if (player.getGameMode().equals(GameMode.SURVIVAL)) {
-                    PowerUtils.reduceDurability(player, handItem);
-                }
+                usePowerTool(player, handItem, e, Material.FARMLAND);
                 continue;
             }
 
-            if (usePath) {
-                e.setType(Material.GRASS_PATH);
-
-                // Reduce durability for each block
-                if (player.getGameMode().equals(GameMode.SURVIVAL)) {
-                    PowerUtils.reduceDurability(player, handItem);
-                }
+            if (PowerUtils.validatePath(handItem.getType(), blockMat)) {
+                usePowerTool(player, handItem, e, Material.GRASS_PATH);
             }
         }
 
+    }
+
+    /**
+     * Replaces the block and reduces the durability of the tool used
+     * @param player Player who used the PowerTool
+     * @param handItem Item used by the player
+     * @param block Target block
+     * @param material Material to replace the target block
+     */
+    private void usePowerTool(@Nonnull final Player player, @Nonnull final ItemStack handItem, @Nonnull final Block block, @Nonnull final Material material) {
+        block.setType(material);
+        // Reduce durability for each block
+        if (player.getGameMode().equals(GameMode.SURVIVAL)) {
+            PowerUtils.reduceDurability(player, handItem);
+        }
+    }
+
+    private boolean basicVerifications(@Nonnull final PlayerInteractEvent event, @Nonnull final Player player, @Nonnull final ItemStack handItem, @Nonnull final Material handItemType, @Nullable final Block block) {
+        if (event.getAction() == Action.LEFT_CLICK_BLOCK)
+            return true;
+        if (event.getAction() == Action.LEFT_CLICK_AIR)
+            return true;
+        if (event.getAction() == Action.RIGHT_CLICK_AIR)
+            return true;
+        if (player.isSneaking())
+            return true;
+        if(handItem.getType().equals(Material.AIR))
+            return true;
+        if (block == null){
+            return true;
+        }
+        if (!PowerUtils.isTillable(block.getType())){
+            return true;
+        }
+        if (!PowerUtils.isPowerTool(handItem))
+            return true;
+        if (!PowerUtils.checkUsePermission(player, handItemType))
+            return true;
+
+        return false;
     }
 }

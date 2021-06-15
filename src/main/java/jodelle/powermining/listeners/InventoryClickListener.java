@@ -24,12 +24,11 @@ import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
+
 public class InventoryClickListener implements Listener {
-	PowerMining plugin;
 
-	public InventoryClickListener(PowerMining plugin) {
-		this.plugin = plugin;
-
+	public InventoryClickListener(@Nonnull PowerMining plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
