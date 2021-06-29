@@ -72,6 +72,10 @@ public class BlockBreakListener implements Listener {
 		for (Block block: PowerUtils.getSurroundingBlocks(blockFace, centerBlock, Reference.RADIUS, Reference.DEEP)) {
 			checkAndBreakBlock(block);
 		}
+
+		if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)){
+			PowerUtils.reduceDurability(player, handItem);
+		}
 	}
 
 	/**
@@ -98,7 +102,9 @@ public class BlockBreakListener implements Listener {
 			//When using breakNaturally the block is broken but the durability of the tool stays the same
 			//so it's necessary to update the damage manually
 			if(block.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)){
-				PowerUtils.reduceDurability(player, handItem);
+				if (useDurabilityPerBlock) {
+					PowerUtils.reduceDurability(player, handItem);
+				}
 			}
 
 		}

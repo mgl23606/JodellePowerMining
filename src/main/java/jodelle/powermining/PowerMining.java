@@ -83,7 +83,7 @@ public final class PowerMining extends JavaPlugin {
         commandHandler.Init(this);
 
 
-        getLogger().info("PowerMining plugin was enabled.");
+        getLogger().info("JodellePowerMining plugin was enabled.");
 
 
     }

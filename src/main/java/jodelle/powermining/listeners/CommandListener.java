@@ -16,10 +16,10 @@ import java.util.List;
 
 public class CommandListener implements Listener, CommandExecutor, TabExecutor {
 
-    protected PowerMining plugin;
-    protected String command = "jpm";
+    protected final PowerMining plugin;
+    protected final String command = "jpm";
 
-    public CommandListener(PowerMining plugin) {
+    public CommandListener(@Nonnull final PowerMining plugin) {
         this.plugin = plugin;
         PluginCommand pluginCommand;
         if ((pluginCommand = plugin.getCommand(command)) != null){
@@ -29,7 +29,7 @@ public class CommandListener implements Listener, CommandExecutor, TabExecutor {
     }
 
     @Override
-    public boolean onCommand(@Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String label, @Nonnull String[] args) {
+    public boolean onCommand(@Nonnull final CommandSender sender, @Nonnull final Command command, @Nonnull final String label, @Nonnull final String[] args) {
 
         if (args.length == 0){
             return versionCommand(sender);
@@ -49,7 +49,12 @@ public class CommandListener implements Listener, CommandExecutor, TabExecutor {
         return true;
     }
 
-    private boolean versionCommand(CommandSender sender) {
+    /**
+     * Sends a message with the plugin version
+     * @param sender Receiver of the message
+     * @return True if the message was successfully sent
+     */
+    private boolean versionCommand(@Nonnull CommandSender sender) {
         sender.sendMessage("Version: " + plugin.getDescription().getVersion());
         return true;
     }
@@ -63,21 +68,27 @@ public class CommandListener implements Listener, CommandExecutor, TabExecutor {
     * the console.
     * */
 
-    private boolean giveCommand(CommandSender sender, String powerToolName) {
+    /**
+     * Gives a PowerTool to the sender
+     * @param sender Sender of the command
+     * @param powerToolName Name of the powertool
+     * @return True if everything went ok
+     */
+    private boolean giveCommand(@Nonnull final CommandSender sender, @Nonnull final String powerToolName) {
         if (!(sender instanceof Player)){
             return true;
         }
 
-        Player player = (Player) sender;
+        final Player player = (Player) sender;
 
         if (!player.hasPermission("powermining.give")){
             sender.sendMessage(ChatColor.RED + "[JodellePowerMining] - You don't have permission to use this command");
             return true;
         }
 
-        NamespacedKey namespacedKey = new NamespacedKey(plugin, powerToolName.toUpperCase());
+        final NamespacedKey namespacedKey = new NamespacedKey(plugin, powerToolName.toUpperCase());
 
-        Recipe recipe = plugin.getServer().getRecipe(namespacedKey);
+        final Recipe recipe = plugin.getServer().getRecipe(namespacedKey);
         if (recipe == null){
             sender.sendMessage(ChatColor.RED + "[JodellePowerMining] - Powertool not found");
             return true;
@@ -90,14 +101,14 @@ public class CommandListener implements Listener, CommandExecutor, TabExecutor {
 
         player.getInventory().addItem(recipe.getResult());
 
-        sender.sendMessage(ChatColor.GREEN + "[JodellePowerMining] - " + powerToolName + "Given to " + sender.getName());
+        sender.sendMessage(ChatColor.GREEN + "[JodellePowerMining] - " + powerToolName + " given to " + sender.getName());
         return true;
     }
 
     @Override
     public List<String> onTabComplete( @Nonnull CommandSender sender, @Nonnull Command command, @Nonnull String alias, String[] args) {
 
-        List<String> arguments = new ArrayList<>();
+        final List<String> arguments = new ArrayList<>();
 
         if (args.length == 1){
 

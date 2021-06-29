@@ -6,7 +6,7 @@ import org.bukkit.command.ConsoleCommandSender;
 
 public class DebuggingMessages {
 
-    protected boolean debugginOn = true;
+    protected boolean debugginOn = false;
     protected ConsoleCommandSender console;
 
     public DebuggingMessages() {

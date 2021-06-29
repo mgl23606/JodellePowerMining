@@ -20,6 +20,7 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -33,6 +34,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Map;
 
 public class CraftItemListener implements Listener {
@@ -40,7 +42,7 @@ public class CraftItemListener implements Listener {
 	private final DebuggingMessages debuggingMessages;
 	private final boolean debugging = true;
 
-	public CraftItemListener(@Nonnull PowerMining plugin) {
+	public CraftItemListener(@Nonnull final PowerMining plugin) {
 		this.plugin = plugin;
 		debuggingMessages = plugin.getDebuggingMessages();
 
@@ -53,6 +55,7 @@ public class CraftItemListener implements Listener {
 	// One option is to check the quantity while he is crafting
 	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
 	public void canCraft(CraftItemEvent event) {
+		final HumanEntity whoClicked = event.getWhoClicked();
 		final ItemStack resultItem = event.getRecipe().getResult();
 		final ItemMeta itemMeta = resultItem.getItemMeta();
 
@@ -62,16 +65,16 @@ public class CraftItemListener implements Listener {
 		}
 
 		// Get the name of the powertool stored in the persistentdatacontainer
-		String powerToolName = getPowerToolName(itemMeta);
+		final String powerToolName = getPowerToolName(itemMeta);
 
-		CraftingInventory inventory = event.getInventory();
-		ItemStack[] matrix = inventory.getMatrix();
+		final CraftingInventory inventory = event.getInventory();
+		final ItemStack[] matrix = inventory.getMatrix();
 
 		//First we get the expected recipe so we can compare it with the current recipe
 		final ItemStack[] expectedRecipe = getExpectedRecipe(powerToolName);
 
 		// If the recipe is not ok, the player can't take the item out of the crafted slot
-		if (!checkCraftingMatrix(matrix, expectedRecipe)){
+		if (!checkCraftingMatrix(matrix, expectedRecipe, whoClicked)){
 			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE+"Recipe not ok");
 			event.setCancelled(true);
 			return;
@@ -140,7 +143,7 @@ public class CraftItemListener implements Listener {
 		return powerToolName;
 	}
 
-	private boolean basicVerifications(@Nonnull CraftItemEvent event, @Nonnull ItemStack resultItem, @Nonnull ItemMeta itemMeta) {
+	private boolean basicVerifications(@Nonnull CraftItemEvent event, @Nonnull ItemStack resultItem, @Nullable ItemMeta itemMeta) {
 		// Check if the item is a power tool
 		if (!PowerUtils.isPowerTool(resultItem)) {
 			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE + "The item is not a PowerTool.");
@@ -158,12 +161,19 @@ public class CraftItemListener implements Listener {
 		return false;
 	}
 
-
-	private boolean checkCraftingMatrix(ItemStack[] matrix, ItemStack[] expectedRecipe) {
+	/**
+	 * Checks the crafting recipe and item amounts
+	 * @param matrix Crafting table matrix
+	 * @param expectedRecipe Expected recipe matrix
+	 * @param whoClicked Player who is crafting
+	 * @return True if the recipe and its amounts are correct
+	 */
+	private boolean checkCraftingMatrix(@Nonnull final ItemStack[] matrix, @Nonnull final ItemStack[] expectedRecipe, @Nonnull final HumanEntity whoClicked) {
 		for (int i = 0; i < matrix.length; i++) {
 			if (matrix[i] != null && expectedRecipe[i] != null){
 				if (matrix[i].getAmount() < expectedRecipe[i].getAmount()){
 					debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "You didn't add enough" + expectedRecipe[i].getType());
+					whoClicked.sendMessage(ChatColor.RED + "[JodellePowerMining] - You didn't add enough " + expectedRecipe[i].getType());
 					//inventory.setResult(null);
 					return false;
 				}

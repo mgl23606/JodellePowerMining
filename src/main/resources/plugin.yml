@@ -1,6 +1,6 @@
 name: JodellePowerMining
 main: jodelle.powermining.PowerMining
-version: 21.06.15
+version: 21.06.29
 author: JodelleLover
 description: Implements Hammer and Excavator tools for faster mining, version updated from BloodyShade. 
 api-version: 1.16
@@ -12,7 +12,7 @@ commands:
 
 
 permissions:
-    powermining.*:
+    powermining.all:
         description: Grants all permissions
         default: op
         children:
@@ -36,12 +36,6 @@ permissions:
             powermining.craft.hammer.all: true
             powermining.craft.excavator.all: true
             powermining.craft.plow.all: true
-
-    powermining.craft.hammer.*:
-        description: Allows players to craft all hammers
-        default: op
-        children:
-            powermining.craft.hammer.all: true
 
     powermining.craft.hammer.all:
         description: Allows players to craft all hammers
@@ -73,12 +67,6 @@ permissions:
         description: Allows players to craft the Netherite Hammer
         default: false
 
-    powermining.craft.plow.*:
-        description: Allows players to craft all Plows
-        default: op
-        children:
-            powermining.craft.plow.all: true
-
     powermining.craft.plow.all:
         description: Allows players to craft all Plows
         default: op
@@ -108,12 +96,6 @@ permissions:
     powermining.craft.plow.netherite:
         description: Allows players to craft the Netherite Plow
         default: false
-
-    powermining.craft.excavator.*:
-        description: Allows players to craft all Excavators
-        default: op
-        children:
-            powermining.craft.excavator.all: true
 
     powermining.craft.excavator.all:
         description: Allows players to craft all Excavators
@@ -145,12 +127,6 @@ permissions:
         description: Allows players to craft the Netherite Excavator
         default: false
 
-    powermining.use.*:
-        description: Allows players to use all Hammers and Excavators
-        default: op
-        children:
-            powermining.use.all: true
-
     powermining.use.all:
         description: Allows players to use all Hammers and Excavators
         default: op
@@ -158,12 +134,6 @@ permissions:
             powermining.use.hammer.all: true
             powermining.use.excavator.all: true
             powermining.use.plow.all: true
-
-    powermining.use.hammer.*:
-        description: Allows players to use all hammers
-        default: op
-        children:
-            powermining.use.hammer.all: true
 
     powermining.use.hammer.all:
         description: Allows players to use all hammers
@@ -195,12 +165,6 @@ permissions:
         description: Allows players to use the Netherite Hammer
         default: false
 
-    powermining.use.plow.*:
-        description: Allows players to use all Plows
-        default: op
-        children:
-            powermining.use.plow.all: true
-
     powermining.use.plow.all:
         description: Allows players to use all Plows
         default: op
@@ -230,12 +194,6 @@ permissions:
     powermining.use.plow.netherite:
         description: Allows players to use the Netherite Plow
         default: false
-
-    powermining.use.excavator.*:
-        description: Allows players to use all excavators
-        default: op
-        children:
-            powermining.use.excavator.all: true
 
     powermining.use.excavator.all:
         description: Allows players to use all excavators
@@ -267,25 +225,13 @@ permissions:
         description: Allows players to use the Netherite Excavator
         default: false
 
-    powermining.enchant.*:
-        description: Allows players to enchant all Hammers and Excavators
-        default: op
-        children:
-            powermining.enchant.all: true
-
     powermining.enchant.all:
         description: Allows players to enchant all Hammers and Excavators
         default: op
         children:
-            powermining.enchant.hammer: true
-            powermining.enchant.excavator: true
-            powermining.enchant.plow: true
-
-    powermining.enchant.hammer.*:
-        description: Allows players to enchant all hammers
-        default: op
-        children:
             powermining.enchant.hammer.all: true
+            powermining.enchant.excavator.all: true
+            powermining.enchant.plow.all: true
 
     powermining.enchant.hammer.all:
         description: Allows players to enchant all hammers
@@ -317,12 +263,6 @@ permissions:
         description: Allows players to enchant the Netherite Hammer
         default: false
 
-    powermining.enchant.plow.*:
-        description: Allows players to enchant all Plows
-        default: op
-        children:
-            powermining.enchant.plow.all: true
-
     powermining.enchant.plow.all:
         description: Allows players to enchant all Plows
         default: op
@@ -352,12 +292,6 @@ permissions:
     powermining.enchant.plow.netherite:
             description: Allows players to enchant the Netherite Plow
             default: false
-
-    powermining.enchant.excavator.*:
-        description: Allows players to enchant all excavators
-        default: op
-        children:
-            powermining.enchant.excavator.all: true
 
     powermining.enchant.excavator.all:
         description: Allows players to enchant all excavators

@@ -46,28 +46,6 @@ public class Reference {
 			Material.GRASS_BLOCK
 	));
 
-
-	public static HashMap<Material, Material> MINABLE_FORTUNE;
-	static {
-		MINABLE_FORTUNE = new HashMap<>();
-
-		MINABLE_FORTUNE.put(Material.COAL_ORE, Material.COAL);
-		MINABLE_FORTUNE.put(Material.REDSTONE_ORE, Material.REDSTONE);
-		MINABLE_FORTUNE.put(Material.LAPIS_ORE, Material.LAPIS_LAZULI);
-		MINABLE_FORTUNE.put(Material.DIAMOND_ORE, Material.DIAMOND);
-		MINABLE_FORTUNE.put(Material.EMERALD_ORE, Material.EMERALD);
-		MINABLE_FORTUNE.put(Material.NETHER_QUARTZ_ORE, Material.QUARTZ);
-		MINABLE_FORTUNE.put(Material.GLOWSTONE, Material.GLOWSTONE_DUST);
-	}
-
-	public static HashMap<Material, Material> DIGGABLE_FORTUNE;
-	static {
-		DIGGABLE_FORTUNE = new HashMap<>();
-
-		DIGGABLE_FORTUNE.put(Material.GRAVEL, Material.FLINT);
-		DIGGABLE_FORTUNE.put(Material.GLOWSTONE, Material.GLOWSTONE_DUST);
-	}
-
 	public static ArrayList<Material> PICKAXES =  new ArrayList<>(Arrays.asList(
 		Material.WOODEN_PICKAXE,
 		Material.STONE_PICKAXE,

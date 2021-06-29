@@ -75,14 +75,7 @@ public class PowerUtils {
         if(item.getEnchantments().containsKey(Enchantment.DURABILITY)){
             Random rand = new Random();
             Integer unbreakingLevel = item.getEnchantments().get(Enchantment.DURABILITY);
-
-            if (unbreakingLevel == 1 && rand.nextDouble() > CHANCE_UNBREAKING_I){
-                return;
-            }
-            if (unbreakingLevel == 2 && rand.nextDouble() > CHANCE_UNBREAKING_II){
-                return;
-            }
-            if (unbreakingLevel == 3 && rand.nextDouble() > CHANCE_UNBREAKING_III){
+            if (rand.nextInt(100/unbreakingLevel+1) == 0){
                 return;
             }
         }
@@ -310,7 +303,6 @@ public class PowerUtils {
         }
         ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
         String perm = Reference.ENCHANT_PERMISSIONS.get(itemType);
-        console.sendMessage(ChatColor.GOLD+ perm);
 
         return player.hasPermission(perm);
     }

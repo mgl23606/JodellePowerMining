@@ -4,13 +4,11 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,7 +22,7 @@ import javax.annotation.Nullable;
 
 public class ClickPlayerListener implements Listener {
     private final PowerMining plugin;
-    private final boolean useDurabilityPerBlock; //TODO
+    private final boolean useDurabilityPerBlock;
     private final DebuggingMessages debuggingMessages;
 
 
@@ -72,6 +70,10 @@ public class ClickPlayerListener implements Listener {
             }
         }
 
+        if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)){
+            PowerUtils.reduceDurability(player, handItem);
+        }
+
     }
 
     /**
@@ -84,7 +86,7 @@ public class ClickPlayerListener implements Listener {
     private void usePowerTool(@Nonnull final Player player, @Nonnull final ItemStack handItem, @Nonnull final Block block, @Nonnull final Material material) {
         block.setType(material);
         // Reduce durability for each block
-        if (player.getGameMode().equals(GameMode.SURVIVAL)) {
+        if (useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)) {
             PowerUtils.reduceDurability(player, handItem);
         }
     }
