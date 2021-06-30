@@ -16,7 +16,6 @@ import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
-import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -126,14 +125,15 @@ public class BlockBreakListener implements Listener {
 			return true;
 		}
 
-		// If the player does not have permission to use the tool, acts like a normal pickaxe/shovel
-
-		if (!PowerUtils.checkUsePermission(player, handItemType)) {
-			return true;
-		}
 
 		// If this is not a power tool, acts like a normal pickaxe
 		if (!PowerUtils.isPowerTool(handItem)) {
+			return true;
+		}
+
+		// If the player does not have permission to use the tool, acts like a normal pickaxe/shovel
+
+		if (!PowerUtils.checkUsePermission(player, handItemType)) {
 			return true;
 		}
 		return false;

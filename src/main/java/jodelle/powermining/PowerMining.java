@@ -12,23 +12,17 @@
 
 package jodelle.powermining;
 
-import com.palmergames.bukkit.towny.Towny;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import jodelle.powermining.enchantment.Glow;
 import jodelle.powermining.handlers.*;
 import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.Reference;
-import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,8 +39,6 @@ public final class PowerMining extends JavaPlugin {
     private DebuggingMessages debuggingMessages;
 
     private WorldGuardPlugin worldguard;
-    private Plugin griefprevention;
-    private Plugin towny;
 
     private static PowerMining instance;
 
@@ -58,7 +50,6 @@ public final class PowerMining extends JavaPlugin {
         debuggingMessages = new DebuggingMessages();
 
         this.saveDefaultConfig();
-        registerGlow();
         processConfig();
         processCraftingRecipes();
         processPermissions();
@@ -314,33 +305,8 @@ public final class PowerMining extends JavaPlugin {
         return (WorldGuardPlugin) worldguard;
     }
 
-    public GriefPrevention getGriefPrevention() {
-        return (GriefPrevention) griefprevention;
-    }
-
-    public Towny getTowny() {
-        return (Towny) towny;
-    }
-
     public DebuggingMessages getDebuggingMessages() {
         return debuggingMessages;
-    }
-
-    public void registerGlow() {
-        try {
-            Field f = Enchantment.class.getDeclaredField("acceptingNew");
-            f.setAccessible(true);
-            f.set(null, true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            Glow glow = new Glow(new NamespacedKey(plugin, "glow"));
-            Enchantment.registerEnchantment(glow);
-        } catch (IllegalArgumentException e) {
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     public static PowerMining getInstance() {

@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Recipe;
 
 import javax.annotation.Nonnull;
-import javax.annotation.concurrent.NotThreadSafe;
 import java.util.ArrayList;
 import java.util.List;
 

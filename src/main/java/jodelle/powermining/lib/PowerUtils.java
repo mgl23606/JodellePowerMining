@@ -36,10 +36,6 @@ import java.util.Random;
 
 public class PowerUtils {
 
-    public static double CHANCE_UNBREAKING_I = 0.50;
-    public static double CHANCE_UNBREAKING_II = 0.33;
-    public static double CHANCE_UNBREAKING_III = 0.25;
-
     public PowerUtils() {
     }
 
@@ -272,7 +268,12 @@ public class PowerUtils {
 
         String perm = Reference.CRAFT_PERMISSIONS.get(itemType);
 
-        return player.hasPermission(perm);
+        if(player.hasPermission(perm)){
+            return true;
+        }
+
+        player.sendMessage(ChatColor.RED + "[JodellePowerMining] - You don't have permissions to craft this PowerTool");
+        return false;
     }
 
     /**
@@ -288,7 +289,12 @@ public class PowerUtils {
 
         String perm = Reference.USE_PERMISSIONS.get(itemType);
 
-        return player.hasPermission(perm);
+        if (player.hasPermission(perm)){
+            return true;
+        }
+
+        player.sendMessage(ChatColor.RED + "[JodellePowerMining] - You don't have permissions to use this PowerTool");
+        return false;
     }
 
     /**
@@ -301,10 +307,15 @@ public class PowerUtils {
         if (!Reference.ENCHANT_PERMISSIONS.containsKey(itemType)){
             throw new NoSuchElementException();
         }
-        ConsoleCommandSender console = Bukkit.getServer().getConsoleSender();
         String perm = Reference.ENCHANT_PERMISSIONS.get(itemType);
 
-        return player.hasPermission(perm);
+        if (player.hasPermission(perm)){
+            return true;
+        }
+
+        player.sendMessage(ChatColor.RED + "[JodellePowerMining] - You don't have permissions to enchant this PowerTool");
+
+        return false;
     }
 
     /**

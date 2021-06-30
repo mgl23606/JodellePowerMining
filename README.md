@@ -9,23 +9,21 @@ JodellePowerMining is a plugin for spigot that adds a new set of tools to the ga
 - Adds 3 distinct tools to the game. Hammer, Excavator and Plow.
 - Mining one block makes the other blocks around to be broken, a 3x3 hole. The size of the 
   hole can be changed.
-- All mineble/diggable blocks can be configured in the config file.
-- Costumisable recipes for the PowerTools.
+- All mineable/diggable blocks can be configured in the config file.
+- Customisable recipes for the PowerTools.
 - Commands to check the version and give PowerTools
 - Permissions to use, give, craft and enchant PowerTools.
+- Support for WorldGuard terrain protection.
 
 ## Todo List
-- Test the recipes. Pretty sure that everything works as intended, but just in case.
-- Implement the durability per block thing. Instead of removing durability per each broken block,
-  only removes durability for one broken block.
-- Test permissions.
+- Everything done?
 
 
 ## Change log
 ##### 14 june 2021
     - Permissions for the Plow are now working. All permissions should work properly now.
 ##### 8 june 2021
-    - Worldguard support added. It is not required to have the plugintho. It checks each block 
+    - Worldguard support added. It is not required to have the plugin tho. It checks each block 
       to see if they are build protected.
     - Added dependencies to the pom.xml
 ##### 6 june 2021

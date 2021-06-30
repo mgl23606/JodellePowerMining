@@ -40,8 +40,9 @@ public class ClickPlayerListener implements Listener {
         final ItemStack handItem = player.getInventory().getItemInMainHand();
         final Material handItemType = handItem.getType();
         final Block block = event.getClickedBlock();
+        final Action action = event.getAction();
 
-        if (basicVerifications(event, player, handItem, handItemType, block)){
+        if (basicVerifications(action, player, handItem, handItemType, block)){
             return;
         }
 
@@ -51,6 +52,12 @@ public class ClickPlayerListener implements Listener {
         final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
         final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
 
+        /*
+        At this point intellij shows a warning about the possibility of the argument
+        block being null. This warning can be ignored because in the method basicVerifications()
+        we already make sure that the block is not null, and if it is indeed null this method
+        never reached this point of the code.
+         */
         for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.RADIUS)) {
             final Material blockMat = e.getType();
 
@@ -66,7 +73,7 @@ public class ClickPlayerListener implements Listener {
             }
 
             if (PowerUtils.validatePath(handItem.getType(), blockMat)) {
-                usePowerTool(player, handItem, e, Material.GRASS_PATH);
+                usePowerTool(player, handItem, e, Material.DIRT_PATH);
             }
         }
 
@@ -91,27 +98,43 @@ public class ClickPlayerListener implements Listener {
         }
     }
 
-    private boolean basicVerifications(@Nonnull final PlayerInteractEvent event, @Nonnull final Player player, @Nonnull final ItemStack handItem, @Nonnull final Material handItemType, @Nullable final Block block) {
-        if (event.getAction() == Action.LEFT_CLICK_BLOCK)
+    /**
+     * Performs the basic verifications
+     * @param action Action performed by the player
+     * @param player Player who performed the action
+     * @param handItem Item held by the player
+     * @param handItemType Type of the item held by the player
+     * @param block Block clicked by the player
+     * @return True if all verifications pass
+     */
+    private boolean basicVerifications(@Nonnull final Action action, @Nonnull final Player player, @Nonnull final ItemStack handItem, @Nonnull final Material handItemType, @Nullable final Block block) {
+        if (action == Action.LEFT_CLICK_BLOCK) {
             return true;
-        if (event.getAction() == Action.LEFT_CLICK_AIR)
+        }
+        if (action == Action.LEFT_CLICK_AIR) {
             return true;
-        if (event.getAction() == Action.RIGHT_CLICK_AIR)
+        }
+        if (action == Action.RIGHT_CLICK_AIR) {
             return true;
-        if (player.isSneaking())
+        }
+        if (player.isSneaking()) {
             return true;
-        if(handItem.getType().equals(Material.AIR))
+        }
+        if(handItem.getType().equals(Material.AIR)) {
             return true;
+        }
         if (block == null){
             return true;
         }
         if (!PowerUtils.isTillable(block.getType())){
             return true;
         }
-        if (!PowerUtils.isPowerTool(handItem))
+        if (!PowerUtils.isPowerTool(handItem)) {
             return true;
-        if (!PowerUtils.checkUsePermission(player, handItemType))
+        }
+        if (!PowerUtils.checkUsePermission(player, handItemType)) {
             return true;
+        }
 
         return false;
     }

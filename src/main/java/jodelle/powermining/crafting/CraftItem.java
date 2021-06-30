@@ -3,7 +3,6 @@ package jodelle.powermining.crafting;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
-import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
