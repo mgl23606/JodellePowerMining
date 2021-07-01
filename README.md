@@ -1,5 +1,6 @@
 # Jodelle Power Mining
 ---
+Feel free to make a donation to help the project: https://www.paypal.com/donate?hosted_button_id=QG8WUHMEEBXWW
 ## Overview
 Attention! I did not create this plugin! I am just updating it because the creator droped it in 2013 and I like this plugin very much. All the credits go to bloodyshade.
 
