@@ -1,191 +1,791 @@
-#VERSION 20
-# Enable this if you want the durability to be reduced for each broken block
+# =============================================================================================== #
+#       _           _      _ _      _____                       __  __ _       _                  #
+#      | |         | |    | | |    |  __ \                     |  \/  (_)     (_)                 #
+#      | | ___   __| | ___| | | ___| |__) |____      _____ _ __| \  / |_ _ __  _ _ __   __ _      #
+#  _   | |/ _ \ / _` |/ _ \ | |/ _ \  ___/ _ \ \ /\ / / _ \ '__| |\/| | | '_ \| | '_ \ / _` |     #
+# | |__| | (_) | (_| |  __/ | |  __/ |  | (_) \ V  V /  __/ |  | |  | | | | | | | | | | (_| |     #
+#  \____/ \___/ \__,_|\___|_|_|\___|_|   \___/ \_/\_/ \___|_|  |_|  |_|_|_| |_|_|_| |_|\__, |     #
+#                                                                                       __/ |     #
+#                                                                                      |___/      #
+# =============================================================================================== #
+
+# 🌍 Language Settings
+#
+# This defines the default language for the plugin.
+# 
+# 🔹 How it works:
+# - The plugin will use the language file that matches this setting.
+# - Language files are stored in the "lang" folder inside the plugin directory.
+# - If the specified language file is missing, the plugin will default to English (en_US).
+#
+# 🔹 Available Languages (no download needed):
+# - "en_US" → English (default)
+# - "de_DE" → German
+#
+# You can add more languages by placing additional translation files in the "lang" folder.
+#
+# Default: English (en_US)
+language: en_US
+
+# ⚒️ Tool Durability Settings
+#
+# 🔹 What this does:
+# - If enabled (true), your tool loses durability for **every block** it breaks.
+# - If disabled (false), your tool only loses durability **once per use**, no matter how many blocks are broken.
+#
+# 🔹 Example:
+# - If you break 10 blocks at once:
+#   - **true** → The tool takes *0 durability damage**.
+#   - **false** → The tool takes **only 1 durability damage**.
+#
+# 🔹 Recommended:
+# - Set to **false** for longer-lasting tools.
+# - Set to **true** for a more balanced gameplay experience.
+#
+# Default: false
 useDurabilityPerBlock: false
 
-#Define radius and deep
-Radius: 1
-Deep: 0
+# Configure how many blocks your tool breaks at once.
+#
+# 🔹 Radius: The width of the mining area
+# - Radius 1: Only breaks the block you mine.
+# - Radius 2: Breaks the block you mine + the blocks directly next to it.
+# - Radius 3: Includes another layer of surrounding blocks, and so on.
+#
+# 🔹 Depth: How deep the mining goes
+# - Depth 1: Only breaks the surface layer (the block you hit).
+# - Depth 2: Breaks the surface layer + the blocks directly underneath.
+#
+# Example: 
+# If Radius = 3 and Depth = 2, your tool will break blocks in a wider area and also mine two layers deep.
+#
+# Default values: (Radius: 2, Depth: 1)
+Radius: 2
+Depth: 1
 
-# These define the blocks that can be mined by the hammer, and which quality of base pickaxe is needed
-# (these are set according to the information on the minecraft wiki)
+# ⛏️ Minable Blocks Configuration
+#
+# 🔹 What this does:
+# - Defines which blocks can be mined using a hammer.
+# - Specifies the minimum required pickaxe type for each block.
+# - Based on Minecraft's official mining mechanics.
+#
+# 🔹 How to use:
+# - Each block name (e.g., COBBLESTONE) must match its exact name in Minecraft.
+# - Below each block, specify the required pickaxe type.
+#   - Use "any" if the block can be mined with any pickaxe.
+#   - Use specific pickaxes (e.g., "IRON_PICKAXE") to require a minimum tool quality.
+#
+# 🔹 Example:
+# - `COBBLESTONE: any` → Can be mined with any pickaxe.
+# - `CHISELED_COPPER: STONE_PICKAXE, IRON_PICKAXE, etc.` → Requires at least a stone pickaxe.
+#
+# 🔹 Helpful Resources:
+# - Full Material List: 🔗 [Spigot API - Material List](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html)
+# - Default Minable Blocks List of the plugin: 🔗 [GitHub](https://github.com/Holt31/JodellePowerMining)
+#
+# 🛠️ Customize as needed!
 Minable:
-  - COBBLESTONE: [ any ]
-  - STONE: [ any ]
-  - STONE_BRICKS: [ any ]
-  - END_STONE: [ any ]
-  - BRICK: [ any ]
-  - MOSSY_COBBLESTONE: [ any ]
-  - COAL_ORE: [ any ]
-  - SANDSTONE: [ any ]
-  - END_STONE_BRICKS: [ any ]
-  - NETHERRACK: [ any ]
-  - NETHER_BRICKS: [ any ]
-  - GRANITE: [ any ]
-  - ANDESITE: [ any ]
-  - DIORITE: [ any ]
-  - NETHER_QUARTZ_ORE: [ any ]
-  - STAINED_CLAY: [ any ]
-  - HARD_CLAY: [ any ]
-  - GLOWSTONE: [ any ]
-  - TERRACOTTA: [ any ]
-  - WHITE_TERRACOTTA: [ any ]
-  - ORANGE_TERRACOTTA: [ any ]
-  - MAGENTA_TERRACOTTA: [ any ]
-  - LIGHT_BLUE_TERRACOTTA: [ any ]
-  - YELLOW_TERRACOTTA: [ any ]
-  - LIME_TERRACOTTA: [ any ]
-  - PINK_TERRACOTTA: [ any ]
-  - GRAY_TERRACOTTA: [ any ]
-  - LIGHT_GRAY_TERRACOTTA: [ any ]
-  - CYAN_TERRACOTTA: [ any ]
-  - PURPLE_TERRACOTTA: [ any ]
-  - BLUE_TERRACOTTA: [ any ]
-  - BROWN_TERRACOTTA: [ any ]
-  - GREEN_TERRACOTTA: [ any ]
-  - RED_TERRACOTTA: [ any ]
-  - BLACK_TERRACOTTA: [ any ]
-  - LIGHT_BLUE_CONCRETE: [ any ]
-  - YELLOW_CONCRETE: [ any ]
-  - LIME_CONCRETE: [ any ]
-  - PINK_CONCRETE: [ any ]
-  - GRAY_CONCRETE: [ any ]
-  - LIGHT_GRAY_CONCRETE: [ any ]
-  - CYAN_CONCRETE: [ any ]
-  - PURPLE_CONCRETE: [ any ]
-  - BLUE_CONCRETE: [ any ]
-  - BROWN_CONCRETE: [ any ]
-  - GREEN_CONCRETE: [ any ]
-  - RED_CONCRETE: [ any ]
-  - BLACK_CONCRETE: [ any ]
-  - WARPED_NYLIUM: [ any ]
-  - CUT_SANDSTONE: [ any ]
-  - PURPUR_BLOCK: [ any ]
-  - DARK_PRISMARINE: [ any ]
-  - CUT_RED_SANDSTONE: [ any ]
-  - SANDSTONE: [ any ]
-  - RED_SANDSTONE: [ any ]
-  - PRISMARINE_BRICKS: [ any ]
-  - CRIMSON_NYLIUM: [ any ]
-  - BLACKSTONE: [ any ]
-  - FROSTED_ICE: [ any ]
-  - BLUE_ICE: [ any ]
-  - PACKED_ICE: [ any ]
-  - BASALT: [ any ]
-  - MAGMA_BLOCK: [ any ]
-  - PURPUR_PILLAR: [ any ]
-  - REDSTONE_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - GLOWING_REDSTONE_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - GOLD_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - NETHER_GOLD_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - DIAMOND_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - OBSIDIAN: [ DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - ANCIENT_DEBRIS: [ DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - EMERALD_ORE: [ IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - LAPIS_ORE: [ STONE_PICKAXE, IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-  - IRON_ORE: [ STONE_PICKAXE, IRON_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE ]
-#- IRON_BLOCK: [STONE_PICKAXE, IRON_PICKAXE, DIAMOND_PICKAXE]
-#- GOLD_BLOCK: [IRON_PICKAXE, DIAMOND_PICKAXE]
-#- DIAMOND_BLOCK: [IRON_PICKAXE, DIAMOND_PICKAXE]
+- COBBLESTONE:
+  - any
+- COBBLED_DEEPSLATE:
+  - any
+- INFESTED_DEEPSLATE:
+  - any
+- STONE:
+  - any
+- DEEPSLATE:
+  - any
+- STONE_BRICKS:
+  - any
+- END_STONE:
+  - any
+- BRICK:
+  - any
+- MOSSY_COBBLESTONE:
+  - any
+- COAL_ORE:
+  - any
+- DEEPSLATE_COAL_ORE:
+  - any
+- SANDSTONE:
+  - any
+- END_STONE_BRICKS:
+  - any
+- NETHERRACK:
+  - any
+- NETHER_BRICKS:
+  - any
+- GRANITE:
+  - any
+- ANDESITE:
+  - any
+- DIORITE:
+  - any
+- NETHER_QUARTZ_ORE:
+  - any
+- STAINED_CLAY:
+  - any
+- HARD_CLAY:
+  - any
+- GLOWSTONE:
+  - any
+- TERRACOTTA:
+  - any
+- WHITE_TERRACOTTA:
+  - any
+- ORANGE_TERRACOTTA:
+  - any
+- MAGENTA_TERRACOTTA:
+  - any
+- LIGHT_BLUE_TERRACOTTA:
+  - any
+- YELLOW_TERRACOTTA:
+  - any
+- LIME_TERRACOTTA:
+  - any
+- PINK_TERRACOTTA:
+  - any
+- GRAY_TERRACOTTA:
+  - any
+- LIGHT_GRAY_TERRACOTTA:
+  - any
+- CYAN_TERRACOTTA:
+  - any
+- PURPLE_TERRACOTTA:
+  - any
+- BLUE_TERRACOTTA:
+  - any
+- BROWN_TERRACOTTA:
+  - any
+- GREEN_TERRACOTTA:
+  - any
+- RED_TERRACOTTA:
+  - any
+- BLACK_TERRACOTTA:
+  - any
+- LIGHT_BLUE_CONCRETE:
+  - any
+- YELLOW_CONCRETE:
+  - any
+- LIME_CONCRETE:
+  - any
+- PINK_CONCRETE:
+  - any
+- GRAY_CONCRETE:
+  - any
+- LIGHT_GRAY_CONCRETE:
+  - any
+- CYAN_CONCRETE:
+  - any
+- PURPLE_CONCRETE:
+  - any
+- BLUE_CONCRETE:
+  - any
+- BROWN_CONCRETE:
+  - any
+- GREEN_CONCRETE:
+  - any
+- RED_CONCRETE:
+  - any
+- BLACK_CONCRETE:
+  - any
+- WARPED_NYLIUM:
+  - any
+- CUT_SANDSTONE:
+  - any
+- PURPUR_BLOCK:
+  - any
+- DARK_PRISMARINE:
+  - any
+- CUT_RED_SANDSTONE:
+  - any
+- SANDSTONE:
+  - any
+- RED_SANDSTONE:
+  - any
+- PRISMARINE_BRICKS:
+  - any
+- CRIMSON_NYLIUM:
+  - any
+- BLACKSTONE:
+  - any
+- FROSTED_ICE:
+  - any
+- BLUE_ICE:
+  - any
+- PACKED_ICE:
+  - any
+- BASALT:
+  - any
+- MAGMA_BLOCK:
+  - any
+- PURPUR_PILLAR:
+  - any
+- DRIPSTONE_BLOCK:
+  - any
+- CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- EXPOSED_CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WEATHERED_CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- OXIDIZED_CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- EXPOSED_CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WEATHERED_CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- OXIDIZED_CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_EXPOSED_CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_WEATHERED_CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_OXIDIZED_CHISELED_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_EXPOSED_CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_WEATHERED_CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- WAXED_OXIDIZED_CUT_COPPER:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- CHISELED_SANDSTONE:
+  - any
+- CHISELED_RED_SANDSTONE:
+  - any
+- CUT_SANDSTONE:
+  - any
+- CUT_RED_SANDSTONE:
+  - any
+- INFESTED_CHISELED_STONE_BRICKS:
+  - any
+- CHISELED_STONE_BRICKS:
+  - any
+- CHISELED_DEEPSLATE:
+  - any
+- CHISELED_RESIN_BRICKS:
+  - any
+- CHISELED_NETHER_BRICKS:
+  - any
+- CHISELED_QUARTZ_BLOCK:
+  - any
+- TUFF:
+  - any
+- POLISHED_TUFF:
+  - any
+- CHISELED_TUFF:
+  - any
+- TUFF_BRICKS:
+  - any
+- CHISELED_TUFF_BRICKS:
+  - any
+- BLACKSTONE:
+  - any
+- CHISELED_POLISHED_BLACKSTONE:
+  - any
+- CRACKED_POLISHED_BLACKSTONE_BRICKS:
+  - any
+- GILDED_BLACKSTONE:
+  - any
+- POLISHED_BLACKSTONE:
+  - any
+- POLISHED_BLACKSTONE_BRICKS:
+  - any
+- COPPER_ORE:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DEEPSLATE_COPPER_ORE:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- REDSTONE_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DEEPSLATE_REDSTONE_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- GLOWING_REDSTONE_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- GOLD_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DEEPSLATE_GOLD_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- NETHER_GOLD_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DIAMOND_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DEEPSLATE_DIAMOND_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- OBSIDIAN:
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- ANCIENT_DEBRIS:
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- EMERALD_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DEEPSLATE_EMERALD_ORE:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- LAPIS_ORE:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DEEPSLATE_LAPIS_ORE:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- IRON_ORE:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- DEEPSLATE_IRON_ORE:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- GOLD_BLOCK:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- REDSTONE_BLOCK:
+  - any
+- DIAMOND_BLOCK:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- EMERALD_BLOCK:
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- LAPIS_BLOCK:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- IRON_BLOCK:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
+- COPPER_BLOCK:
+  - STONE_PICKAXE
+  - IRON_PICKAXE
+  - GOLDEN_PICKAXE
+  - DIAMOND_PICKAXE
+  - NETHERITE_PICKAXE
 
-# These define the blocks that can be dug by the excavator
+# 🏗️ Diggable Blocks Configuration
+#
+# 🔹 What this does:
+# - Defines which blocks can be dug using the **excavator** tool.
+# - Only blocks listed here will be affected by the excavator.
+#
+# 🔹 How to use:
+# - List block names exactly as they appear in Minecraft.
+# - You can add or remove blocks to customize which materials the excavator can dig.
+#
+# 🔹 Helpful Resources:
+# - Full Material List: 🔗 [Spigot API - Material List](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html)
+# - Default Diggable Blocks List: 🔗 [GitHub](https://github.com/Holt31/JodellePowerMining)
+#
+# 🛠️ Customize as needed!
 Diggable:
-  - GRASS_BLOCK
-  - DIRT
-  - SAND
-  - GRAVEL
   - CLAY
-  - SOUL_SOIL
-  - SOUL_SAND
-  - GRASS_PATH
-  - SNOW_BLOW
-  - SNOW
-  - SNOW_BLOCK
-  - MYCELIUM
-  - RED_SAND
-  - WARPED_WART_BLOCK
+  - COARSE_DIRT
+  - WHITE_CONCRETE_POWDER
+  - ORANGE_CONCRETE_POWDER
+  - MAGENTA_CONCRETE_POWDER
+  - LIGHT_BLUE_CONCRETE_POWDER
+  - YELLOW_CONCRETE_POWDER
+  - LIME_CONCRETE_POWDER
+  - PINK_CONCRETE_POWDER
+  - GRAY_CONCRETE_POWDER
+  - LIGHT_GRAY_CONCRETE_POWDER
+  - CYAN_CONCRETE_POWDER
+  - PURPLE_CONCRETE_POWDER
+  - BLUE_CONCRETE_POWDER
+  - BROWN_CONCRETE_POWDER
+  - GREEN_CONCRETE_POWDER
+  - RED_CONCRETE_POWDER
+  - BLACK_CONCRETE_POWDER
+  - DIRT
+  - DIRT_PATH
   - FARMLAND
-  - GLOWSTONE
+  - GRASS_BLOCK
+  - GRAVEL
+  - MUD
+  - MUDDY_MANGROVE_ROOTS
+  - MYCELIUM
+  - PODZOL
+  - ROOTED_DIRT
+  - SAND
+  - RED_SAND
+  - SNOW
+  - SNOW_BLOW
+  - SNOW_BLOCK
+  - SOUL_SAND
+  - SOUL_SOIL
+  - SUSPICIOUS_GRAVEL
+  - SUSPICIOUS_SAND
 
-#- Recipes
-# |1|2|3|
-# |4|5|6|
-# |7|8|9|
-# - TOOL_NAME: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-# Each number refers to a crafting table slot
-# Accepted items are in the format ITEMNAME*AMOUNT. Ex: STONE*6
-# EMPTY it's an empty slot, obviously
-Recipes:
-  #Hammers
-  - WOODEN_HAMMER: [ EMPTY, OAK_LOG*1, EMPTY,
-                     OAK_LOG*1, WOODEN_PICKAXE*1, OAK_LOG*1,
-                     EMPTY, OAK_LOG*1, EMPTY ]
+# 🛠️ Crafting Recipes Configuration
+# =================================
+#
+# 🔹 What this does:
+# - Defines the crafting recipes for hammers, excavators, and plows.
+# - Each recipe consists of **ingredients** and a **crafting shape**.
+# - Any changes require a server restart or running: `/powermining admin reload`
+#
+# 🔹 How to Define Recipe Ingredients:
+# - Use exact material names from Spigot's material list (case-sensitive).
+# - Full list of valid materials: 🔗 [Spigot API - Material List](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html)
+# - To leave a slot empty in the crafting grid, use `"AIR"` or `"EMPTY"`.
+# - Format: `'Symbol': "MATERIAL_NAME*AMOUNT"`
+# - Example:
+#     'I': "IRON_INGOT*2" → Uses **2 Iron Ingots** for symbol **I**
+#
+# 🔹 How to Define Recipe Shape:
+# - Defines the crafting table layout.
+# - Must use **three rows**, each containing **three symbols**.
+# - Symbols must match those listed in `recipe-ingredients`.
+# - Example:
+#     ```yaml
+#     recipe-shape:
+#       - "IEI"
+#       - "IPI"
+#       - "IEI"
+#     ```
+#   - `I` = Iron Ingot
+#   - `E` = Empty Slot
+#   - `P` = Pickaxe (placed in the center)
+#
+# 🔹 Important Notes:
+# - **Do not change item names** (e.g., `WOODEN_HAMMER` must stay the same).
+# - Available recipes and their defaults can be found on GitHub:  
+#   🔗 [JodellePowerMining GitHub](https://github.com/Holt31/JodellePowerMining)
+#
+# 🛠️ Customize as needed!
+recipes:
+  # Hammers
+  WOODEN_HAMMER:
+    recipe-ingredients:
+      'L': "OAK_LOG"
+      'P': "WOODEN_PICKAXE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ELE"
+      - "LPL"
+      - "ELE"
 
-  - STONE_HAMMER: [ EMPTY, STONE*1, EMPTY,
-                    STONE*1, STONE_PICKAXE*1, STONE*1,
-                    EMPTY, STONE*1, EMPTY ]
+  STONE_HAMMER:
+    recipe-ingredients:
+      'S': "STONE"
+      'P': "STONE_PICKAXE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ESE"
+      - "SPS"
+      - "ESE"
 
-  - IRON_HAMMER: [ EMPTY, IRON_INGOT*1, EMPTY,
-                   IRON_INGOT*1, IRON_PICKAXE*1, IRON_INGOT*1,
-                   EMPTY, IRON_INGOT*1, EMPTY ]
+  IRON_HAMMER:
+    recipe-ingredients:
+      'I': "IRON_INGOT"
+      'P': "IRON_PICKAXE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EIE"
+      - "IPI"
+      - "EIE"
 
-  - GOLDEN_HAMMER: [ EMPTY, GOLD_INGOT*1, EMPTY,
-                     GOLD_INGOT*1, GOLDEN_PICKAXE*1, GOLD_INGOT*1,
-                     EMPTY, GOLD_INGOT*1, EMPTY ]
+  GOLDEN_HAMMER:
+    recipe-ingredients:
+      'G': "GOLD_INGOT"
+      'P': "GOLDEN_PICKAXE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EGE"
+      - "GPG"
+      - "EGE"
 
-  - DIAMOND_HAMMER: [ EMPTY, DIAMOND*1, EMPTY,
-                      DIAMOND*1, DIAMOND_PICKAXE*1, DIAMOND*1,
-                      EMPTY, DIAMOND*1, EMPTY ]
+  DIAMOND_HAMMER:
+    recipe-ingredients:
+      'D': "DIAMOND"
+      'P': "DIAMOND_PICKAXE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EDE"
+      - "DPD"
+      - "EDE"
 
-  - NETHERITE_HAMMER: [ EMPTY, NETHERITE_INGOT*1, EMPTY,
-                        NETHERITE_INGOT*1, NETHERITE_PICKAXE*1, NETHERITE_INGOT*1,
-                        EMPTY, NETHERITE_INGOT*1, EMPTY ]
+  NETHERITE_HAMMER:
+    recipe-ingredients:
+      'N': "NETHERITE_INGOT"
+      'P': "NETHERITE_PICKAXE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ENE"
+      - "NPN"
+      - "ENE"
 
-  #Excavators
-  - WOODEN_EXCAVATOR: [ EMPTY, OAK_LOG*1, EMPTY,
-                        OAK_LOG*1, WOODEN_SHOVEL*1, OAK_LOG*1,
-                        EMPTY, OAK_LOG*1, EMPTY ]
+  # Excavators
+  WOODEN_EXCAVATOR:
+    recipe-ingredients:
+      'L': "OAK_LOG"
+      'S': "WOODEN_SHOVEL"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ELE"
+      - "LSL"
+      - "ELE"
 
-  - STONE_EXCAVATOR: [ EMPTY, STONE*1, EMPTY,
-                       STONE*1, STONE_SHOVEL*1, STONE*1,
-                       EMPTY, STONE*1, EMPTY ]
+  STONE_EXCAVATOR:
+    recipe-ingredients:
+      'S': "STONE"
+      'T': "STONE_SHOVEL"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ESE"
+      - "STS"
+      - "ESE"
 
-  - IRON_EXCAVATOR: [ EMPTY, IRON_INGOT*1, EMPTY,
-                      IRON_INGOT*1, IRON_SHOVEL*1, IRON_INGOT*1,
-                      EMPTY, IRON_INGOT*1, EMPTY ]
+  IRON_EXCAVATOR:
+    recipe-ingredients:
+      'I': "IRON_INGOT"
+      'S': "IRON_SHOVEL"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EIE"
+      - "ISI"
+      - "EIE"
 
-  - GOLDEN_EXCAVATOR: [ EMPTY, GOLD_INGOT*1, EMPTY,
-                        GOLD_INGOT*1, GOLDEN_SHOVEL*1, GOLD_INGOT*1,
-                        EMPTY, GOLD_INGOT*1, EMPTY ]
+  GOLDEN_EXCAVATOR:
+    recipe-ingredients:
+      'G': "GOLD_INGOT"
+      'S': "GOLDEN_SHOVEL"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EGE"
+      - "GSG"
+      - "EGE"
 
-  - DIAMOND_EXCAVATOR: [ EMPTY, DIAMOND*1, EMPTY,
-                         DIAMOND*1, DIAMOND_SHOVEL*1, DIAMOND*1,
-                         EMPTY, DIAMOND*1, EMPTY ]
+  DIAMOND_EXCAVATOR:
+    recipe-ingredients:
+      'D': "DIAMOND"
+      'S': "DIAMOND_SHOVEL"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EDE"
+      - "DSD"
+      - "EDE"
 
-  - NETHERITE_EXCAVATOR: [ EMPTY, NETHERITE_INGOT*1, EMPTY,
-                           NETHERITE_INGOT*1, NETHERITE_SHOVEL*1, NETHERITE_INGOT*1,
-                           EMPTY, NETHERITE_INGOT*1, EMPTY ]
+  NETHERITE_EXCAVATOR:
+    recipe-ingredients:
+      'N': "NETHERITE_INGOT"
+      'S': "NETHERITE_SHOVEL"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ENE"
+      - "NSN"
+      - "ENE"
 
-  #Plows
-  - WOODEN_PLOW: [ EMPTY, OAK_LOG*1, EMPTY,
-                   OAK_LOG*1, WOODEN_HOE*1, OAK_LOG*1,
-                   EMPTY, OAK_LOG*1, EMPTY ]
+  # Plows
+  WOODEN_PLOW:
+    recipe-ingredients:
+      'L': "OAK_LOG"
+      'H': "WOODEN_HOE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ELE"
+      - "LHL"
+      - "ELE"
 
-  - STONE_PLOW: [ EMPTY, STONE*1, EMPTY,
-                  STONE*1, STONE_HOE*1, STONE*1,
-                  EMPTY, STONE*1, EMPTY ]
+  STONE_PLOW:
+    recipe-ingredients:
+      'S': "STONE"
+      'H': "STONE_HOE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ESE"
+      - "SHS"
+      - "ESE"
 
-  - IRON_PLOW: [ EMPTY, IRON_INGOT*1, EMPTY,
-                 IRON_INGOT*1, IRON_HOE*1, IRON_INGOT*1,
-                 EMPTY, IRON_INGOT*1, EMPTY ]
+  IRON_PLOW:
+    recipe-ingredients:
+      'I': "IRON_INGOT"
+      'H': "IRON_HOE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EIE"
+      - "IHI"
+      - "EIE"
 
-  - GOLDEN_PLOW: [ EMPTY, GOLD_INGOT*1, EMPTY,
-                   GOLD_INGOT*1, GOLDEN_HOE*1, GOLD_INGOT*1,
-                   EMPTY, GOLD_INGOT*1, EMPTY ]
+  GOLDEN_PLOW:
+    recipe-ingredients:
+      'G': "GOLD_INGOT"
+      'H': "GOLDEN_HOE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EGE"
+      - "GHG"
+      - "EGE"
 
-  - DIAMOND_PLOW: [ EMPTY, DIAMOND*1, EMPTY,
-                    DIAMOND*1, DIAMOND_HOE*1, DIAMOND*1,
-                    EMPTY, DIAMOND*1, EMPTY ]
+  DIAMOND_PLOW:
+    recipe-ingredients:
+      'D': "DIAMOND"
+      'H': "DIAMOND_HOE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "EDE"
+      - "DHD"
+      - "EDE"
 
-  - NETHERITE_PLOW: [ EMPTY, NETHERITE_INGOT*1, EMPTY,
-                      NETHERITE_INGOT*1, NETHERITE_HOE*1, NETHERITE_INGOT*1,
-                      EMPTY, NETHERITE_INGOT*1, EMPTY ]
+  NETHERITE_PLOW:
+    recipe-ingredients:
+      'N': "NETHERITE_INGOT"
+      'H': "NETHERITE_HOE"
+      'E': "EMPTY"
+    recipe-shape:
+      - "ENE"
+      - "NHN"
+      - "ENE"
+
+# ⚙️ Configuration Version
+# ------------------------
+# This value tracks the version of the configuration file.
+# It is used to ensure compatibility with future updates.
+#
+# 🚨 Do NOT change this value! 🚨
+# - Modifying it may cause the plugin to stop working.
+# - If there’s an issue, delete the config file and restart the server or reload the plugin to regenerate it.
+configVersion: "1.0"
+
+# 🛠️ Debug Mode
+# -------------
+# Enables or disables debug mode.
+#
+# 🔹 What this does:
+# - If **false**, the plugin runs normally (recommended).
+# - If **true**, extra debug messages are sent **only to the console**.
+#
+# 🔹 Important Notes:
+# - This setting is useful for troubleshooting but **will flood your console with messages**.
+# - Keep this **false** unless you are debugging an issue.
+#
+# Default: false
+debug: false

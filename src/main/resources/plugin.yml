@@ -1,33 +1,65 @@
 name: JodellePowerMining
 main: jodelle.powermining.PowerMining
-version: 21.06
-author: JodelleLover
-description: Implements Hammer, Excavator and Plow tools for faster mining, version updated from BloodyShade.
-api-version: 1.17
+version: 1.0
+authors: [Holt]
+description: Implements Hammer, Excavator and Plow tools for faster mining, version updated from BloodyShade and JodelleLover.
+api-version: "1.21"
 softdepend: [worldguard]
 
 commands:
-    jpm:
+    powermining:
         usage: /<command>
         description: Gives a powertool
-
+        aliases: [jpm]
 
 permissions:
     powermining.all:
         description: Grants all permissions
         default: op
         children:
+            powermining.admin: true
+            powermining.version: true
+            powermining.give: true
+            powermining.highdurability: true
             powermining.craft.all: true
             powermining.use.all: true
             powermining.enchant.all: true
-            powermining.highdurability: true
 
     powermining.highdurability:
         description: Allows player's PowerTool to use only 1 durability per use
         default: true
 
+    powermining.version:
+        description: Allows using `/powermining version`
+        default: op
+    
     powermining.give:
         description: Allows player to receive a Powertool of his choice
+        default: op
+
+    powermining.admin:
+        description: Grants access to all admin commands
+        default: op
+        children:
+            powermining.admin.reload: true
+            powermining.admin.language: true
+            powermining.admin.debug: true
+            powermining.admin.help: true
+
+    powermining.admin.reload:
+        description: Allows using `/powermining admin reload`
+        default: op
+
+    powermining.admin.language:
+        description: Allows using `/powermining admin language <language>`
+        default: op
+
+    powermining.admin.debug:
+        description: Allows using `/powermining admin debug`
+        default: op
+
+    powermining.admin.help:
+        description: Allows using `/powermining admin help`
         default: op
 
     powermining.craft.all:
@@ -135,7 +167,12 @@ permissions:
             powermining.use.hammer.all: true
             powermining.use.excavator.all: true
             powermining.use.plow.all: true
+            powermining.use.commands: true
 
+    powermining.use.commands:
+        description: Allows players to use default commands
+        default: op
+        
     powermining.use.hammer.all:
         description: Allows players to use all hammers
         default: op

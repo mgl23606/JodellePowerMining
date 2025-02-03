@@ -14,7 +14,8 @@ package jodelle.powermining.listeners;
 
 
 import jodelle.powermining.PowerMining;
-import jodelle.powermining.lib.PowerUtils;
+import jodelle.powermining.utils.PowerUtils;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,21 +26,23 @@ import javax.annotation.Nonnull;
 
 public class EnchantItemListener implements Listener {
 
-	public EnchantItemListener(@Nonnull PowerMining plugin) {
+    private final PowerMining plugin;
 
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
+    public EnchantItemListener(@Nonnull PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void canEnchant(EnchantItemEvent event) {
-		final ItemStack item = event.getItem();
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void canEnchant(EnchantItemEvent event) {
+        final ItemStack item = event.getItem();
 
-		if (!PowerUtils.isPowerTool(item)) {
-			return;
-		}
+        if (!PowerUtils.isPowerTool(item)) {
+            return;
+        }
 
-		if (!PowerUtils.checkEnchantPermission(event.getEnchanter(), item.getType())) {
-			event.setCancelled(true);
-		}
-	}
+        if (!PowerUtils.checkEnchantPermission(plugin, event.getEnchanter(), item.getType())) {
+            event.setCancelled(true);
+        }
+    }
 }

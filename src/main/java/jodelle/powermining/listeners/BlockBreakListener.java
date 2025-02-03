@@ -14,126 +14,165 @@ package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
-import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
+import jodelle.powermining.utils.PowerUtils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExpEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
 public class BlockBreakListener implements Listener {
-	public final PowerMining plugin;
-	public final boolean useDurabilityPerBlock;
-	public final DebuggingMessages debuggingMessages;
+    public final PowerMining plugin;
+    public final boolean useDurabilityPerBlock;
+    public final DebuggingMessages debuggingMessages;
 
-	private Player player;
-	private ItemStack handItem;
+    private Player player;
+    private ItemStack handItem;
 
-	public BlockBreakListener(@Nonnull PowerMining plugin) {
+    public BlockBreakListener(@Nonnull PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        debuggingMessages = plugin.getDebuggingMessages();
+        useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
+    }
 
-		this.plugin = plugin;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        player = event.getPlayer();
+        handItem = player.getInventory().getItemInMainHand();
 
-		debuggingMessages = plugin.getDebuggingMessages();
+        if (handItem != null && handItem.getItemMeta() != null && handItem.getItemMeta().hasDisplayName()) {
+            debuggingMessages.sendConsoleMessage(
+                    ChatColor.RED + "Broke a block with item: " + handItem.getItemMeta().getDisplayName());
+        }
 
-		useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
-	}
+        if (basicVerifications()) {
+            return;
+        }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockBreak(BlockBreakEvent event) {
-		boolean debugging = true;
+        final Block centerBlock = event.getBlock();
+        final String playerName = player.getName();
 
-		player = event.getPlayer();
-		handItem = player.getInventory().getItemInMainHand();
+        final PlayerInteractListener pil = plugin.getPlayerInteractHandler() != null
+                ? plugin.getPlayerInteractHandler().getListener()
+                : null;
 
-		debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "Broke a block: ");
+        if (pil == null) {
+            debuggingMessages.sendConsoleMessage(ChatColor.RED + "PlayerInteractListener is null.");
+            return;
+        }
 
-		if (basicVerifications()){
-			return;
-		}
+        final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
 
-		final Block centerBlock = event.getBlock();
-		final String playerName = player.getName();
+        int radius = Math.max(0, plugin.getConfig().getInt("Radius", Reference.RADIUS) - 1);
+        int depth = Math.max(0, plugin.getConfig().getInt("Depth", Reference.DEPTH) - 1);
 
-		final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
-		final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
+        debuggingMessages.sendConsoleMessage("(processConfig) Value for radius is: (Reference) " + Reference.RADIUS
+                + " (Config) " + (plugin.getConfig().getInt("Radius", 2) - 1));
+        debuggingMessages.sendConsoleMessage("(processConfig) Value for depth is: (Reference) " + Reference.DEPTH
+                + " (Config) " + (plugin.getConfig().getInt("Depth", 1) - 1));
 
-		// Breaks surrounding blocks as long as they match the corresponding tool
-		for (Block block: PowerUtils.getSurroundingBlocks(blockFace, centerBlock, Reference.RADIUS, Reference.DEEP)) {
-			checkAndBreakBlock(block);
-		}
+        List<Block> surroundingBlocks = PowerUtils.getSurroundingBlocks(blockFace, centerBlock, radius, depth);
 
-		if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)){
-			PowerUtils.reduceDurability(player, handItem);
-		}
-	}
+        if (surroundingBlocks.isEmpty()) {
+            debuggingMessages.sendConsoleMessage(ChatColor.RED + "No surrounding blocks found.");
+            return;
+        }
+
+        int totalExp = event.getExpToDrop();
+
+        for (Block block : surroundingBlocks) {
+            totalExp += checkAndBreakBlock(block);
+        }
+
+        if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)) {
+            event.setCancelled(true);
+            PowerUtils.reduceDurability(player, handItem);
+            centerBlock.breakNaturally(handItem);
+        }
+
+        if (totalExp > 0) {
+            BlockExpEvent expEvent = new BlockExpEvent(centerBlock, totalExp);
+            plugin.getServer().getPluginManager().callEvent(expEvent);
+
+            ExperienceOrb orb = centerBlock.getWorld().spawn(centerBlock.getLocation(), ExperienceOrb.class);
+            orb.setExperience(expEvent.getExpToDrop());
+        }
+    }
 
 	/**
 	 * Check and break the block if possible
+	 * 
 	 * @param block The block being broken by the player
 	 */
-	private void checkAndBreakBlock(@Nonnull Block block) {
-		Material blockMat = block.getType();
+    private int checkAndBreakBlock(@Nonnull Block block) {
+        Material blockMat = block.getType();
+        boolean useHammer;
+        boolean useExcavator = false;
 
-		boolean useHammer;
-		boolean useExcavator = false;
+        if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat)) ;
+        else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat)) ;
 
-		// This bit is necessary to guarantee we only get one or the other as true, otherwise it might break blocks with the wrong tool
-		if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat));
-		else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat));
+        if (useHammer || useExcavator) {
+            if (!PowerUtils.canBreak(plugin, player, block)) {
+                return 0;
+            }
 
-		if (useHammer || useExcavator) {
+            int expToDrop = block.getDrops().isEmpty() ? 0 : block.getType().getHardness() > 0 ? 1 : 0;
 
-			// Check if player has permission to break the block
-			if (!PowerUtils.canBreak(plugin, player, block)) {
-				return;
-			}
+            if (block.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)) {
+                if (useDurabilityPerBlock) {
+                    PowerUtils.reduceDurability(player, handItem);
+                }
+            }
 
-			//When using breakNaturally the block is broken but the durability of the tool stays the same
-			//so it's necessary to update the damage manually
-			if(block.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)){
-				if (useDurabilityPerBlock) {
-					PowerUtils.reduceDurability(player, handItem);
-				}
-			}
+            return expToDrop;
+        }
 
-		}
-	}
+        return 0;
+    }
 
 	/**
 	 * Perform the basic verifications
+	 * 
 	 * @return True if the PowerTool is ready to use
 	 */
 	private boolean basicVerifications() {
-		// If the player is sneaking, we want the tool to act like a normal pickaxe/shovel
+		// If the player is sneaking, we want the tool to act like a normal
+		// pickaxe/shovel
 		if (player.isSneaking()) {
 			return true;
 		}
 
 		Material handItemType = handItem.getType();
 
-		if(handItemType.equals(Material.AIR)) {
+		if (handItemType.equals(Material.AIR)) {
 			return true;
 		}
-
 
 		// If this is not a power tool, acts like a normal pickaxe
 		if (!PowerUtils.isPowerTool(handItem)) {
 			return true;
 		}
 
-		// If the player does not have permission to use the tool, acts like a normal pickaxe/shovel
+		// If the player does not have permission to use the tool, acts like a normal
+		// pickaxe/shovel
 
-		if (!PowerUtils.checkUsePermission(player, handItemType)) {
+		if (!PowerUtils.checkUsePermission(plugin, player, handItemType)) {
 			return true;
 		}
 		return false;

@@ -2,8 +2,9 @@ package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
-import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
+import jodelle.powermining.utils.PowerUtils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -132,7 +133,7 @@ public class ClickPlayerListener implements Listener {
         if (!PowerUtils.isPowerTool(handItem)) {
             return true;
         }
-        if (!PowerUtils.checkUsePermission(player, handItemType)) {
+        if (!PowerUtils.checkUsePermission(plugin, player, handItemType)) {
             return true;
         }
 

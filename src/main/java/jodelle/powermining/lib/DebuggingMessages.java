@@ -4,28 +4,26 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.ConsoleCommandSender;
 
+import jodelle.powermining.PowerMining;
+
 public class DebuggingMessages {
 
-    protected boolean debugginOn = false;
     protected ConsoleCommandSender console;
 
     public DebuggingMessages() {
-        if (debugginOn){
-            console = Bukkit.getServer().getConsoleSender();
+        console = Bukkit.getServer().getConsoleSender();
+        if (PowerMining.isDebugMode()){
             sendConsoleMessage("Debugging is On");
         }
     }
-
+    
+    public boolean isDebuggingOn() {
+        return PowerMining.isDebugMode();
+    }
+    
     public void sendConsoleMessage(String message){
-        if (debugginOn){
-            console.sendMessage( ChatColor.LIGHT_PURPLE + "[JodellePowerMiningDebugging] - " + message);
+        if (isDebuggingOn()){
+            console.sendMessage(ChatColor.LIGHT_PURPLE + "[JodellePowerMiningDebugging] - " + message);
         }
     }
-
-    public void sendConsoleMessage(Boolean show, String message){
-        if (debugginOn && show){
-            console.sendMessage( ChatColor.LIGHT_PURPLE + "[JodellePowerMiningDebugging] - " + message);
-        }
-    }
-
 }
