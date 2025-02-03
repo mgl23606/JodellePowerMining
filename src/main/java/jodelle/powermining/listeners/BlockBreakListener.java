@@ -93,11 +93,8 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        int totalExp = event.getExpToDrop();
-
-        for (Block block : surroundingBlocks) {
-            totalExp += checkAndBreakBlock(block);
-        }
+        // Handle the center block XP as usual
+        int centerBlockExp = event.getExpToDrop();
 
         if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)) {
             event.setCancelled(true);
@@ -105,76 +102,136 @@ public class BlockBreakListener implements Listener {
             centerBlock.breakNaturally(handItem);
         }
 
-        if (totalExp > 0) {
-            BlockExpEvent expEvent = new BlockExpEvent(centerBlock, totalExp);
-            plugin.getServer().getPluginManager().callEvent(expEvent);
+        if (centerBlockExp > 0) {
+            BlockExpEvent centerExpEvent = new BlockExpEvent(centerBlock, centerBlockExp);
+            plugin.getServer().getPluginManager().callEvent(centerExpEvent);
 
-            ExperienceOrb orb = centerBlock.getWorld().spawn(centerBlock.getLocation(), ExperienceOrb.class);
-            orb.setExperience(expEvent.getExpToDrop());
+            ExperienceOrb centerOrb = centerBlock.getWorld().spawn(centerBlock.getLocation(), ExperienceOrb.class);
+            centerOrb.setExperience(centerExpEvent.getExpToDrop());
+        }
+
+        // Handle surrounding blocks XP separately
+        for (Block block : surroundingBlocks) {
+            int exp = checkAndBreakBlock(block);
+
+            if (exp > 0) {
+                BlockExpEvent expEvent = new BlockExpEvent(block, exp);
+                plugin.getServer().getPluginManager().callEvent(expEvent);
+
+                ExperienceOrb orb = block.getWorld().spawn(block.getLocation(), ExperienceOrb.class);
+                orb.setExperience(expEvent.getExpToDrop());
+            }
         }
     }
 
-	/**
-	 * Check and break the block if possible
-	 * 
-	 * @param block The block being broken by the player
-	 */
+    /**
+     * Check and break the block if possible
+     * 
+     * @param block The block being broken by the player
+     */
     private int checkAndBreakBlock(@Nonnull Block block) {
         Material blockMat = block.getType();
         boolean useHammer;
         boolean useExcavator = false;
 
-        if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat)) ;
-        else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat)) ;
+        if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat))
+            ;
+        else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat))
+            ;
 
         if (useHammer || useExcavator) {
             if (!PowerUtils.canBreak(plugin, player, block)) {
                 return 0;
             }
 
-            int expToDrop = block.getDrops().isEmpty() ? 0 : block.getType().getHardness() > 0 ? 1 : 0;
+            int expToDrop = 0;
 
+            // Only assign XP for blocks that naturally drop XP in vanilla Minecraft
+            switch (blockMat) {
+                case COAL_ORE:
+                case DEEPSLATE_COAL_ORE:
+                    expToDrop = (int) (Math.random() * 3); // 0-2 XP
+                    break;
+
+                case DIAMOND_ORE:
+                case DEEPSLATE_DIAMOND_ORE:
+                    expToDrop = 3 + (int) (Math.random() * 5); // 3-7 XP
+                    break;
+
+                case EMERALD_ORE:
+                case DEEPSLATE_EMERALD_ORE:
+                    expToDrop = 3 + (int) (Math.random() * 5); // 3-7 XP
+                    break;
+
+                case REDSTONE_ORE:
+                case DEEPSLATE_REDSTONE_ORE:
+                    expToDrop = 2 + (int) (Math.random() * 4); // 2-6 XP
+                    break;
+
+                case LAPIS_ORE:
+                case DEEPSLATE_LAPIS_ORE:
+                    expToDrop = 2 + (int) (Math.random() * 4); // 2-6 XP
+                    break;
+
+                case NETHER_QUARTZ_ORE:
+                    expToDrop = 2 + (int) (Math.random() * 3); // 2-5 XP
+                    break;
+
+                case NETHER_GOLD_ORE:
+                    expToDrop = 1 + (int) (Math.random() * 5); // 1-5 XP
+                    break;
+
+                case SPAWNER:
+                    expToDrop = 15 + (int) (Math.random() * 30); // 15-43 XP
+                    break;
+
+                default:
+                    expToDrop = 0; // No XP for blocks not listed
+                    break;
+            }
+
+            // Break the block naturally if conditions are met
             if (block.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)) {
                 if (useDurabilityPerBlock) {
                     PowerUtils.reduceDurability(player, handItem);
                 }
             }
 
-            return expToDrop;
+            return expToDrop; // Return XP only for eligible blocks
         }
 
-        return 0;
+        return 0; // Return 0 XP if conditions aren't met
     }
 
-	/**
-	 * Perform the basic verifications
-	 * 
-	 * @return True if the PowerTool is ready to use
-	 */
-	private boolean basicVerifications() {
-		// If the player is sneaking, we want the tool to act like a normal
-		// pickaxe/shovel
-		if (player.isSneaking()) {
-			return true;
-		}
+    /**
+     * Perform the basic verifications
+     * 
+     * @return True if the PowerTool is ready to use
+     */
+    private boolean basicVerifications() {
+        // If the player is sneaking, we want the tool to act like a normal
+        // pickaxe/shovel
+        if (player.isSneaking()) {
+            return true;
+        }
 
-		Material handItemType = handItem.getType();
+        Material handItemType = handItem.getType();
 
-		if (handItemType.equals(Material.AIR)) {
-			return true;
-		}
+        if (handItemType.equals(Material.AIR)) {
+            return true;
+        }
 
-		// If this is not a power tool, acts like a normal pickaxe
-		if (!PowerUtils.isPowerTool(handItem)) {
-			return true;
-		}
+        // If this is not a power tool, acts like a normal pickaxe
+        if (!PowerUtils.isPowerTool(handItem)) {
+            return true;
+        }
 
-		// If the player does not have permission to use the tool, acts like a normal
-		// pickaxe/shovel
+        // If the player does not have permission to use the tool, acts like a normal
+        // pickaxe/shovel
 
-		if (!PowerUtils.checkUsePermission(plugin, player, handItemType)) {
-			return true;
-		}
-		return false;
-	}
+        if (!PowerUtils.checkUsePermission(plugin, player, handItemType)) {
+            return true;
+        }
+        return false;
+    }
 }

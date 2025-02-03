@@ -23,9 +23,20 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
 ✅ **Permissions for crafting, using, giving, and enchanting PowerTools**  
 ✅ **WorldGuard protection support to prevent griefing**  
 
+## Screenshots
+### Hammer
+![Hammer Usage](https://github.com/dringewald/JodellePowerMining/blob/master/github/Hammer.gif?raw=true)
+
+### Excavator
+![Excavator Usage](https://github.com/dringewald/JodellePowerMining/blob/master/github/Excavator.gif?raw=true)
+
+### Plow
+![Plow Usage](https://github.com/dringewald/JodellePowerMining/blob/master/github/Plow.gif?raw=true)
+
 ## Configuration
 
 - The plugin **automatically migrates outdated configs** to the latest version.
+  - ⚠️ If possible use a freshly generated config file
 - The **config file now includes versioning** for future updates.
 - The `Deep` option has been **renamed to `Depth`** (this is migrated automatically).
 - The **language system** allows full translation of all messages, item names, and lore.
@@ -34,9 +45,9 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
 ## 📜 Commands
 | **Command** | **Description** | **Permission** |
 |------------|----------------|---------------|
-| `/powermining` | Displays plugin information | `powermining.use` |
-| `/powermining help` | Shows the help menu | `powermining.use` |
-| `/powermining info` | Displays plugin info (same as `/powermining`) | `powermining.use` |
+| `/powermining` | Displays plugin information | `powermining.use.commands` |
+| `/powermining help` | Shows the help menu | `powermining.use.commands` |
+| `/powermining info` | Displays plugin info (same as `/powermining`) | `powermining.use.commands` |
 | `/powermining version` | Shows the current plugin version | `powermining.version` |
 | `/powermining give <tool>` | Gives a PowerTool to the player | `powermining.give` |
 | `/powermining admin` | Shows the admin help menu | `powermining.admin` |
@@ -100,6 +111,7 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
 | **Permission** | **Description** | **Default** |
 |--------------|----------------|------------|
 | `powermining.use.all` | Allows using all PowerTools | `op` |
+| `powermining.use.commands` | Allows using relevant commands | `op` |
 | `powermining.use.hammer.all` | Allows using all Hammers | `op` |
 | `powermining.use.excavator.all` | Allows using all Excavators | `op` |
 | `powermining.use.plow.all` | Allows using all Plows | `op` |
@@ -193,6 +205,13 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
   - `breakNaturally()` now properly drops items.
   - **Fortune enchantment now works correctly** with PowerTools.
   - **Plow logic cleaned up** for better performance.
+
+---
+
+## **🌎 Useful Links**
+- 🔗 [Original GitHub repo](https://github.com/mgl23606/JodellePowerMining)
+- 🔗 [BStats Page](https://bstats.org/plugin/bukkit/JodellePowerMining/24587)
+- 🔗 [Discord](https://discord.gg/jymDumdFVU)
 
 ---
 
