@@ -1,59 +1,98 @@
-# Jodelle Power Mining
+# ⚡ Jodelle Power Mining  
+*A powerful tool enhancement plugin for Spigot servers!*  
+
+![⛏️ Spigot](https://img.shields.io/badge/Platform-Spigot-blue)  
+
 ---
-Feel free to make a donation to help the project: https://www.paypal.com/donate?hosted_button_id=QG8WUHMEEBXWW
-## Overview
-Attention! I did not create this plugin! I am just updating it because the creator droped it in 2013 and I like this plugin very much. All the credits go to bloodyshade.
 
-JodellePowerMining is a plugin for spigot that adds a new set of tools to the game. These tools have a different behavior from the original version. An example is instead of a pickaxe mining just one block, it can mine 3x3.
+## 📌 Overview  
+**Jodelle Power Mining** is a **revived and enhanced** version of an old mining plugin originally created by **bloodyshade** (2013). Since the original plugin was abandoned, I took the initiative to **update, maintain, and improve** it for modern Spigot servers!  
 
-## Features
-- Adds 3 distinct tools to the game. Hammer, Excavator and Plow.
-- Mining one block makes the other blocks around to be broken, a 3x3 hole. The size of the 
-  hole can be changed.
-- All mineable/diggable blocks can be configured in the config file.
-- Customisable recipes for the PowerTools.
-- Commands to check the version and give PowerTools
-- Permissions to use, give, craft and enchant PowerTools.
-- Support for WorldGuard terrain protection.
+This plugin introduces **special PowerTools** that allow **efficient block breaking**, such as **3x3 mining with hammers and excavators**.  
 
-## Todo List
-- Everything done?
+🔹 **Mine faster.**  
+🔹 **Dig smarter.**  
+🔹 **Customize everything.**  
+
+💖 If you love this project, consider [donating](https://www.paypal.com/donate?hosted_button_id=QG8WUHMEEBXWW) to support further development!  
+
+---
+
+## ✨ Features  
+✔ **New Power Tools** – Includes **Hammer, Excavator, and Plow** for enhanced mining & digging.  
+✔ **3x3 Mining & Digging** – Tools break multiple blocks at once (fully configurable).  
+✔ **Customizable Blocks** – Choose which blocks can be mined or dug using PowerTools.  
+✔ **Configurable Recipes** – Customize crafting recipes for the PowerTools.  
+✔ **Permissions System** – Control **who** can use, craft, and enchant PowerTools.  
+✔ **WorldGuard Support** – Respects **protected areas** (optional dependency).  
+✔ **Enchantments Transfer** – Tools crafted with enchanted materials inherit enchantments.  
+
+---
+
+## 📥 Installation  
+1. **Download** the latest `.jar` from [Releases](https://github.com/your-repo/jodelle-power-mining/releases).  
+2. **Place it** in the `plugins` folder of your **Spigot** server.  
+3. **Restart** your server.  
+4. **Configure** settings in the `config.yml` file if needed.  
+
+---
+
+## 🔧 Commands  
+
+| Command | Description |
+|---------|------------|
+| `/jpm version` | Displays the current plugin version. |
+| `/jpm give <player> <tool>` | Gives a player a PowerTool. |
+
+---
+
+## 🔒 Permissions  
+
+| Permission | Description |
+|------------|------------|
+| `jpm.use` | Allows using PowerTools. |
+| `jpm.craft` | Allows crafting PowerTools. |
+| `jpm.give` | Allows giving PowerTools via command. |
+| `jpm.enchant` | Allows enchanting PowerTools. |
+
+---
+
+## 🛠 Configuration  
+PowerTools and their settings can be configured via `config.yml`:  
+
+### 🔹 **Tool Break Radius**  
+Adjust the **mining/digging size**:  
 
 
-## Change log
-##### 14 june 2021
-    - Permissions for the Plow are now working. All permissions should work properly now.
-##### 8 june 2021
-    - Worldguard support added. It is not required to have the plugin tho. It checks each block 
-      to see if they are build protected.
-    - Added dependencies to the pom.xml
-##### 6 june 2021
-    - Implemented the logic that removes the item from the player inventory as soons as the 
-      durability reaches a value below zero. Also plays a breaking sound.
-##### 3 june 2021
-    - Added the command "jpm give" and " jpm version"
-    - Enchantments of items from the recipe on the crafting table are now passed onto
-      the crafted PowerTool.
-    - Max stack size is now verified when loading the custom recipes. This prevents, for example, more
-      setting more than one pickaxe per slot, which is impossible to make in survival.
-    - Little optimizations on the code.
+## 🛠 Change Log  
 
-##### 26 may 2021
-    - Changed the way permissions are checked. Instead of having all the permissions hardcoded on each method 
-      they are now created while the plugin is loaded. HashMaps are used to store each type of permission which 
-      are later used to check if the player has the specific permissions.
-##### 25 may 2021
-    - When using a powertool the durability wasn't updated. That's due to a deprecated method being used.
-      It has been updated to use the new way. Basically now we need to get the item meta and change the durability
-      there. If we use the old method the changes are not applied.
-      Created the method, on the PowerUtils class, reduceDurability(ItemStack) to be used by all powertools.
-      Also implemented the unbreaking enchantment logic.    
+### 📅 Latest Updates  
 
-    - Reviewed the BlockBreakListener code and removed useless code. 
-      Before the method breakNaturally() didn't drop anything, so the dropping logic needed to be implemented 
-      manually. This includes the enchants like the various fortune levels.
-      Also removed some code referring to the Plow present on the this class.
-    
-    
-    
-    
+#### 🆕 June 14, 2021  
+✔ **Fixed** Plow permissions (all permissions now work correctly).  
+
+#### 🆕 June 8, 2021  
+✔ **Added** **WorldGuard** support (checks protection before breaking blocks).  
+✔ **Updated** dependencies for compatibility.  
+
+#### 🆕 June 6, 2021  
+✔ **Implemented** tool break detection: tools now **break and disappear** when durability runs out.  
+✔ **Added** breaking **sound effects** when tools break.  
+
+#### 🆕 June 3, 2021  
+✔ **Added** `/jpm give` and `/jpm version` commands.  
+✔ **Improved** enchantment handling: crafted PowerTools inherit enchantments.  
+
+## 📜 License  
+This plugin is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.  
+
+## 💬 Support & Contributions  
+- 🐛 **Found a bug?** Report it in [Issues](../../issues).  
+- 🔧 **Want to contribute?** Fork the repo and submit a **pull request**!  
+- 💬 **Need help?** Join our **Discord community** *(if available).*  
+
+---
+
+⚡ **Supercharge your mining experience with Jodelle Power Mining!** ⚡  
+
+
