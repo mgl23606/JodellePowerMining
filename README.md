@@ -1,9 +1,8 @@
 # ⚡ Jodelle Power Mining  
 *A powerful tool enhancement plugin for Spigot servers!*  
 
-![⛏️ Spigot](https://img.shields.io/badge/Platform-Spigot-blue)  
-
----
+[![](https://img.shields.io/badge/Platform-Spigot-blue)](https://www.spigotmc.org/resources/jodelle-powermining.59834/ "⛏️ Spigot")
+[![](https://img.shields.io/badge/BStats-Metrics-00695c)](https://bstats.org/plugin/bukkit/JodellePowerMining/24587)
 
 ## 📌 Overview
 **Jodelle Power Mining** is a **revived and enhanced** version of an old mining plugin originally created by **bloodyshade** (2013).
@@ -16,7 +15,7 @@ This plugin introduces **special PowerTools** that allow **efficient block break
 
 💖 If you love this project, consider [donating](https://www.paypal.com/donate?hosted_button_id=QG8WUHMEEBXWW) to support further development!  
 
-## Disclaimer
+## 📖 Disclaimer
 I did not originally create this plugin!  
 I am just updating it because the **original creator** has abandoned it.  
 
@@ -25,7 +24,7 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 💡 **Original credits go to:**  
 - **bloodyshade** – The original creator  
 
-## Features
+## 🛠️ Features
 ✅ **New Power Tools** – Includes **Hammer, Excavator, and Plow** for enhanced mining & digging.  
 ✅ **3x3 Mining & Digging** – Tools break multiple blocks at once (fully configurable).
 ✅ **Customizable Blocks** – Choose which blocks can be mined or dug using PowerTools.  
@@ -36,7 +35,7 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 ✅ **WorldGuard Support** – Respects **protected areas** (optional dependency).  
 ✅ **Enchantments Transfer** – Tools crafted with enchanted materials inherit enchantments.  
 
-## Screenshots
+## 📸 Screenshots
 ### Hammer
 ![Hammer Usage](https://github.com/mgl23606/JodellePowerMining/blob/master/github/Hammer.gif?raw=true)
 
@@ -53,7 +52,7 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 3. **Restart** your server.  
 4. **Configure** settings in the `config.yml` file if needed.  
 
-## Configuration
+## 🔧 Configuration
 
 - With the overhaul of the plugin to Version 1.0, it **automatically migrates outdated configs** to the latest version.
   - ⚠️ If possible use a freshly generated config file
@@ -75,7 +74,6 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 | `/powermining admin language <language>` | Changes the language file immediately | `powermining.admin.language` |
 | `/powermining admin debug` | Toggles debug mode (Logs extra info, may spam console) | `powermining.admin.debug` |
 
----
 
 ## 🔑 Permissions
 ### General Permissions
@@ -85,7 +83,6 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 | `powermining.highdurability` | PowerTools use only 1 durability per use | `true` |
 | `powermining.give` | Allows receiving a PowerTool via `/powermining give <tool>` | `op` |
 
----
 
 ### Crafting Permissions
 | **Permission** | **Description** | **Default** |
@@ -124,8 +121,6 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 | `powermining.craft.plow.golden` | Allows crafting the Golden Plow | `false` |
 | `powermining.craft.plow.diamond` | Allows crafting the Diamond Plow | `false` |
 | `powermining.craft.plow.netherite` | Allows crafting the Netherite Plow | `false` |
-
----
 
 ### Usage Permissions
 | **Permission** | **Description** | **Default** |
@@ -166,8 +161,6 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 | `powermining.use.plow.diamond` | Allows using the Diamond Plow | `false` |
 | `powermining.use.plow.netherite` | Allows using the Netherite Plow | `false` |
 
----
-
 ### Enchantment Permissions
 | **Permission** | **Description** | **Default** |
 |--------------|----------------|------------|
@@ -175,8 +168,6 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 | `powermining.enchant.hammer.all` | Allows enchanting all Hammers | `op` |
 | `powermining.enchant.excavator.all` | Allows enchanting all Excavators | `op` |
 | `powermining.enchant.plow.all` | Allows enchanting all Plows | `op` |
-
----
 
 ## **📌 Change Log**
 ### 🆕 **Latest Updates - January 29, 2025**
@@ -226,18 +217,14 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
   - **Fortune enchantment now works correctly** with PowerTools.
   - **Plow logic cleaned up** for better performance.
 
----
-
 ## **🌎 Useful Links**
 - 🔗 [BStats Page](https://bstats.org/plugin/bukkit/JodellePowerMining/24587)
 - 🔗 [Spigot](https://img.shields.io/badge/Platform-Spigot-blue)  
----
 
 ## **🚀 Future Plans**
 - Open to suggestions!  
 - If you have feature requests, feel free to **open an issue**.
 
----
 ## **📢 Support & Contributions**
 If you enjoy this plugin, please consider **contributing or donating** to help keep development active!  
 
