@@ -243,4 +243,4 @@ If you enjoy this plugin, please consider **contributing or donating** to help k
 
 🔗 [PayPal Donation](https://www.paypal.com/donate?hosted_button_id=QG8WUHMEEBXWW)
 
-Thank you for using **Jodelle Power Mining**! 🚀  
+⚡ **Supercharge your mining experience with Jodelle Power Mining!** ⚡  
