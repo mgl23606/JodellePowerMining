@@ -1,46 +1,66 @@
-# Jodelle Power Mining
+# ⚡ Jodelle Power Mining  
+*A powerful tool enhancement plugin for Spigot servers!*  
 
-## Overview
-JodellePowerMining is a plugin for Spigot that adds a **new set of powerful tools** to the game. These tools **enhance mining and digging efficiency**, allowing you to mine a **3x3 area** instead of a single block.
+![⛏️ Spigot](https://img.shields.io/badge/Platform-Spigot-blue)  
+
+---
+
+## 📌 Overview
+**Jodelle Power Mining** is a **revived and enhanced** version of an old mining plugin originally created by **bloodyshade** (2013).
+
+This plugin introduces **special PowerTools** that allow **efficient block breaking**, such as **3x3 mining with hammers and excavators**.  
+
+🔹 **Mine faster.**  
+🔹 **Dig smarter.**  
+🔹 **Customize everything.**
+
+💖 If you love this project, consider [donating](https://www.paypal.com/donate?hosted_button_id=QG8WUHMEEBXWW) to support further development!  
 
 ## Disclaimer
 I did not originally create this plugin!  
-I am just updating it because the **original creator, as well as the person who initially updated it,** have abandoned it.  
+I am just updating it because the **original creator** has abandoned it.  
 
-My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decided to **update and improve it further**.
+I really **enjoyed** the plugin, so I decided to **update and improve it further**.
 
 💡 **Original credits go to:**  
 - **bloodyshade** – The original creator  
-- **mgl23606** – Maintained updates until 2021  
 
 ## Features
-✅ **Adds 3 specialized tools: Hammer, Excavator, and Plow**  
-✅ **Mine/Dig in a 3x3 area (configurable size)**  
-✅ **All mineable/diggable blocks are configurable in the config file**  
-✅ **Fully customizable crafting recipes for PowerTools**  
-✅ **Full translation support**  
-✅ **Multiple commands: Check version, give PowerTools, reload config, set language, etc.**  
-✅ **Permissions for crafting, using, giving, and enchanting PowerTools**  
-✅ **WorldGuard protection support to prevent griefing**  
+✅ **New Power Tools** – Includes **Hammer, Excavator, and Plow** for enhanced mining & digging.  
+✅ **3x3 Mining & Digging** – Tools break multiple blocks at once (fully configurable).
+✅ **Customizable Blocks** – Choose which blocks can be mined or dug using PowerTools.  
+✅ **Configurable Recipes** – Fully customizable crafting recipes for PowerTools
+✅ **Language support** – Full translation support
+✅ **Permissions System** – Control **who** can use, craft, and enchant PowerTools.  
+✅ **Multiple commands** – Check version, give PowerTools, reload config, set language, etc.
+✅ **WorldGuard Support** – Respects **protected areas** (optional dependency).  
+✅ **Enchantments Transfer** – Tools crafted with enchanted materials inherit enchantments.  
 
 ## Screenshots
 ### Hammer
-![Hammer Usage](https://github.com/dringewald/JodellePowerMining/blob/master/github/Hammer.gif?raw=true)
+![Hammer Usage](https://github.com/mgl23606/JodellePowerMining/blob/master/github/Hammer.gif?raw=true)
 
 ### Excavator
-![Excavator Usage](https://github.com/dringewald/JodellePowerMining/blob/master/github/Excavator.gif?raw=true)
+![Excavator Usage](https://github.com/mgl23606/JodellePowerMining/blob/master/github/Excavator.gif?raw=true)
 
 ### Plow
-![Plow Usage](https://github.com/dringewald/JodellePowerMining/blob/master/github/Plow.gif?raw=true)
+![Plow Usage](https://github.com/mgl23606/JodellePowerMining/blob/master/github/Plow.gif?raw=true)
+> Thanks to Tom from [NoX](https://discord.gg/jymDumdFVU) for these Screenshots
+
+## 📥 Installation  
+1. **Download** the latest `.jar` from [Releases](https://github.com/your-repo/jodelle-power-mining/releases).  
+2. **Place it** in the `plugins` folder of your **Spigot** server.  
+3. **Restart** your server.  
+4. **Configure** settings in the `config.yml` file if needed.  
 
 ## Configuration
 
-- The plugin **automatically migrates outdated configs** to the latest version.
+- With the overhaul of the plugin to Version 1.0, it **automatically migrates outdated configs** to the latest version.
   - ⚠️ If possible use a freshly generated config file
 - The **config file now includes versioning** for future updates.
 - The `Deep` option has been **renamed to `Depth`** (this is migrated automatically).
 - The **language system** allows full translation of all messages, item names, and lore.
-- 🔧 [Config file (config.yml)](https://github.com/Holt31/JodellePowerMining/blob/master/src/main/resources/config.yml)
+- 🔧 [Config file (config.yml)](https://github.com/mgl23606/JodellePowerMining/blob/master/src/main/resources/config.yml)
 
 ## 📜 Commands
 | **Command** | **Description** | **Permission** |
@@ -159,7 +179,7 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
 ---
 
 ## **📌 Change Log**
-### **🆕 Latest Updates - January 29, 2025**
+### 🆕 **Latest Updates - January 29, 2025**
 - **🔄 Updated plugin to fully work in Minecraft 1.21.4** - Earlier versions are not supported (should work, but untested).
 - **🔤 Added full Language system** – Everything is translatable (messages, items, commands).
 - **🔨 Added Anvil support** Let's you repair and fix your PowerTool without loosing your precious ressources.
@@ -174,31 +194,31 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
 - **🧹 Removed outdated dependencies**.
 
 ### **📌 Previous Updates**
-#### **June 14, 2021**
+#### 📅 **June 14, 2021**
 - Fixed **Plow permissions**.
 - Verified that all permissions work as expected.
 
-#### **June 8, 2021**
+#### 📅 **June 8, 2021**
 - **Added WorldGuard support** (Optional dependency).
 - Now **checks each block before breaking** to prevent griefing.
 - Updated dependencies in `pom.xml`.
 
-#### **June 6, 2021**
+#### 📅 **June 6, 2021**
 - **Implemented item durability logic** – PowerTools now break correctly when they reach zero durability.
 - **Added breaking sound effects** when a tool breaks.
 
-#### **June 3, 2021**
+#### 📅 **June 3, 2021**
 - **Added new commands:** `/jpm give`, `/jpm version`
 - **Enchantment Transfer** – Enchantments from crafting materials now **transfer to the PowerTool**.
 - **Max stack size validation for crafting** – Prevents unrealistic recipes (e.g., stacking multiple pickaxes in one slot).
 - **Code optimizations** for better performance.
 
-#### **May 26, 2021**
+#### 📅 **May 26, 2021**
 - **Refactored permission handling**
   - Uses **HashMaps** for permission storage instead of hardcoding them in each method.
   - Improves performance and maintainability.
 
-#### **May 25, 2021**
+#### 📅 **May 25, 2021**
 - **Fixed durability loss bug** – PowerTools now lose durability correctly.
 - **Implemented Unbreaking enchantment logic**.
 - **Improved BlockBreakListener**:
@@ -209,10 +229,8 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
 ---
 
 ## **🌎 Useful Links**
-- 🔗 [Original GitHub repo](https://github.com/mgl23606/JodellePowerMining)
 - 🔗 [BStats Page](https://bstats.org/plugin/bukkit/JodellePowerMining/24587)
-- 🔗 [Discord](https://discord.gg/jymDumdFVU)
-
+- 🔗 [Spigot](https://img.shields.io/badge/Platform-Spigot-blue)  
 ---
 
 ## **🚀 Future Plans**
@@ -223,6 +241,6 @@ My [community](https://discord.gg/jymDumdFVU) **loves this plugin**, so I decide
 ## **📢 Support & Contributions**
 If you enjoy this plugin, please consider **contributing or donating** to help keep development active!  
 
-🔗 [PayPal Donation](http://paypal.me/noxholt)  
+🔗 [PayPal Donation](https://www.paypal.com/donate?hosted_button_id=QG8WUHMEEBXWW)
 
 Thank you for using **Jodelle Power Mining**! 🚀  
