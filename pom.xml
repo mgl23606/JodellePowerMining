@@ -6,7 +6,7 @@
 
     <groupId>jodelle.powermining</groupId>
     <artifactId>JodellePowerMining</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -102,6 +102,10 @@
             <id>sk89q-repo</id>
             <url>https://maven.enginehub.org/repo/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -134,6 +138,12 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.17.0</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Zrips</groupId>
+            <artifactId>Jobs</artifactId>
+            <version>v5.2.2.3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

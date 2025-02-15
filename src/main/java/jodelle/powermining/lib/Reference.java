@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Reference {
 
-    public static final String[] dependencies = {"WorldGuard"};
+    public static final String[] dependencies = {"WorldGuard", "Jobs"};
 
     public static HashMap<Material, String> CRAFT_PERMISSIONS = new HashMap<>();
     public static HashMap<Material, String> USE_PERMISSIONS = new HashMap<>();

@@ -37,17 +37,17 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 
 ## 📸 Screenshots
 ### Hammer
-![Hammer Usage](https://github.com/mgl23606/JodellePowerMining/blob/master/github/Hammer.gif?raw=true)
+![Hammer Usage](./github/Hammer.gif?raw=true)
 
 ### Excavator
-![Excavator Usage](https://github.com/mgl23606/JodellePowerMining/blob/master/github/Excavator.gif?raw=true)
+![Excavator Usage](./github/Excavator.gif?raw=true)
 
 ### Plow
-![Plow Usage](https://github.com/mgl23606/JodellePowerMining/blob/master/github/Plow.gif?raw=true)
+![Plow Usage](./github/Plow.gif?raw=true)
 > Thanks to Tom from [NoX](https://discord.gg/jymDumdFVU) for these Screenshots
 
 ## 📥 Installation  
-1. **Download** the latest `.jar` from [Releases](https://github.com/your-repo/jodelle-power-mining/releases).  
+1. **Download** the latest `.jar` from [Releases](https://github.com/dringewald/JodellePowerMining/releases).  
 2. **Place it** in the `plugins` folder of your **Spigot** server.  
 3. **Restart** your server.  
 4. **Configure** settings in the `config.yml` file if needed.  
@@ -170,7 +170,11 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 | `powermining.enchant.plow.all` | Allows enchanting all Plows | `op` |
 
 ## **📌 Change Log**
-### 🆕 **Latest Updates - January 29, 2025**
+### 🆕 **Latest Update - February 15, 2025**
+- **💼 Jobs support** - Added support for [Jobs Reborn](https://www.spigotmc.org/resources/jobs-reborn.4216/).
+
+### **📌 Previous Updates**
+#### 📅 **January 29, 2025**
 - **🔄 Updated plugin to fully work in Minecraft 1.21.4** - Earlier versions are not supported (should work, but untested).
 - **🔤 Added full Language system** – Everything is translatable (messages, items, commands).
 - **🔨 Added Anvil support** Let's you repair and fix your PowerTool without loosing your precious ressources.
@@ -184,7 +188,6 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 - **🐞 Fixed a bug where XP orbs did not drop when using a PowerTool.**
 - **🧹 Removed outdated dependencies**.
 
-### **📌 Previous Updates**
 #### 📅 **June 14, 2021**
 - Fixed **Plow permissions**.
 - Verified that all permissions work as expected.

@@ -31,6 +31,10 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockExpEvent;
 import org.bukkit.inventory.ItemStack;
 
+import com.gamingmesh.jobs.Jobs;
+import com.gamingmesh.jobs.actions.BlockActionInfo;
+import com.gamingmesh.jobs.container.ActionType;
+
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -144,6 +148,20 @@ public class BlockBreakListener implements Listener {
                 return 0;
             }
 
+            // Notify Jobs Reborn BEFORE breaking the block
+            if (plugin.isJobsLoaded()) {
+                debuggingMessages.sendConsoleMessage(
+                        ChatColor.YELLOW + "🔍 Jobs Reborn is loaded, notifying BEFORE breaking...");
+                debuggingMessages.sendConsoleMessage(ChatColor.YELLOW + "📌 Player: " + player.getName() +
+                        ", Block: " + block.getType() + ", Action: BREAK");
+
+                Jobs.action(Jobs.getPlayerManager().getJobsPlayer(player),
+                        new BlockActionInfo(block, ActionType.BREAK));
+                debuggingMessages
+                        .sendConsoleMessage(ChatColor.GREEN + "✅ Jobs Reborn notified for block: " + block.getType());
+            }
+
+            // XP Drops
             int expToDrop = 0;
 
             // Only assign XP for blocks that naturally drop XP in vanilla Minecraft

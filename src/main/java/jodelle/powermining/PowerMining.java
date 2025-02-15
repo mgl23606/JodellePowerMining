@@ -60,6 +60,7 @@ public final class PowerMining extends JavaPlugin {
     private List<String> availableLanguages = new ArrayList<>();
 
     private WorldGuardPlugin worldguard;
+    private boolean isJobsLoaded;
 
     private static PowerMining instance;
     String prefix = ChatColor.DARK_BLUE + "[" + ChatColor.DARK_GREEN + "Jodelle" + ChatColor.DARK_RED + "Power"
@@ -130,9 +131,18 @@ public final class PowerMining extends JavaPlugin {
 
         for (String pluginName : Reference.dependencies) {
             Plugin plugin = getServer().getPluginManager().getPlugin(pluginName);
+
+            if (plugin == null) {
+                debuggingMessages.sendConsoleMessage(ChatColor.RED + pluginName + " not found.");
+                continue;
+            }
+
             if (plugin instanceof WorldGuardPlugin) {
-                debuggingMessages.sendConsoleMessage(ChatColor.YELLOW + pluginName + " Found!");
+                debuggingMessages.sendConsoleMessage(ChatColor.YELLOW + "WorldGuard Found!");
                 worldguard = (WorldGuardPlugin) plugin;
+            } else if (pluginName.equals("Jobs")) {
+                debuggingMessages.sendConsoleMessage(ChatColor.YELLOW + "Jobs Found!");
+                isJobsLoaded = true;
             }
         }
     }
@@ -420,6 +430,10 @@ public final class PowerMining extends JavaPlugin {
 
     public BlockBreakListener getBlockBreakListener() {
         return blockBreakListener;
+    }
+
+    public boolean isJobsLoaded() {
+        return isJobsLoaded;
     }
 
     public void setBlockBreakListener(BlockBreakListener listener) {
