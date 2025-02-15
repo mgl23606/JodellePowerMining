@@ -59,7 +59,7 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 - The **config file now includes versioning** for future updates.
 - The `Deep` option has been **renamed to `Depth`** (this is migrated automatically).
 - The **language system** allows full translation of all messages, item names, and lore.
-- 🔧 [Config file (config.yml)](https://github.com/mgl23606/JodellePowerMining/blob/master/src/main/resources/config.yml)
+- 🔧 [Config file (config.yml)](./src/main/resources/config.yml)
 
 ## 📜 Commands
 | **Command** | **Description** | **Permission** |
