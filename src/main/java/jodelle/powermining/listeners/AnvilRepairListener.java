@@ -55,32 +55,37 @@ public class AnvilRepairListener implements Listener {
         AnvilInventory inventory = event.getInventory();
         ItemStack firstItem = inventory.getItem(0);
         ItemStack secondItem = inventory.getItem(1);
-
-        if (firstItem == null || secondItem == null) {
-            return; // No operation if either slot is empty
+    
+        if (firstItem == null) {
+            return; // No first item, do nothing
         }
-
+    
         boolean isFirstPowerTool = PowerUtils.isPowerTool(firstItem);
-        boolean isSecondPowerTool = PowerUtils.isPowerTool(secondItem);
-
-        // Handle Repair Restrictions
-        if (isFirstPowerTool != isSecondPowerTool || (isFirstPowerTool && !isSameToolType(firstItem, secondItem))) {
-            if (secondItem.getType() != Material.ENCHANTED_BOOK) {
-                event.setResult(null); // Prevent incompatible repairs
+        boolean isSecondPowerTool = secondItem != null && PowerUtils.isPowerTool(secondItem);
+    
+        // If the first item is NOT a PowerTool, let Minecraft handle everything normally
+        if (!isFirstPowerTool) {
+            if (isSecondPowerTool) {
+                event.setResult(null); // Prevent normal tools from merging with PowerTools
+            }
+            return;
+        }
+    
+        // If second item is an enchanted book, apply enchantments
+        if (secondItem != null && secondItem.getType() == Material.ENCHANTED_BOOK) {
+            applyEnchantments(firstItem, secondItem, event);
+            return;
+        }
+    
+        // PowerTools can ONLY be repaired with the same type of PowerTool
+        if (isFirstPowerTool) {
+            if (!isSecondPowerTool || !isSameToolType(firstItem, secondItem)) {
+                event.setResult(null); // Prevent repairing with normal tools
                 return;
             }
-        }
-
-        // Handle Enchanting with Enchanted Books
-        if (secondItem.getType() == Material.ENCHANTED_BOOK) {
-            applyEnchantments(firstItem, secondItem, event);
-        } else if (isFirstPowerTool && isSecondPowerTool) {
-            // Combine enchantments if both are PowerTools
             combineToolEnchantments(firstItem, secondItem, event);
-        } else {
-            event.setResult(null); // Default case to prevent unintended behavior
         }
-    }
+    }        
 
     /**
      * Checks if two PowerTools are of the same type.
