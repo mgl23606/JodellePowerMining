@@ -1,141 +1,217 @@
-/*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for handling the actual mining when using a Hammer/Excavator
- */
-
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
-import jodelle.powermining.lib.PowerUtils;
 import jodelle.powermining.lib.Reference;
+import jodelle.powermining.utils.PowerUtils;
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExpEvent;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Listener for handling {@link BlockBreakEvent} in the PowerMining plugin.
+ * 
+ * <p>
+ * This class manages the mechanics of breaking blocks using custom PowerTools
+ * such as Hammers and Excavators. It determines the area of effect, reduces
+ * tool durability, grants experience, and integrates with job-tracking plugins.
+ * </p>
+ */
 public class BlockBreakListener implements Listener {
-	public final PowerMining plugin;
-	public final boolean useDurabilityPerBlock;
-	public final DebuggingMessages debuggingMessages;
+    public final PowerMining plugin;
+    public final boolean useDurabilityPerBlock;
+    public final DebuggingMessages debuggingMessages;
 
-	private Player player;
-	private ItemStack handItem;
+    public BlockBreakListener(@Nonnull PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        debuggingMessages = plugin.getDebuggingMessages();
+        useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
+    }
 
-	public BlockBreakListener(@Nonnull PowerMining plugin) {
+    /**
+     * Handles block breaking events and applies PowerTool effects.
+     * 
+     * <p>
+     * This method verifies that the player is using a PowerTool, determines the
+     * affected blocks, reduces durability, grants XP, and integrates with
+     * JobsReborn if enabled.
+     * </p>
+     * 
+     * @param event The {@link BlockBreakEvent} triggered when a block is broken.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        ItemStack handItem = player.getInventory().getItemInMainHand();
 
-		this.plugin = plugin;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        if (handItem == null || handItem.getType() == Material.AIR) {
+            return;
+        }
 
-		debuggingMessages = plugin.getDebuggingMessages();
+        if (handItem.getItemMeta() != null && handItem.getItemMeta().hasDisplayName()) {
+            debuggingMessages.sendConsoleMessage(
+                    ChatColor.RED + "Broke a block with item: " + handItem.getItemMeta().getDisplayName());
+        }
 
-		useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
-	}
+        if (basicVerifications(player, handItem)) { // ✅ Pass player & handItem explicitly
+            return;
+        }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockBreak(BlockBreakEvent event) {
-		boolean debugging = true;
+        final Block centerBlock = event.getBlock();
+        final String playerName = player.getName();
+        final PlayerInteractListener pil = plugin.getPlayerInteractHandler() != null
+                ? plugin.getPlayerInteractHandler().getListener()
+                : null;
 
-		player = event.getPlayer();
-		handItem = player.getInventory().getItemInMainHand();
+        if (pil == null) {
+            debuggingMessages.sendConsoleMessage(ChatColor.RED + "PlayerInteractListener is null.");
+            return;
+        }
 
-		debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "Broke a block: ");
+        final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
 
-		if (basicVerifications()){
-			return;
-		}
+        int radius = Math.max(0, plugin.getConfig().getInt("Radius", Reference.RADIUS) - 1);
+        int depth = Math.max(0, plugin.getConfig().getInt("Depth", Reference.DEPTH) - 1);
 
-		final Block centerBlock = event.getBlock();
-		final String playerName = player.getName();
+        List<Block> surroundingBlocks = PowerUtils.getSurroundingBlocks(blockFace, centerBlock, radius, depth);
 
-		final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
-		final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
+        if (surroundingBlocks.isEmpty()) {
+            debuggingMessages.sendConsoleMessage(ChatColor.RED + "No surrounding blocks found.");
+            return;
+        }
 
-		// Breaks surrounding blocks as long as they match the corresponding tool
-		for (Block block: PowerUtils.getSurroundingBlocks(blockFace, centerBlock, Reference.RADIUS, Reference.DEEP)) {
-			checkAndBreakBlock(block);
-		}
+        // Handle durability for the center block
+        if (player.getGameMode().equals(GameMode.SURVIVAL)) {
+            PowerUtils.reduceDurability(player, handItem);
+            player.getInventory().setItemInMainHand(handItem);
+        }
 
-		if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)){
-			PowerUtils.reduceDurability(player, handItem);
-		}
-	}
+        for (Block block : surroundingBlocks) {
+            int exp = checkAndBreakBlock(player, handItem, block);
 
-	/**
-	 * Check and break the block if possible
-	 * @param block The block being broken by the player
-	 */
-	private void checkAndBreakBlock(@Nonnull Block block) {
-		Material blockMat = block.getType();
+            if (player.getGameMode().equals(GameMode.SURVIVAL)) {
+                PowerUtils.reduceDurability(player, handItem);
+                player.getInventory().setItemInMainHand(handItem);
+            }
 
-		boolean useHammer;
-		boolean useExcavator = false;
+            if (exp > 0) {
+                BlockExpEvent expEvent = new BlockExpEvent(block, exp);
+                plugin.getServer().getPluginManager().callEvent(expEvent);
 
-		// This bit is necessary to guarantee we only get one or the other as true, otherwise it might break blocks with the wrong tool
-		if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat));
-		else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat));
+                ExperienceOrb orb = block.getWorld().spawn(block.getLocation(), ExperienceOrb.class);
+                orb.setExperience(expEvent.getExpToDrop());
+            }
+        }
+    }
 
-		if (useHammer || useExcavator) {
+    /**
+     * Checks and breaks a block if it is compatible with the PowerTool.
+     * 
+     * <p>
+     * This method validates whether the tool can break the given block, notifies
+     * JobsReborn (if enabled), and determines the experience points (XP) to drop.
+     * </p>
+     * 
+     * @param player   The player breaking the block.
+     * @param handItem The tool being used to break the block.
+     * @param block    The {@link Block} being broken.
+     * @return The amount of XP to drop from breaking the block.
+     */
+    private int checkAndBreakBlock(Player player, ItemStack handItem, @Nonnull Block block) {
+        if (handItem == null || handItem.getType() == Material.AIR) {
+            return 0; // No tool, no block breaking
+        }
 
-			// Check if player has permission to break the block
-			if (!PowerUtils.canBreak(plugin, player, block)) {
-				return;
-			}
+        Material blockMat = block.getType();
+        boolean useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat);
+        boolean useExcavator = !useHammer && PowerUtils.validateExcavator(handItem.getType(), blockMat);
 
-			//When using breakNaturally the block is broken but the durability of the tool stays the same
-			//so it's necessary to update the damage manually
-			if(block.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)){
-				if (useDurabilityPerBlock) {
-					PowerUtils.reduceDurability(player, handItem);
-				}
-			}
+        if (useHammer || useExcavator) {
+            if (!PowerUtils.canBreak(plugin, player, block)) {
+                return 0;
+            }
 
-		}
-	}
+            // Notify Jobs Reborn BEFORE breaking the block
+            if (plugin.getJobsHook() != null) {
+                plugin.getJobsHook().notifyJobs(player, block);
+                debuggingMessages
+                        .sendConsoleMessage(ChatColor.GREEN + "✅ Jobs Reborn notified for block: " + block.getType());
+            }
 
-	/**
-	 * Perform the basic verifications
-	 * @return True if the PowerTool is ready to use
-	 */
-	private boolean basicVerifications() {
-		// If the player is sneaking, we want the tool to act like a normal pickaxe/shovel
-		if (player.isSneaking()) {
-			return true;
-		}
+            // XP Drops
+            int expToDrop = switch (blockMat) {
+                case COAL_ORE, DEEPSLATE_COAL_ORE -> (int) (Math.random() * 3); // 0-2 XP
+                case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE, EMERALD_ORE, DEEPSLATE_EMERALD_ORE ->
+                    3 + (int) (Math.random() * 5); // 3-7 XP
+                case REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE, LAPIS_ORE, DEEPSLATE_LAPIS_ORE ->
+                    2 + (int) (Math.random() * 4); // 2-6 XP
+                case NETHER_QUARTZ_ORE -> 2 + (int) (Math.random() * 3); // 2-5 XP
+                case NETHER_GOLD_ORE -> 1 + (int) (Math.random() * 5); // 1-5 XP
+                case SPAWNER -> 15 + (int) (Math.random() * 30); // 15-43 XP
+                default -> 0; // No XP for blocks not listed
+            };
 
-		Material handItemType = handItem.getType();
+            // Break the block naturally if conditions are met
+            if (block.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)) {
+                if (plugin.getConfig().getBoolean("useDurabilityPerBlock")) {
+                    PowerUtils.reduceDurability(player, handItem);
+                }
+            }
 
-		if(handItemType.equals(Material.AIR)) {
-			return true;
-		}
+            return expToDrop; // Return XP only for eligible blocks
+        }
 
+        return 0; // Return 0 XP if conditions aren't met
+    }
 
-		// If this is not a power tool, acts like a normal pickaxe
-		if (!PowerUtils.isPowerTool(handItem)) {
-			return true;
-		}
+    /**
+     * Performs basic verifications before applying PowerTool effects.
+     * 
+     * <p>
+     * This method ensures the player is using a valid PowerTool, has permissions,
+     * and is not sneaking to bypass the special tool mechanics.
+     * </p>
+     * 
+     * @param player   The player using the tool.
+     * @param handItem The tool being used.
+     * @return {@code true} if the tool should behave normally, {@code false} if
+     *         PowerTool mechanics apply.
+     */
+    private boolean basicVerifications(Player player, ItemStack handItem) {
+        if (handItem == null || handItem.getType() == Material.AIR) {
+            return true;
+        }
 
-		// If the player does not have permission to use the tool, acts like a normal pickaxe/shovel
+        if (player.isSneaking()) {
+            return true;
+        }
 
-		if (!PowerUtils.checkUsePermission(player, handItemType)) {
-			return true;
-		}
-		return false;
-	}
+        Material handItemType = handItem.getType();
+
+        if (!PowerUtils.isPowerTool(handItem)) {
+            return true;
+        }
+
+        if (!PowerUtils.checkUsePermission(plugin, player, handItemType)) {
+            return true;
+        }
+
+        return false;
+    }
 }
