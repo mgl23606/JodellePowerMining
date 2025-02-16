@@ -174,6 +174,7 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 - **💼 Jobs** - Fixed plugin not working, when [Jobs Reborn](https://www.spigotmc.org/resources/jobs-reborn.4216/) wasn't installed.
 - **🔨 Anvils** - Fixed Anvils not adding durability when the Item with lower durability was on the right site. 
 - **✨ Enchantments** - Fixed Unbreaking enchantment not working correctly.
+- **🛠️ Durability** - Fixed Items with enchantments not breaking correctly.
 
 ### **📌 Previous Updates**
 #### 📅 **February 15, 2025**

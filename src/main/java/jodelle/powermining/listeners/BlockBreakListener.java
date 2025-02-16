@@ -5,6 +5,7 @@ import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.Reference;
 import jodelle.powermining.utils.PowerUtils;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -59,66 +60,83 @@ public class BlockBreakListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         ItemStack handItem = player.getInventory().getItemInMainHand();
-
+    
+        // Ensure the player is holding an item
         if (handItem == null || handItem.getType() == Material.AIR) {
             return;
         }
-
+    
+        // Debug message if tool has a custom name
         if (handItem.getItemMeta() != null && handItem.getItemMeta().hasDisplayName()) {
             debuggingMessages.sendConsoleMessage(
                     ChatColor.RED + "Broke a block with item: " + handItem.getItemMeta().getDisplayName());
         }
-
-        if (basicVerifications(player, handItem)) { // ✅ Pass player & handItem explicitly
+    
+        // Perform basic verifications (permissions, tool type, sneaking)
+        if (basicVerifications(player, handItem)) {
             return;
         }
-
+    
         final Block centerBlock = event.getBlock();
         final String playerName = player.getName();
-        final PlayerInteractListener pil = plugin.getPlayerInteractHandler() != null
-                ? plugin.getPlayerInteractHandler().getListener()
+        final PlayerInteractListener pil = (plugin.getPlayerInteractHandler() != null) 
+                ? plugin.getPlayerInteractHandler().getListener() 
                 : null;
-
+    
         if (pil == null) {
             debuggingMessages.sendConsoleMessage(ChatColor.RED + "PlayerInteractListener is null.");
             return;
         }
-
+    
         final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
-
+    
         int radius = Math.max(0, plugin.getConfig().getInt("Radius", Reference.RADIUS) - 1);
         int depth = Math.max(0, plugin.getConfig().getInt("Depth", Reference.DEPTH) - 1);
-
+    
         List<Block> surroundingBlocks = PowerUtils.getSurroundingBlocks(blockFace, centerBlock, radius, depth);
-
+    
         if (surroundingBlocks.isEmpty()) {
             debuggingMessages.sendConsoleMessage(ChatColor.RED + "No surrounding blocks found.");
             return;
         }
-
-        // Handle durability for the center block
+    
+        // Handle durability reduction for the main block first
         if (player.getGameMode().equals(GameMode.SURVIVAL)) {
             PowerUtils.reduceDurability(player, handItem);
-            player.getInventory().setItemInMainHand(handItem);
+            
+            // Schedule a delayed inventory update to ensure proper tool breaking
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (player.getInventory().getItemInMainHand().getType() == Material.AIR) {
+                    player.updateInventory();
+                }
+            }, 1L);
         }
-
+    
         for (Block block : surroundingBlocks) {
             int exp = checkAndBreakBlock(player, handItem, block);
-
+    
+            // Handle durability reduction per surrounding block
             if (player.getGameMode().equals(GameMode.SURVIVAL)) {
                 PowerUtils.reduceDurability(player, handItem);
-                player.getInventory().setItemInMainHand(handItem);
+                
+                // Schedule a delayed inventory update to prevent tool reappearing
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (player.getInventory().getItemInMainHand().getType() == Material.AIR) {
+                        player.updateInventory();
+                    }
+                }, 1L);
             }
-
+    
+            // Handle XP drops
             if (exp > 0) {
                 BlockExpEvent expEvent = new BlockExpEvent(block, exp);
                 plugin.getServer().getPluginManager().callEvent(expEvent);
-
+    
                 ExperienceOrb orb = block.getWorld().spawn(block.getLocation(), ExperienceOrb.class);
                 orb.setExperience(expEvent.getExpToDrop());
             }
         }
-    }
+    }    
 
     /**
      * Checks and breaks a block if it is compatible with the PowerTool.

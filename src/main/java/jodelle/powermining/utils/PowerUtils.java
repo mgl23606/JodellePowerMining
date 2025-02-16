@@ -125,9 +125,11 @@ public class PowerUtils {
          * If the damage is higher than the item durability, the item is remover from
          * the player inventory and a breaking sound is played
          */
-        if (damageable.getDamage() > item.getType().getMaxDurability()) {
-            player.getInventory().remove(item);
-
+        if (damageable.getDamage() > item.getType().getMaxDurability() - 1) {
+            player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));  
+            player.updateInventory(); 
+    
+            // Play item break sound
             Location loc = player.getEyeLocation();
             World world = loc.getWorld();
             if (world != null) {
