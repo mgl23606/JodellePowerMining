@@ -73,7 +73,7 @@ public class PowerUtils {
         if(item.getEnchantments().containsKey(Enchantment.UNBREAKING)){
             Random rand = new Random();
             Integer unbreakingLevel = item.getEnchantments().get(Enchantment.UNBREAKING);
-            if (rand.nextInt(100/unbreakingLevel+1) == 0){
+            if (rand.nextInt(unbreakingLevel + 1) != 0) {
                 return;
             }
         }

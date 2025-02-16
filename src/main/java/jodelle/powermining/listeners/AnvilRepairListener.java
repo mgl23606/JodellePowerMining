@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -101,20 +102,20 @@ public class AnvilRepairListener implements Listener {
     private void combineToolEnchantments(ItemStack baseTool, ItemStack additionTool, PrepareAnvilEvent event) {
         ItemMeta baseMeta = baseTool.getItemMeta();
         ItemMeta additionMeta = additionTool.getItemMeta();
-
+    
         if (baseMeta == null || additionMeta == null) {
             return; // Skip if metadata is missing
         }
-
+    
         ItemStack resultTool = baseTool.clone();
         ItemMeta resultMeta = resultTool.getItemMeta();
-
+    
+        // Combine enchantments
         Map<Enchantment, Integer> additionEnchants = additionMeta.getEnchants();
         for (Map.Entry<Enchantment, Integer> entry : additionEnchants.entrySet()) {
             Enchantment enchantment = entry.getKey();
             int level = entry.getValue();
-
-            // Apply the higher level or combine levels if they are the same
+    
             if (resultMeta.hasEnchant(enchantment)) {
                 int currentLevel = resultMeta.getEnchantLevel(enchantment);
                 if (currentLevel == level && currentLevel < enchantment.getMaxLevel()) {
@@ -126,8 +127,17 @@ public class AnvilRepairListener implements Listener {
                 resultMeta.addEnchant(enchantment, level, true);
             }
         }
-
-        // Preserve custom metadata
+    
+        // Repair durability
+        if (resultMeta instanceof Damageable) {
+            Damageable damageable = (Damageable) resultMeta;
+            int baseDamage = ((Damageable) baseMeta).getDamage();
+            int repairAmount = additionTool.getType().getMaxDurability() / 2; // Repairs up to 50% of max durability
+    
+            damageable.setDamage(Math.max(0, baseDamage - repairAmount)); // Prevents negative damage
+        }
+    
+        // Apply changes
         resultTool.setItemMeta(resultMeta);
         event.setResult(resultTool);
     }

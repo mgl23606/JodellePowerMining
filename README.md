@@ -170,10 +170,15 @@ I really **enjoyed** the plugin, so I decided to **update and improve it further
 | `powermining.enchant.plow.all` | Allows enchanting all Plows | `op` |
 
 ## **📌 Change Log**
-### 🆕 **Latest Update - February 15, 2025**
-- **💼 Jobs support** - Added support for [Jobs Reborn](https://www.spigotmc.org/resources/jobs-reborn.4216/).
+### 🆕 **Latest Update - February 16, 2025**
+- **💼 Jobs** - Fixed plugin not working, when [Jobs Reborn](https://www.spigotmc.org/resources/jobs-reborn.4216/) wasn't installed.
+- **🔨 Anvils** - Fixed Anvils not adding durability when the Item with lower durability was on the right site. 
+- **✨ Enchantments** - Fixed Unbreaking enchantment not working correctly.
 
 ### **📌 Previous Updates**
+#### 📅 **February 15, 2025**
+- **💼 Jobs support** - Added support for [Jobs Reborn](https://www.spigotmc.org/resources/jobs-reborn.4216/).
+
 #### 📅 **January 29, 2025**
 - **🔄 Updated plugin to fully work in Minecraft 1.21.4** - Earlier versions are not supported (should work, but untested).
 - **🔤 Added full Language system** – Everything is translatable (messages, items, commands).

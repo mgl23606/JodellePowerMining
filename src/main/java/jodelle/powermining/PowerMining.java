@@ -17,6 +17,10 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import jodelle.powermining.commands.PowerMiningCommand;
 import jodelle.powermining.commands.PowerMiningTabCompleter;
 import jodelle.powermining.handlers.*;
+
+import jodelle.powermining.integrations.JobsHook;
+import jodelle.powermining.integrations.JobsHookImpl;
+
 import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.Reference;
 import jodelle.powermining.listeners.BlockBreakListener;
@@ -60,6 +64,8 @@ public final class PowerMining extends JavaPlugin {
     private List<String> availableLanguages = new ArrayList<>();
 
     private WorldGuardPlugin worldguard;
+    private JobsHook jobsHook = null;
+
     private boolean isJobsLoaded;
 
     private static PowerMining instance;
@@ -96,6 +102,11 @@ public final class PowerMining extends JavaPlugin {
         processPermissions();
         getLogger().info("Finished processing config file.");
         loadDependencies();
+
+        // Initialize Jobs integration if Jobs is loaded
+        if (isJobsLoaded) {
+            jobsHook = new JobsHookImpl();
+        }
 
         handlerPlayerInteract = new PlayerInteractHandler();
         handlerBlockBreak = new BlockBreakHandler();
@@ -438,6 +449,10 @@ public final class PowerMining extends JavaPlugin {
 
     public void setBlockBreakListener(BlockBreakListener listener) {
         this.blockBreakListener = listener;
+    }
+
+    public JobsHook getJobsHook() {
+        return jobsHook;
     }
 
     public static PowerMining getInstance() {
