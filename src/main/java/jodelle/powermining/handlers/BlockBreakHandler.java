@@ -1,7 +1,3 @@
-/*
- * Handler class for the BlockBreakEvent Listener, used to create the listener and keep a reference to it
- */
-
 package jodelle.powermining.handlers;
 
 import jodelle.powermining.PowerMining;
