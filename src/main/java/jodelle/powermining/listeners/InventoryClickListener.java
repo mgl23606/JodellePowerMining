@@ -1,15 +1,3 @@
-/*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for cancelling the enchanting through repair in case the user does not have permission
- */
-
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
@@ -27,15 +15,40 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Listener for handling {@link InventoryClickEvent} in an anvil to enforce enchantment and repair permissions.
+ * 
+ * <p>
+ * This class ensures that PowerTools can only be repaired or enchanted if the 
+ * player has the necessary permissions. It prevents invalid anvil operations, 
+ * such as attempting to enchant or repair PowerTools with unauthorized items.
+ * </p>
+ */
 public class InventoryClickListener implements Listener {
 
     private final PowerMining plugin;
 
+    /**
+     * Constructs an {@code InventoryClickListener} and registers it as an event listener.
+     * 
+     * @param plugin The instance of {@link PowerMining} used for event registration.
+     */
     public InventoryClickListener(@Nonnull PowerMining plugin) {
         this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
+    /**
+     * Validates whether a player can enchant or repair a PowerTool in an anvil.
+     * 
+     * <p>
+     * This method ensures that only valid PowerTools can be modified and that 
+     * the player has the appropriate permissions. It cancels unauthorized anvil 
+     * interactions to prevent unintended modifications.
+     * </p>
+     * 
+     * @param event The {@link InventoryClickEvent} triggered when a player interacts with an anvil.
+     */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void canEnchant(InventoryClickEvent event) {
         // Ignore the event if this is not an Anvil

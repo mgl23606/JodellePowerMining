@@ -18,6 +18,25 @@ import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.listeners.BlockBreakListener;
 import jodelle.powermining.utils.LangFile;
 
+/**
+ * Handles the `/powermining` command for the PowerMining plugin.
+ * 
+ * <p>
+ * This command provides various administrative and user functionalities,
+ * including:
+ * </p>
+ * <ul>
+ * <li>Displaying plugin information.</li>
+ * <li>Admin commands such as reloading the plugin, setting the language, and
+ * enabling debug mode.</li>
+ * <li>Giving players PowerTools.</li>
+ * <li>Displaying help and version information.</li>
+ * </ul>
+ * 
+ * <p>
+ * Command aliases: `powermining`, `pm`
+ * </p>
+ */
 public class PowerMiningCommand implements CommandExecutor {
    private PowerMining plugin;
    private DebuggingMessages debuggingMessages;
@@ -29,6 +48,41 @@ public class PowerMiningCommand implements CommandExecutor {
       debuggingMessages = plugin.getDebuggingMessages();
    }
 
+   /**
+    * Executes the `/powermining` command.
+    * 
+    * <p>
+    * This method handles various subcommands based on the provided arguments. It
+    * supports:
+    * </p>
+    * <ul>
+    * <li>No arguments: Displays general plugin information.</li>
+    * <li>`admin` - Admin commands (reload, language setting, debug toggle).</li>
+    * <li>`give` - Gives a PowerTool to a player.</li>
+    * <li>`help` - Displays available commands.</li>
+    * <li>`info` - Displays plugin information.</li>
+    * <li>`version` - Shows the current plugin version.</li>
+    * </ul>
+    * 
+    * <p>
+    * Command permission requirements:
+    * </p>
+    * <ul>
+    * <li>`powermining.admin.reload` - Allows reloading the plugin.</li>
+    * <li>`powermining.admin.language` - Allows changing the plugin language.</li>
+    * <li>`powermining.admin.debug` - Allows toggling debug mode.</li>
+    * <li>`powermining.give` - Allows giving PowerTools.</li>
+    * <li>`powermining.use.commands` - Grants access to user commands like help and
+    * info.</li>
+    * <li>`powermining.version` - Grants access to check the plugin version.</li>
+    * </ul>
+    * 
+    * @param sender The sender of the command (player or console).
+    * @param cmd    The command that was executed.
+    * @param lbl    The command alias used.
+    * @param args   The arguments provided by the user.
+    * @return true if the command executed successfully, false otherwise.
+    */
    public boolean onCommand(CommandSender sender, Command cmd, String lbl, String[] args) {
       if (cmd.getName().equals("powermining")) {
          if (sender instanceof Player) {

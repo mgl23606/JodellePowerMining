@@ -1,17 +1,4 @@
-/*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * Handler class for the CraftItemHammer/CraftItemExcavator classes, used to create the instances and keep a reference to them
- */
-
 package jodelle.powermining.handlers;
-
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.crafting.CraftItemExcavator;
@@ -21,13 +8,38 @@ import jodelle.powermining.listeners.CraftItemListener;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Handles the initialization and management of crafting-related classes and listeners.
+ * 
+ * <p>
+ * This class is responsible for creating and maintaining references to instances of 
+ * {@link CraftItemHammer}, {@link CraftItemExcavator}, {@link CraftItemPlow}, and 
+ * {@link CraftItemListener} within the PowerMining plugin.
+ * </p>
+ */
 public class CraftItemHandler {
+    /**
+     * Constructs an instance of {@code CraftItemHandler}.
+     */
 	public CraftItemHandler() {}
+	
 	public CraftItemHammer HammerClass;
 	public CraftItemExcavator ExcavatorClass;
 	public CraftItemPlow HoeClass;
 	public CraftItemListener listener;
 
+    /**
+     * Initializes crafting-related classes and registers the crafting event listener.
+     * 
+     * <p>
+     * This method creates instances of {@link CraftItemHammer}, {@link CraftItemExcavator}, 
+     * and {@link CraftItemPlow} to manage the crafting process of different tool types. 
+     * Additionally, it initializes a {@link CraftItemListener} to handle crafting events.
+     * </p>
+     * 
+     * @param plugin The instance of {@link PowerMining} used to initialize crafting classes 
+     *               and register event listeners.
+     */
 	public void Init(@Nonnull PowerMining plugin) {
 		HammerClass = new CraftItemHammer(plugin);
 		ExcavatorClass = new CraftItemExcavator(plugin);
@@ -35,6 +47,11 @@ public class CraftItemHandler {
 		listener = new CraftItemListener(plugin);
 	}
 
+    /**
+     * Retrieves the crafting event listener instance.
+     * 
+     * @return The {@link CraftItemListener} associated with this handler.
+     */
 	@Nonnull
 	public CraftItemListener getListener() {
 		return listener;

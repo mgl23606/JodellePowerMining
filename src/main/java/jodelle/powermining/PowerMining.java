@@ -1,15 +1,3 @@
-/*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * Main Plugin class, responsible for initializing the plugin and it's respective systems, also keeps a reference to the handlers
-*/
-
 package jodelle.powermining;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -47,6 +35,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Main class for the PowerMining plugin.
+ * 
+ * <p>
+ * This class extends {@link JavaPlugin} and serves as the entry point for the
+ * PowerMining Bukkit plugin. It initializes configuration settings, registers
+ * event listeners, handles dependencies, and manages the plugin lifecycle.
+ * </p>
+ * 
+ * <p>
+ * PowerMining enhances the mining experience by adding specialized PowerTools
+ * such as Hammers, Excavators, and Plows, each with unique abilities for
+ * breaking
+ * blocks efficiently.
+ * </p>
+ */
 public final class PowerMining extends JavaPlugin {
     public JavaPlugin plugin;
     private PlayerInteractHandler handlerPlayerInteract;
@@ -73,6 +77,28 @@ public final class PowerMining extends JavaPlugin {
             + ChatColor.GOLD + "Mining"
             + ChatColor.DARK_BLUE + "]" + ChatColor.RESET + " ";
 
+    /**
+     * Called when the plugin is enabled.
+     * 
+     * <p>
+     * This method initializes the plugin, registers event listeners, processes
+     * configuration files, loads dependencies, and sets up necessary handlers.
+     * Additionally, it measures the startup time and prints a message to the
+     * console indicating the time taken to enable the plugin.
+     * </p>
+     * 
+     * <p>
+     * Key startup actions:
+     * </p>
+     * <ul>
+     * <li>Registers the plugin with bStats for tracking usage statistics.</li>
+     * <li>Ensures the configuration and language files exist.</li>
+     * <li>Loads permissions and processes the configuration.</li>
+     * <li>Initializes event handlers and command executors.</li>
+     * <li>Checks for external dependencies like WorldGuard and Jobs.</li>
+     * <li>Registers crafting recipes for PowerTools.</li>
+     * </ul>
+     */
     @Override
     public void onEnable() {
         long startTime = System.currentTimeMillis();
@@ -135,7 +161,45 @@ public final class PowerMining extends JavaPlugin {
     }
 
     /**
-     * Loads the dependencies that the plugin might require to properly function
+     * Called when the plugin is disabled.
+     * 
+     * <p>
+     * This method ensures that critical data, such as configuration and language
+     * files, are preserved before the plugin shuts down. It also unregisters any
+     * custom recipes that were added during plugin runtime.
+     * </p>
+     * 
+     * <p>
+     * Key shutdown actions:
+     * </p>
+     * <ul>
+     * <li>Ensures the configuration and language files remain intact.</li>
+     * <li>Unregisters custom recipes to prevent conflicts on reload.</li>
+     * <li>Logs a shutdown message to indicate the plugin has been disabled.</li>
+     * </ul>
+     */
+    @Override
+    public void onDisable() {
+        // Save config / language and schematic in case it got deleted somehow
+        this.ensureConfigExists();
+        this.ensureLanguageFilesExist();
+
+        // Unregister Recipes
+        if (recipeManager != null) {
+            recipeManager.unregisterRecipes();
+            getLogger().info("PowerMining recipes unregistered successfully!");
+        }
+
+        getLogger().info("PowerMining plugin was disabled.");
+    }
+    
+    /**
+     * Loads the dependencies that the plugin might require to properly function.
+     * 
+     * <p>
+     * This method checks for the presence of required dependencies such as
+     * WorldGuard and Jobs. If found, it initializes them for use within the plugin.
+     * </p>
      */
     private void loadDependencies() {
         debuggingMessages.sendConsoleMessage(ChatColor.YELLOW + "Loading dependencies...");
@@ -159,7 +223,13 @@ public final class PowerMining extends JavaPlugin {
     }
 
     /**
-     * Fills the permissions HashMaps with the available permissions.
+     * Populates the permissions HashMaps with the available permissions.
+     * 
+     * <p>
+     * This method initializes the permission mappings for crafting, using, and
+     * enchanting
+     * PowerTools by iterating over the defined PowerTool types.
+     * </p>
      */
     private void processPermissions() {
 
@@ -178,10 +248,16 @@ public final class PowerMining extends JavaPlugin {
     }
 
     /**
-     * Generates the permissions in form of a String
+     * Generates the necessary permissions for a set of PowerTools.
      * 
-     * @param powerToolNames Array containing the names of all the PowerTools
-     * @param items          List of the items
+     * <p>
+     * This method constructs permission strings for crafting, using, and enchanting
+     * tools based on their names and assigns them to the corresponding material in
+     * the permission mappings.
+     * </p>
+     * 
+     * @param powerToolNames List of PowerTool names.
+     * @param items          List of corresponding {@link Material} types.
      */
     protected void generatePermission(@Nonnull final ArrayList<String> powerToolNames,
             @Nonnull final ArrayList<Material> items) {
@@ -203,23 +279,14 @@ public final class PowerMining extends JavaPlugin {
 
     }
 
-    @Override
-    public void onDisable() {
-        // Save config / language and schematic in case it got deleted somehow
-        this.ensureConfigExists();
-        this.ensureLanguageFilesExist();
-
-        // Unregister Recipes
-        if (recipeManager != null) {
-            recipeManager.unregisterRecipes();
-            getLogger().info("PowerMining recipes unregistered successfully!");
-        }
-
-        getLogger().info("PowerMining plugin was disabled.");
-    }
-
     /**
-     * Reads the config file and processes it
+     * Reads and processes the configuration file.
+     * 
+     * <p>
+     * This method extracts various settings from the config file, including
+     * the list of minable, diggable, tillable, and pathable blocks, and sets
+     * up radius and depth values for PowerTools.
+     * </p>
      */
     public void processConfig() {
         try {
@@ -289,7 +356,14 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
-    // Ensure the config.yml exists when reloading the plugin
+    /**
+     * Ensures that the configuration file exists, creating it if necessary.
+     * 
+     * <p>
+     * If the configuration file is missing, this method extracts the default
+     * `config.yml` from the plugin's resources.
+     * </p>
+     */
     public void ensureConfigExists() {
         File configFile = new File(this.getDataFolder(), "config.yml");
         if (!configFile.exists()) {
@@ -297,7 +371,14 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
-    // Ensure Language files exists when reloading the plugin
+    /**
+     * Ensures that the necessary language files exist.
+     * 
+     * <p>
+     * This method creates the language directory and extracts default language
+     * files if they are missing.
+     * </p>
+     */
     public void ensureLanguageFilesExist() {
         File langDir = new File(this.getDataFolder(), "lang");
         if (!langDir.exists()) {
@@ -317,7 +398,18 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
-    // Check if Language File exists
+    /**
+     * Checks whether a specific language file exists.
+     * 
+     * <p>
+     * This method verifies the existence of a language file and ensures that
+     * it contains the required configuration keys.
+     * </p>
+     * 
+     * @param lang The language code (e.g., "en_US").
+     * @return {@code true} if the language file exists and is valid, {@code false}
+     *         otherwise.
+     */
     public boolean doesLanguageExist(String lang) {
         // Define the directory and the language file
         File langDir = new File(getDataFolder(), "lang");
@@ -344,10 +436,18 @@ public final class PowerMining extends JavaPlugin {
                 langConfig.contains("powermining-cmd-not-found");
     }
 
+    /**
+     * Retrieves the {@link RecipeManager} instance.
+     * 
+     * @return The {@link RecipeManager} instance.
+     */
     public RecipeManager getRecipeManager() {
         return recipeManager;
     }
 
+    /**
+     * Unregisters the RecipeManager and removes custom recipes.
+     */
     public void unregisterRecipeManager() {
         if (recipeManager != null) {
             recipeManager.unregisterRecipes();
@@ -357,6 +457,9 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
+    /**
+     * Registers the RecipeManager and adds custom recipes.
+     */
     public void registerRecipeManager() {
         if (recipeManager == null) {
             recipeManager = new RecipeManager(this);
@@ -365,12 +468,28 @@ public final class PowerMining extends JavaPlugin {
         getLogger().info("PowerMining recipes registered successfully!");
     }
 
+    /**
+     * Registers the command and tab completer for PowerMining.
+     * 
+     * <p>
+     * This method sets up the "/powermining" command with its executor and
+     * tab completer.
+     * </p>
+     */
     public void registerCommand() {
         // Register Command
         this.getCommand("powermining").setExecutor(new PowerMiningCommand(this));
         this.getCommand("powermining").setTabCompleter(new PowerMiningTabCompleter(this));
     }
 
+    /**
+     * Loads the available languages from the language directory.
+     * 
+     * <p>
+     * This method scans the "lang" folder for language files and caches
+     * their names for use in command auto-completion.
+     * </p>
+     */
     public void loadAvailableLanguages() {
         File langFolder = new File(getDataFolder(), "lang");
         if (langFolder.exists() && langFolder.isDirectory()) {
@@ -384,77 +503,167 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
+    /**
+     * Retrieves the cached list of available languages.
+     * 
+     * @return A list of available language codes.
+     */
     public List<String> getAvailableLanguagesFromCache() {
         return availableLanguages;
     }
 
+    /**
+     * Refreshes the DebuggingMessages instance.
+     * 
+     * <p>
+     * This method reinitializes the DebuggingMessages object to ensure
+     * updated debug configurations are applied.
+     * </p>
+     */
     public void refreshDebuggingMessages() {
         this.debuggingMessages = new DebuggingMessages();
     }
 
-    // Methode to get the LangFile
+    /**
+     * Retrieves the {@link LangFile} instance.
+     * 
+     * @return The {@link LangFile} instance.
+     */
     public LangFile getLangFile() {
         return langFile;
     }
 
-    // Methode to set the LangFile
+    /**
+     * Sets a new {@link LangFile} instance.
+     * 
+     * @param langFile The new {@link LangFile} instance.
+     */
     public void setLangFile(LangFile langFile) {
         this.langFile = langFile;
     }
 
-    // Methode to set Debug
+    /**
+     * Checks if debug mode is enabled.
+     * 
+     * @return {@code true} if debug mode is enabled, {@code false} otherwise.
+     */
     public static boolean isDebugMode() {
         return getInstance().getConfig().getBoolean("debug");
     }
 
+    /**
+     * Retrieves the {@link PlayerInteractHandler} instance.
+     * 
+     * @return The {@link PlayerInteractHandler} instance.
+     */
     public PlayerInteractHandler getPlayerInteractHandler() {
         return handlerPlayerInteract;
     }
 
+    /**
+     * Retrieves the {@link BlockBreakHandler} instance.
+     * 
+     * @return The {@link BlockBreakHandler} instance.
+     */
     public BlockBreakHandler getBlockBreakHandler() {
         return handlerBlockBreak;
     }
 
+    /**
+     * Retrieves the {@link ClickPlayerHandler} instance.
+     * 
+     * @return The {@link ClickPlayerHandler} instance.
+     */
     public ClickPlayerHandler getHandlerClickPlayer() {
         return handlerClickPlayer;
     }
 
+    /**
+     * Retrieves the {@link CraftItemHandler} instance.
+     * 
+     * @return The {@link CraftItemHandler} instance.
+     */
     public CraftItemHandler getCraftItemHandler() {
         return handlerCraftItem;
     }
 
+    /**
+     * Retrieves the {@link EnchantItemHandler} instance.
+     * 
+     * @return The {@link EnchantItemHandler} instance.
+     */
     public EnchantItemHandler getEnchantItemHandler() {
         return handlerEnchantItem;
     }
 
+    /**
+     * Retrieves the {@link InventoryClickHandler} instance.
+     * 
+     * @return The {@link InventoryClickHandler} instance.
+     */
     public InventoryClickHandler getInventoryClickHandler() {
         return handlerInventoryClick;
     }
 
+    /**
+     * Retrieves the WorldGuard plugin instance.
+     * 
+     * @return The {@link WorldGuardPlugin} instance, or {@code null} if not loaded.
+     */
     public WorldGuardPlugin getWorldGuard() {
         return (WorldGuardPlugin) worldguard;
     }
 
+    /**
+     * Retrieves the {@link DebuggingMessages} instance.
+     * 
+     * @return The {@link DebuggingMessages} instance.
+     */
     public DebuggingMessages getDebuggingMessages() {
         return debuggingMessages;
     }
 
+    /**
+     * Retrieves the {@link BlockBreakListener} instance.
+     * 
+     * @return The {@link BlockBreakListener} instance.
+     */
     public BlockBreakListener getBlockBreakListener() {
         return blockBreakListener;
     }
 
+    /**
+     * Checks whether the Jobs plugin is loaded.
+     * 
+     * @return {@code true} if Jobs is loaded, {@code false} otherwise.
+     */
     public boolean isJobsLoaded() {
         return isJobsLoaded;
     }
 
+    /**
+     * Sets the {@link BlockBreakListener} instance.
+     * 
+     * @param listener The new {@link BlockBreakListener} instance.
+     */
     public void setBlockBreakListener(BlockBreakListener listener) {
         this.blockBreakListener = listener;
     }
 
+    /**
+     * Retrieves the {@link JobsHook} instance.
+     * 
+     * @return The {@link JobsHook} instance, or {@code null} if Jobs is not loaded.
+     */
     public JobsHook getJobsHook() {
         return jobsHook;
     }
 
+    /**
+     * Retrieves the singleton instance of the PowerMining plugin.
+     * 
+     * @return The {@link PowerMining} instance.
+     */
     public static PowerMining getInstance() {
         return instance;
     }

@@ -1,15 +1,3 @@
-/*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for handling the actual mining when using a Hammer/Excavator
- */
-
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
@@ -35,6 +23,15 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+/**
+ * Listener for handling {@link BlockBreakEvent} in the PowerMining plugin.
+ * 
+ * <p>
+ * This class manages the mechanics of breaking blocks using custom PowerTools
+ * such as Hammers and Excavators. It determines the area of effect, reduces
+ * tool durability, grants experience, and integrates with job-tracking plugins.
+ * </p>
+ */
 public class BlockBreakListener implements Listener {
     public final PowerMining plugin;
     public final boolean useDurabilityPerBlock;
@@ -47,6 +44,17 @@ public class BlockBreakListener implements Listener {
         useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
     }
 
+    /**
+     * Handles block breaking events and applies PowerTool effects.
+     * 
+     * <p>
+     * This method verifies that the player is using a PowerTool, determines the
+     * affected blocks, reduces durability, grants XP, and integrates with
+     * JobsReborn if enabled.
+     * </p>
+     * 
+     * @param event The {@link BlockBreakEvent} triggered when a block is broken.
+     */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
@@ -113,9 +121,17 @@ public class BlockBreakListener implements Listener {
     }
 
     /**
-     * Check and break the block if possible
+     * Checks and breaks a block if it is compatible with the PowerTool.
      * 
-     * @param block The block being broken by the player
+     * <p>
+     * This method validates whether the tool can break the given block, notifies
+     * JobsReborn (if enabled), and determines the experience points (XP) to drop.
+     * </p>
+     * 
+     * @param player   The player breaking the block.
+     * @param handItem The tool being used to break the block.
+     * @param block    The {@link Block} being broken.
+     * @return The amount of XP to drop from breaking the block.
      */
     private int checkAndBreakBlock(Player player, ItemStack handItem, @Nonnull Block block) {
         if (handItem == null || handItem.getType() == Material.AIR) {
@@ -134,7 +150,8 @@ public class BlockBreakListener implements Listener {
             // Notify Jobs Reborn BEFORE breaking the block
             if (plugin.getJobsHook() != null) {
                 plugin.getJobsHook().notifyJobs(player, block);
-                debuggingMessages.sendConsoleMessage(ChatColor.GREEN + "✅ Jobs Reborn notified for block: " + block.getType());
+                debuggingMessages
+                        .sendConsoleMessage(ChatColor.GREEN + "✅ Jobs Reborn notified for block: " + block.getType());
             }
 
             // XP Drops
@@ -164,9 +181,17 @@ public class BlockBreakListener implements Listener {
     }
 
     /**
-     * Perform the basic verifications
+     * Performs basic verifications before applying PowerTool effects.
      * 
-     * @return True if the PowerTool is NOT ready to use (acts like a normal tool)
+     * <p>
+     * This method ensures the player is using a valid PowerTool, has permissions,
+     * and is not sneaking to bypass the special tool mechanics.
+     * </p>
+     * 
+     * @param player   The player using the tool.
+     * @param handItem The tool being used.
+     * @return {@code true} if the tool should behave normally, {@code false} if
+     *         PowerTool mechanics apply.
      */
     private boolean basicVerifications(Player player, ItemStack handItem) {
         if (handItem == null || handItem.getType() == Material.AIR) {

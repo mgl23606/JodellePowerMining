@@ -17,14 +17,39 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Map;
 
+/**
+ * Listener for handling {@link PrepareAnvilEvent} in the PowerMining plugin.
+ * 
+ * <p>
+ * This class manages the repair and enchanting logic for custom PowerTools when used
+ * in an anvil. It ensures compatibility checks, applies enchantments from enchanted
+ * books, and merges enchantments when two PowerTools of the same type are combined.
+ * </p>
+ */
 public class AnvilRepairListener implements Listener {
     private final PowerMining plugin;
 
+    /**
+     * Constructs an {@code AnvilRepairListener} and registers it as an event listener.
+     * 
+     * @param plugin The instance of {@link PowerMining} used for event registration.
+     */
     public AnvilRepairListener(PowerMining plugin) {
         this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
+    /**
+     * Handles anvil interactions to determine valid repairs and enchantments.
+     * 
+     * <p>
+     * This method ensures that only compatible PowerTools can be repaired together.
+     * It prevents invalid item combinations while allowing enchantments to be applied
+     * from enchanted books.
+     * </p>
+     * 
+     * @param event The {@link PrepareAnvilEvent} triggered when an item is placed in an anvil.
+     */
     @EventHandler
     public void onPrepareAnvil(PrepareAnvilEvent event) {
         AnvilInventory inventory = event.getInventory();
@@ -57,6 +82,18 @@ public class AnvilRepairListener implements Listener {
         }
     }
 
+    /**
+     * Checks if two PowerTools are of the same type.
+     * 
+     * <p>
+     * This method compares the persistent data stored in the item metadata
+     * to ensure that only tools of the same type can be combined in an anvil.
+     * </p>
+     * 
+     * @param firstItem  The first {@link ItemStack} in the anvil.
+     * @param secondItem The second {@link ItemStack} in the anvil.
+     * @return {@code true} if both items are PowerTools of the same type, otherwise {@code false}.
+     */
     private boolean isSameToolType(ItemStack firstItem, ItemStack secondItem) {
         ItemMeta firstMeta = firstItem.getItemMeta();
         ItemMeta secondMeta = secondItem.getItemMeta();
@@ -75,6 +112,18 @@ public class AnvilRepairListener implements Listener {
         return firstToolType != null && firstToolType.equals(secondToolType);
     }
 
+    /**
+     * Applies enchantments from an enchanted book to a PowerTool.
+     * 
+     * <p>
+     * This method ensures that the enchantments from the book are properly transferred
+     * to the tool while preserving existing custom metadata.
+     * </p>
+     * 
+     * @param tool  The {@link ItemStack} representing the PowerTool.
+     * @param book  The {@link ItemStack} representing the enchanted book.
+     * @param event The {@link PrepareAnvilEvent} to modify the result item.
+     */
     private void applyEnchantments(ItemStack tool, ItemStack book, PrepareAnvilEvent event) {
         ItemMeta toolMeta = tool.getItemMeta();
         ItemMeta bookMeta = book.getItemMeta();
@@ -99,6 +148,18 @@ public class AnvilRepairListener implements Listener {
         event.setResult(tool);
     }
 
+    /**
+     * Merges enchantments and repairs durability when two PowerTools are combined.
+     * 
+     * <p>
+     * This method ensures that enchantments are merged correctly according to Minecraft's
+     * anvil mechanics, and that the tool's durability is partially restored.
+     * </p>
+     * 
+     * @param baseTool     The base {@link ItemStack} in the anvil.
+     * @param additionTool The additional {@link ItemStack} used for repair.
+     * @param event        The {@link PrepareAnvilEvent} to modify the result item.
+     */
     private void combineToolEnchantments(ItemStack baseTool, ItemStack additionTool, PrepareAnvilEvent event) {
         ItemMeta baseMeta = baseTool.getItemMeta();
         ItemMeta additionMeta = additionTool.getItemMeta();

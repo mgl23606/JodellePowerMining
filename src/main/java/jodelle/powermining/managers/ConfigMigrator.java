@@ -5,18 +5,41 @@ import jodelle.powermining.PowerMining;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.util.*;
 
+/**
+ * Handles the migration of the configuration file to ensure compatibility with newer versions of the PowerMining plugin.
+ * 
+ * <p>
+ * This class checks for outdated configuration formats and updates them to the latest version. 
+ * It ensures that required settings are present, renames deprecated keys, and converts the recipe format 
+ * to a structured format while enforcing a consistent order of tools.
+ * </p>
+ */
 public class ConfigMigrator {
 
     private final PowerMining plugin;
 
+    /**
+     * The current version of the configuration format.
+     */
     private static final String CURRENT_VERSION = "1.0"; // New version for migration
 
+    /**
+     * Constructs a {@code ConfigMigrator} instance.
+     * 
+     * @param plugin The instance of {@link PowerMining} responsible for managing the configuration.
+     */
     public ConfigMigrator(PowerMining plugin) {
         this.plugin = plugin;
     }
 
     /**
-     * Checks and migrates the configuration if needed.
+     * Checks and migrates the configuration file if it is outdated.
+     * 
+     * <p>
+     * This method ensures that required configuration keys exist, renames deprecated keys, 
+     * removes old sections, and converts recipes into the new structured format while maintaining 
+     * a predefined order for tools.
+     * </p>
      */
     public void migrateConfig() {
         FileConfiguration config = plugin.getConfig();

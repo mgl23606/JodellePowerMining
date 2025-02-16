@@ -11,6 +11,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Handles tab completion for the `/powermining` command.
+ * 
+ * <p>
+ * Provides suggestions for various subcommands and arguments to enhance user
+ * experience. It supports:
+ * </p>
+ * <ul>
+ * <li>Main command suggestions (e.g., `give`, `admin`, `version`, `help`,
+ * `info`).</li>
+ * <li>Admin subcommands (e.g., `reload`, `language`, `debug`, `help`).</li>
+ * <li>PowerTools suggestions for the `give` command (Excavators, Hammers,
+ * Plows).</li>
+ * <li>Available language options for `/powermining admin language`.</li>
+ * </ul>
+ */
 public class PowerMiningTabCompleter implements TabCompleter {
     private final List<String> availableLanguages;
 
@@ -18,6 +34,28 @@ public class PowerMiningTabCompleter implements TabCompleter {
         availableLanguages = plugin.getAvailableLanguagesFromCache();
     }
 
+    /**
+     * Provides tab-completion suggestions for the `/powermining` command.
+     * 
+     * <p>
+     * Depending on the command arguments, it suggests:
+     * </p>
+     * <ul>
+     * <li>Level 1: Main command keywords (`give`, `admin`, `version`, `help`,
+     * `info`).</li>
+     * <li>Level 2: Subcommands (`reload`, `language`, `debug`, `help` for
+     * `admin`).</li>
+     * <li>Level 2: PowerTools list when using `/powermining give`.</li>
+     * <li>Level 3: Available language options when using `/powermining admin
+     * language`.</li>
+     * </ul>
+     * 
+     * @param sender The sender of the command (player or console).
+     * @param cmd    The command being executed.
+     * @param alias  The alias of the command.
+     * @param args   The arguments typed so far.
+     * @return A list of possible completions based on the current input.
+     */
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         List<String> completions = new ArrayList<>();

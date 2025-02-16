@@ -1,11 +1,3 @@
-/*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
 package jodelle.powermining.utils;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
@@ -36,41 +28,78 @@ import java.util.Collections;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
+/**
+ * Utility class for handling PowerTools-related logic in the PowerMining
+ * plugin.
+ * 
+ * <p>
+ * This class provides a collection of static methods to check tool types,
+ * validate permissions,
+ * handle durability reduction, and interact with blocks in the game world. It
+ * also integrates
+ * with WorldGuard to enforce region protection rules.
+ * </p>
+ */
 public class PowerUtils {
 
+    /**
+     * Constructs a {@code PowerUtils} instance.
+     * 
+     * <p>
+     * This constructor is private since all methods in this class are static,
+     * meaning an instance of {@code PowerUtils} is never needed.
+     * </p>
+     */
     public PowerUtils() {
     }
 
     /**
-     * This method validates if the item is a PowerTool
-     * It checks the PersistantDataContainer of the item for a key
-     * set specifically for the PowerTools
-     * @param item The item to test
-     * @return True if the item is a PowerTool
+     * Checks if an {@link ItemStack} is a PowerTool by verifying its
+     * {@link PersistentDataContainer}.
+     * 
+     * <p>
+     * This method looks for a specific {@link NamespacedKey} in the item's metadata
+     * to determine if
+     * it is a PowerTool.
+     * </p>
+     * 
+     * @param item The {@link ItemStack} to check.
+     * @return {@code true} if the item is a PowerTool, {@code false} otherwise.
      */
     public static boolean isPowerTool(@Nonnull ItemStack item) {
 
         PowerMining plugin = PowerMining.getInstance();
         ItemMeta itemMeta = item.getItemMeta();
 
-        if(itemMeta == null){
+        if (itemMeta == null) {
             return false;
         }
 
-		PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
 
-		return container.has(isPowerTool, PersistentDataType.STRING);
-}
+        return container.has(isPowerTool, PersistentDataType.STRING);
+    }
 
     /**
-     * Reduces the durability of a tool
-     * @param player Player who used the tool
-     * @param item Item used by the player
+     * Reduces the durability of a tool when it is used.
+     * 
+     * <p>
+     * If the tool has the {@link Enchantment#UNBREAKING} enchantment, there is a
+     * chance
+     * that durability loss will be prevented based on the enchantment level. If the
+     * tool
+     * reaches zero durability, it is removed from the player's inventory and a
+     * breaking
+     * sound effect is played.
+     * </p>
+     * 
+     * @param player The {@link Player} using the tool.
+     * @param item   The {@link ItemStack} representing the tool.
      */
-    public static void reduceDurability(@Nonnull Player player, @Nonnull ItemStack item){
+    public static void reduceDurability(@Nonnull Player player, @Nonnull ItemStack item) {
 
-        if(item.getEnchantments().containsKey(Enchantment.UNBREAKING)){
+        if (item.getEnchantments().containsKey(Enchantment.UNBREAKING)) {
             Random rand = new Random();
             Integer unbreakingLevel = item.getEnchantments().get(Enchantment.UNBREAKING);
             if (rand.nextInt(unbreakingLevel + 1) != 0) {
@@ -79,21 +108,24 @@ public class PowerUtils {
         }
         ItemMeta itemMeta = item.getItemMeta();
 
-        if (!(itemMeta instanceof Damageable)){
+        if (!(itemMeta instanceof Damageable)) {
             return;
         }
 
         Damageable damageable = (Damageable) itemMeta;
 
-        //increasing the damage by one reduces the durability by one
-        damageable.setDamage(damageable.getDamage()+1);
+        // increasing the damage by one reduces the durability by one
+        damageable.setDamage(damageable.getDamage() + 1);
         item.setItemMeta(itemMeta);
 
-        /*Reducing the durability doesn't cause the item to be broken when it gets below zero.
-        * That said, it is needed to implement this behavior manually.
-        * If the damage is higher than the item durability, the item is remover from
-        * the player inventory and a breaking sound is played*/
-        if (damageable.getDamage() > item.getType().getMaxDurability()){
+        /*
+         * Reducing the durability doesn't cause the item to be broken when it gets
+         * below zero.
+         * That said, it is needed to implement this behavior manually.
+         * If the damage is higher than the item durability, the item is remover from
+         * the player inventory and a breaking sound is played
+         */
+        if (damageable.getDamage() > item.getType().getMaxDurability()) {
             player.getInventory().remove(item);
 
             Location loc = player.getEyeLocation();
@@ -104,54 +136,70 @@ public class PowerUtils {
         }
     }
 
-
     /**
-     * Returns if the block is present on the minable list
-     * @param blockType Block to be verified
-     * @return True if the block is minable
+     * Determines whether a given block type is minable.
+     * 
+     * @param blockType The {@link Material} of the block.
+     * @return {@code true} if the block is minable, {@code false} otherwise.
      */
     public static boolean isMineable(@Nonnull Material blockType) {
         return Reference.MINABLE.containsKey(blockType);
     }
 
     /**
-     * Returns if the block is present on the digable list
-     * @param blockType Block to be verified
-     * @return True if the block is digable
+     * Determines whether a given block type is diggable.
+     * 
+     * @param blockType The {@link Material} of the block.
+     * @return {@code true} if the block is diggable, {@code false} otherwise.
      */
     public static boolean isDigable(@Nonnull Material blockType) {
         return Reference.DIGGABLE.contains(blockType);
     }
 
     /**
-     * Returns if the block is present on the tillable list
-     * @param blockType Block to be verified
-     * @return True if the block is tillable
+     * Determines whether a given block type is tillable.
+     * 
+     * @param blockType The {@link Material} of the block.
+     * @return {@code true} if the block is tillable, {@code false} otherwise.
      */
     public static boolean isTillable(@Nonnull Material blockType) {
         return Reference.TILLABLE.contains(blockType);
     }
 
     /**
-     * Returns if the block is present on the pathable list
-     * @param blockType Block to be verified
-     * @return True if the block is pathable
+     * Determines whether a given block type is pathable.
+     * 
+     * @param blockType The {@link Material} of the block.
+     * @return {@code true} if the block is pathable, {@code false} otherwise.
      */
     public static boolean isPathable(@Nonnull Material blockType) {
         return Reference.PATHABLE.contains(blockType);
     }
 
     /**
-     * Returns a lif of the surrounding blocks given a block face, a target block, a radius and a depth
-     * @param blockFace Face of the block where the player clicked
-     * @param targetBlock Block broke by the player
-     * @param radius Radius of the hole
-     * @param depth Depth of the hole
-     * @return Array containing all the blocks surrounding the target block
+     * Retrieves a list of surrounding blocks based on the block face clicked, the
+     * target block,
+     * and the specified radius and depth.
+     * 
+     * <p>
+     * This method determines which blocks should be affected by the player's
+     * action, depending
+     * on the block face interacted with. It generates a list of blocks in a cubic
+     * or rectangular
+     * shape, trimming any null values.
+     * </p>
+     * 
+     * @param blockFace   The {@link BlockFace} indicating the direction the player
+     *                    interacted with.
+     * @param targetBlock The {@link Block} the player broke.
+     * @param radius      The radius of the area to affect.
+     * @param depth       The depth of the area to affect.
+     * @return A list of surrounding {@link Block}s affected by the player's action.
      */
     @Nonnull
-    public static ArrayList<Block> getSurroundingBlocks(@Nonnull BlockFace blockFace, @Nonnull Block targetBlock, @Nonnull Integer radius, @Nonnull Integer depth) {
-        //Array that will store the blocks surrounding the center block
+    public static ArrayList<Block> getSurroundingBlocks(@Nonnull BlockFace blockFace, @Nonnull Block targetBlock,
+            @Nonnull Integer radius, @Nonnull Integer depth) {
+        // Array that will store the blocks surrounding the center block
         final ArrayList<Block> blocks = new ArrayList<>();
         World world = targetBlock.getWorld();
 
@@ -160,7 +208,8 @@ public class PowerUtils {
         by = targetBlock.getY();
         bz = targetBlock.getZ();
 
-        // Check the block face from which the block is being broken in order to get the correct surrounding blocks
+        // Check the block face from which the block is being broken in order to get the
+        // correct surrounding blocks
         switch (blockFace) {
             case UP:
                 for (int x = bx - radius; x <= bx + radius; x++) {
@@ -208,7 +257,7 @@ public class PowerUtils {
                 }
                 break;
             case SOUTH:
-                //logs.sendMessage(ChatColor.AQUA + "SOUTH");
+                // logs.sendMessage(ChatColor.AQUA + "SOUTH");
                 for (int x = bx - radius; x <= bx + radius; x++) {
                     for (int y = by - radius; y <= by + radius; y++) {
                         for (int z = bz - depth; z <= bz; z++) {
@@ -227,11 +276,22 @@ public class PowerUtils {
     }
 
     /**
-     * Returns a lif of the surrounding blocks given a block face, a target block, a radius and a depth
-     * @param blockFace Face of the block where the player clicked
-     * @param targetBlock Block broke by the player
-     * @param radius Radius of the hole
-     * @return Array containing all the blocks surrounding the target block
+     * Retrieves a list of surrounding blocks for farming purposes based on the
+     * block face clicked.
+     * 
+     * <p>
+     * This method is a specialized version of {@link #getSurroundingBlocks} used
+     * primarily for
+     * plowing or path creation. It only checks horizontally, as farmland and paths
+     * are typically
+     * affected on a flat plane.
+     * </p>
+     * 
+     * @param blockFace   The {@link BlockFace} indicating the direction the player
+     *                    interacted with.
+     * @param targetBlock The {@link Block} being affected.
+     * @param radius      The radius of the area to affect.
+     * @return A list of surrounding {@link Block}s affected by the farming tool.
      */
     public static ArrayList<Block> getSurroundingBlocksFarm(BlockFace blockFace, Block targetBlock, Integer radius) {
         ArrayList<Block> blocks = new ArrayList<>();
@@ -241,7 +301,8 @@ public class PowerUtils {
         by = targetBlock.getY();
         bz = targetBlock.getZ();
 
-        // Check the block face from which the block is being broken in order to get the correct surrounding blocks
+        // Check the block face from which the block is being broken in order to get the
+        // correct surrounding blocks
         if (blockFace == BlockFace.UP) {
             for (int x = bx - radius; x <= bx + radius; x++) {
                 for (int z = bz - radius; z <= bz + radius; z++) {
@@ -256,80 +317,101 @@ public class PowerUtils {
     }
 
     /**
-     * Checks if the player has permission to craft the PowerTool
-     * @param plugin Instance of the plugin
-     * @param player Player who used the tool
-     * @param itemType Item used by the player
-     * @return True if the player has permission to craft the PowerTool
+     * Checks if the player has permission to craft a PowerTool.
+     * 
+     * @param plugin   The {@link PowerMining} instance managing permissions.
+     * @param player   The {@link Player} attempting to craft the tool.
+     * @param itemType The {@link Material} type of the tool being crafted.
+     * @return {@code true} if the player has permission, {@code false} otherwise.
+     * @throws NoSuchElementException if the tool is not listed in the craft
+     *                                permissions.
      */
-    public static boolean checkCraftPermission(@Nonnull PowerMining plugin, @Nonnull Player player, @Nonnull Material itemType) {
-        if (!Reference.CRAFT_PERMISSIONS.containsKey(itemType)){
+    public static boolean checkCraftPermission(@Nonnull PowerMining plugin, @Nonnull Player player,
+            @Nonnull Material itemType) {
+        if (!Reference.CRAFT_PERMISSIONS.containsKey(itemType)) {
             throw new NoSuchElementException();
         }
 
         String perm = Reference.CRAFT_PERMISSIONS.get(itemType);
 
-        if(player.hasPermission(perm)){
+        if (player.hasPermission(perm)) {
             return true;
         }
 
-        player.sendMessage(plugin.getLangFile().getMessage("no-craft-permission", "&cYou don't have permissions to craft this PowerTool!", true));
+        player.sendMessage(plugin.getLangFile().getMessage("no-craft-permission",
+                "&cYou don't have permissions to craft this PowerTool!", true));
         return false;
     }
 
     /**
-     * Checks if the player has permission to use the PowerTool
-     * @param plugin Instance of the plugin
-     * @param player Player who used the tool
-     * @param itemType Item used by the player
-     * @return True if the player has permission to use the PowerTool
+     * Checks if the player has permission to use a PowerTool.
+     * 
+     * @param plugin   The {@link PowerMining} instance managing permissions.
+     * @param player   The {@link Player} attempting to use the tool.
+     * @param itemType The {@link Material} type of the tool being used.
+     * @return {@code true} if the player has permission, {@code false} otherwise.
      */
-    public static boolean checkUsePermission(@NonNull PowerMining plugin, @Nonnull Player player, @Nonnull Material itemType) {
-        if (!Reference.USE_PERMISSIONS.containsKey(itemType)){
+    public static boolean checkUsePermission(@NonNull PowerMining plugin, @Nonnull Player player,
+            @Nonnull Material itemType) {
+        if (!Reference.USE_PERMISSIONS.containsKey(itemType)) {
             throw new NoSuchElementException();
         }
 
         String perm = Reference.USE_PERMISSIONS.get(itemType);
 
-        if (player.hasPermission(perm)){
+        if (player.hasPermission(perm)) {
             return true;
         }
 
-        player.sendMessage(plugin.getLangFile().getMessage("no-use-permission", "&cYou don't have permissions to use this PowerTool!", true));
+        player.sendMessage(plugin.getLangFile().getMessage("no-use-permission",
+                "&cYou don't have permissions to use this PowerTool!", true));
         return false;
     }
 
     /**
-     * Checks if the player has permission to enchant the PowerTool
-     * @param plugin
-     * @param player Player who used the tool
-     * @param itemType Item used by the player
-     * @return True if the player has permission to enchant the PowerTool
+     * Checks if the player has permission to enchant a PowerTool.
+     * 
+     * @param plugin   The {@link PowerMining} instance managing permissions.
+     * @param player   The {@link Player} attempting to enchant the tool.
+     * @param itemType The {@link Material} type of the tool being enchanted.
+     * @return {@code true} if the player has permission, {@code false} otherwise.
      */
-    public static boolean checkEnchantPermission(@Nonnull PowerMining plugin, @Nonnull Player player, @Nonnull Material itemType) {
-        if (!Reference.ENCHANT_PERMISSIONS.containsKey(itemType)){
+    public static boolean checkEnchantPermission(@Nonnull PowerMining plugin, @Nonnull Player player,
+            @Nonnull Material itemType) {
+        if (!Reference.ENCHANT_PERMISSIONS.containsKey(itemType)) {
             throw new NoSuchElementException();
         }
         String perm = Reference.ENCHANT_PERMISSIONS.get(itemType);
 
-        if (player.hasPermission(perm)){
+        if (player.hasPermission(perm)) {
             return true;
         }
 
-        player.sendMessage(plugin.getLangFile().getMessage("no-enchant-permission", "&cYou don't have permissions to enchant this PowerTool!", true));
+        player.sendMessage(plugin.getLangFile().getMessage("no-enchant-permission",
+                "&cYou don't have permissions to enchant this PowerTool!", true));
         return false;
     }
 
     /**
-     * Checks if the player is allowed to destroy the target block
-     * @param plugin Instance of the plugin
-     * @param player Player who broke the block
-     * @param block Block broken
-     * @return True if the player is allowed to destroy the block
+     * Checks if the player is allowed to destroy the target block based on
+     * WorldGuard region protections.
+     * 
+     * <p>
+     * This method verifies whether the player has permission to break a block in a
+     * protected region using WorldGuard. If WorldGuard is not enabled, it assumes
+     * the player is allowed to break the block.
+     * </p>
+     * 
+     * @param plugin The {@link PowerMining} instance managing WorldGuard
+     *               integration.
+     * @param player The {@link Player} attempting to break the block.
+     * @param block  The {@link Block} the player is trying to destroy.
+     * @return {@code true} if the player is allowed to break the block,
+     *         {@code false} otherwise.
      */
     public static boolean canBreak(@Nonnull PowerMining plugin, @Nonnull Player player, @Nonnull Block block) {
 
-        if (plugin.getWorldGuard() == null){
+        if (plugin.getWorldGuard() == null) {
             return true;
         }
 
@@ -348,10 +430,20 @@ public class PowerUtils {
     }
 
     /**
-     * Returns if the tool is a valid Hammer against certain block
-     * @param hammerType Type of the tool
-     * @param blockType Type of the block to be used on
-     * @return True if the Hammer is valid
+     * Determines if the given tool is a valid Hammer for breaking a specific block
+     * type.
+     * 
+     * <p>
+     * This method checks whether the specified hammer type is allowed to mine the
+     * given
+     * block type, ensuring compatibility with the configured list of minable
+     * materials.
+     * </p>
+     * 
+     * @param hammerType The {@link Material} representing the hammer.
+     * @param blockType  The {@link Material} representing the block to be mined.
+     * @return {@code true} if the hammer is valid for breaking the block,
+     *         {@code false} otherwise.
      */
     public static boolean validateHammer(@Nonnull Material hammerType, @Nonnull Material blockType) {
         return (isMineable(blockType) && Reference.PICKAXES.contains(hammerType) &&
@@ -359,30 +451,59 @@ public class PowerUtils {
     }
 
     /**
-     * Returns if the tool is a valid Excavator against certain block
-     * @param excavatorType Type of the tool
-     * @param blockType Type of the block to be used on
-     * @return True if the Excavator is valid
+     * Determines if the given tool is a valid Excavator for digging a specific
+     * block type.
+     * 
+     * <p>
+     * This method checks if the specified excavator type is appropriate for digging
+     * the given block type, ensuring it aligns with the predefined list of diggable
+     * materials.
+     * </p>
+     * 
+     * @param excavatorType The {@link Material} representing the excavator.
+     * @param blockType     The {@link Material} representing the block to be
+     *                      excavated.
+     * @return {@code true} if the excavator is valid for digging the block,
+     *         {@code false} otherwise.
      */
     public static boolean validateExcavator(@Nonnull Material excavatorType, @Nonnull Material blockType) {
         return (isDigable(blockType) && Reference.SPADES.contains(excavatorType));
     }
 
     /**
-     * Returns if the tool is a valid Plow against certain block
-     * @param plowType Type of the tool
-     * @param blockType Type of the block to be used on
-     * @return True if the Plow is valid
+     * Determines if the given tool is a valid Plow for tilling a specific block
+     * type.
+     * 
+     * <p>
+     * This method checks if the specified plow type can till the given block type,
+     * ensuring it matches the configured list of tillable materials.
+     * </p>
+     * 
+     * @param plowType  The {@link Material} representing the plow.
+     * @param blockType The {@link Material} representing the block to be tilled.
+     * @return {@code true} if the plow is valid for tilling the block,
+     *         {@code false} otherwise.
      */
     public static boolean validatePlow(@Nonnull Material plowType, @Nonnull Material blockType) {
         return (isTillable(blockType) && Reference.HOES.contains(plowType));
     }
 
     /**
-     * Returns if the tool is a valid Excavator against certain block
-     * @param excavatorType Type of the tool
-     * @param blockType Type of the block to be used on
-     * @return True if the Excavator is valid
+     * Determines if the given tool is a valid Excavator for creating paths on a
+     * specific block type.
+     * 
+     * <p>
+     * This method checks if the specified excavator type is suitable for converting
+     * the
+     * given block type into a dirt path, ensuring it is part of the predefined list
+     * of pathable materials.
+     * </p>
+     * 
+     * @param excavatorType The {@link Material} representing the excavator.
+     * @param blockType     The {@link Material} representing the block to be
+     *                      converted into a path.
+     * @return {@code true} if the excavator is valid for creating a path,
+     *         {@code false} otherwise.
      */
     public static boolean validatePath(@Nonnull Material excavatorType, @Nonnull Material blockType) {
         return (isPathable(blockType) && Reference.SPADES.contains(excavatorType));

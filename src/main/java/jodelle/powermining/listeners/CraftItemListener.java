@@ -25,6 +25,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
+/**
+ * Listener for handling {@link CraftItemEvent} when crafting PowerTools.
+ * 
+ * <p>
+ * This class ensures that PowerTools are crafted only if the correct recipe 
+ * and materials are used. It verifies crafting permissions, checks the crafting 
+ * matrix for valid ingredients, and manages material consumption.
+ * </p>
+ */
 public class CraftItemListener implements Listener {
     private final PowerMining plugin;
     private final DebuggingMessages debuggingMessages;
@@ -36,6 +45,17 @@ public class CraftItemListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
+    /**
+     * Validates whether a player can craft a PowerTool.
+     * 
+     * <p>
+     * This method ensures the player has the required crafting permissions and 
+     * verifies if the correct materials and amounts are used in the crafting grid.
+     * If any condition is not met, the crafting event is canceled.
+     * </p>
+     * 
+     * @param event The {@link CraftItemEvent} triggered when a player attempts to craft an item.
+     */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void canCraft(CraftItemEvent event) {
         final HumanEntity whoClicked = event.getWhoClicked();
@@ -61,6 +81,13 @@ public class CraftItemListener implements Listener {
         updateCraftingMatrix(inventory, matrix, expectedRecipe);
     }
 
+    /**
+     * Updates the crafting matrix by reducing material amounts as needed.
+     * 
+     * @param inventory      The {@link CraftingInventory} involved in the crafting event.
+     * @param matrix         The current crafting matrix.
+     * @param expectedRecipe The expected item amounts for the recipe.
+     */
     private void updateCraftingMatrix(@Nonnull final CraftingInventory inventory, @Nonnull final ItemStack[] matrix,
             @Nonnull final ItemStack[] expectedRecipe) {
         for (int i = 0; i < matrix.length; i++) {
@@ -77,6 +104,12 @@ public class CraftItemListener implements Listener {
         }
     }
 
+    /**
+     * Retrieves the expected recipe for a given PowerTool.
+     * 
+     * @param powerToolName The name of the PowerTool being crafted.
+     * @return An array representing the expected recipe's item amounts.
+     */
     @NotNull
     private ItemStack[] getExpectedRecipe(@Nonnull final String powerToolName) {
         ItemStack[] expectedRecipe = null;
@@ -94,6 +127,12 @@ public class CraftItemListener implements Listener {
         return expectedRecipe;
     }
 
+    /**
+     * Extracts the PowerTool name from the item's metadata.
+     * 
+     * @param itemMeta The {@link ItemMeta} containing the PowerTool's persistent data.
+     * @return The name of the PowerTool.
+     */
     @NotNull
     private String getPowerToolName(@Nonnull ItemMeta itemMeta) {
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
@@ -105,6 +144,19 @@ public class CraftItemListener implements Listener {
         return powerToolName;
     }
 
+    /**
+     * Performs basic validations before allowing a PowerTool to be crafted.
+     * 
+     * <p>
+     * Checks if the item is a PowerTool and whether the player has the necessary 
+     * crafting permissions. If any check fails, the event is canceled.
+     * </p>
+     * 
+     * @param event      The {@link CraftItemEvent} triggered when a player attempts to craft an item.
+     * @param resultItem The resulting item from the crafting event.
+     * @param itemMeta   The metadata of the resulting item.
+     * @return {@code true} if the crafting attempt should be denied, {@code false} otherwise.
+     */
     private boolean basicVerifications(@Nonnull CraftItemEvent event, @Nonnull ItemStack resultItem,
             @Nullable ItemMeta itemMeta) {
         if (!PowerUtils.isPowerTool(resultItem)) {
@@ -122,6 +174,20 @@ public class CraftItemListener implements Listener {
         return false;
     }
 
+    /**
+     * Validates whether the crafting matrix matches the expected recipe.
+     * 
+     * <p>
+     * Ensures that each slot in the crafting grid contains the correct amount of items.
+     * If an ingredient is missing or insufficient, the event is canceled, and a message 
+     * is sent to the player.
+     * </p>
+     * 
+     * @param matrix         The current crafting matrix.
+     * @param expectedRecipe The expected recipe for the PowerTool.
+     * @param whoClicked     The player attempting to craft the item.
+     * @return {@code true} if the matrix is valid, {@code false} otherwise.
+     */
     private boolean checkCraftingMatrix(@Nonnull final ItemStack[] matrix, @Nonnull final ItemStack[] expectedRecipe,
             @Nonnull final HumanEntity whoClicked) {
         for (int i = 0; i < matrix.length; i++) {
@@ -140,6 +206,12 @@ public class CraftItemListener implements Listener {
         return true;
     }
 
+    /**
+     * Ensures that extra items (such as leftover materials) are removed properly 
+     * from the crafting inventory after a PowerTool is crafted.
+     * 
+     * @param event The {@link CraftItemEvent} triggered when a PowerTool is crafted.
+     */
     @EventHandler
     public void onCraftItem(CraftItemEvent event) {
         // Skip non-power tool items to avoid interfering with standard crafting
