@@ -6,10 +6,6 @@
  * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
-/*
- * Main Plugin class, responsible for initializing the plugin and it's respective systems, also keeps a reference to the handlers
- */
-
 package jodelle.powermining;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -18,6 +14,7 @@ import jodelle.powermining.lib.DebuggingMessages;
 import jodelle.powermining.lib.Reference;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -27,15 +24,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.ChatColor;
-import java.util.List;
-
 public final class PowerMining extends JavaPlugin {
+
+    // --- Plugin Fields ---
     public JavaPlugin plugin;
     private PlayerInteractHandler handlerPlayerInteract;
     private BlockBreakHandler handlerBlockBreak;
@@ -47,40 +41,63 @@ public final class PowerMining extends JavaPlugin {
     private DebuggingMessages debuggingMessages;
 
     private WorldGuardPlugin worldguard;
-
     private static PowerMining instance;
 
+    // --- Configuration Fields ---
     private FileConfiguration recipesConfig;
-    private File recipesFile;
+    private File recipesFile; // Note: Only used in loadRecipesConfig, could be local if desired.
+
+    private FileConfiguration generalConfig;
+    private FileConfiguration mineableConfig;
+    private FileConfiguration diggableConfig;
 
     @Override
     public void onEnable() {
-
         instance = this;
-
         debuggingMessages = new DebuggingMessages();
 
-        //Generate the recipes.json file if it doesn't exist
+        // --- 1. FILE GENERATION ---
         generateDefaultRecipesFile();
-        // 2. Load the recipes configuration
+        generateDefaultConfig();
+        generateDiggableFile();
+        generateMineableFile();
+
+        // --- 2. CONFIGURATION LOADING & VALIDATION ---
+        // Load methods now contain validation and return false on failure.
         if (!loadRecipesConfig()) {
             getLogger().severe("FAILED to load recipes.json. Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
+        if (!loadConfigFile()) {
+            getLogger().severe("FAILED to load config.json. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        if (!loadMineableFile()) {
+            getLogger().severe("FAILED to load mineable.json. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        if (!loadDiggableFile()) {
+            getLogger().severe("FAILED to load diggable.json. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
-        // 3. Process the recipes using the loaded config
-        processCraftingRecipes();
+        // --- 3. PROCESSING AND INITIALIZATION ---
 
-
-        this.saveDefaultConfig();
+        // Process general settings, mineable, and diggable lists
         processConfig();
+
+        // Process crafting recipes
         processCraftingRecipes();
+
         processPermissions();
-        getLogger().info("Finished processing config file.");
+        getLogger().info("Finished processing all config files.");
         loadDependencies();
 
-
+        // --- 4. HANDLER REGISTRATION ---
         handlerPlayerInteract = new PlayerInteractHandler();
         handlerBlockBreak = new BlockBreakHandler();
         handlerCraftItem = new CraftItemHandler();
@@ -97,26 +114,44 @@ public final class PowerMining extends JavaPlugin {
         handlerClickPlayer.Init(this);
         commandHandler.Init(this);
 
-
         getLogger().info("JodellePowerMining plugin was enabled.");
-
-
     }
 
+    @Override
+    public void onDisable() {
+        getLogger().info("PowerMining plugin was disabled.");
+    }
 
-    /**
-     * Checks if recipes.json exists and copies the default from the JAR
-     * into the plugin's data folder if it doesn't.
-     */
+    // ====================================================================
+    //                         FILE GENERATION METHODS
+    // ====================================================================
+
+    // Note: These use saveResource(fileName, false) to copy the default from
+    // the JAR if the file does not already exist in the plugin folder.
+
     private void generateDefaultRecipesFile() {
-        // The saveResource method checks if the file exists.
-        // If it doesn't, it copies the file from the resources folder
-        // inside your JAR to the plugin's data folder.
-        // The 'false' parameter means it will NOT overwrite an existing file.
         saveResource("recipes.json", false);
-
         getLogger().info("Checking for recipes.json... File ready!");
     }
+
+    private void generateDefaultConfig() {
+        saveResource("config.json", false);
+        getLogger().info("Checking for config.json... File ready!");
+    }
+
+    private void generateMineableFile() {
+        saveResource("mineable.json", false);
+        getLogger().info("Checking for mineable.json... File ready!");
+    }
+
+    private void generateDiggableFile() {
+        saveResource("diggable.json", false);
+        getLogger().info("Checking for diggable.json... File ready!");
+    }
+
+    // ====================================================================
+    //                           FILE LOADING METHODS
+    // ====================================================================
 
     /**
      * Loads the recipes.json file into a FileConfiguration object.
@@ -124,11 +159,8 @@ public final class PowerMining extends JavaPlugin {
      */
     private boolean loadRecipesConfig() {
         recipesFile = new File(getDataFolder(), "recipes.json");
-
-        // YamlConfiguration can handle basic JSON structures
         recipesConfig = YamlConfiguration.loadConfiguration(recipesFile);
 
-        // Check for basic validity (e.g., if the root key exists)
         if (recipesConfig.get("Recipes") == null) {
             getLogger().severe("recipes.json loaded but is missing the root 'Recipes' key. Check file structure.");
             return false;
@@ -137,6 +169,250 @@ public final class PowerMining extends JavaPlugin {
         getLogger().info("Successfully loaded recipes.json.");
         return true;
     }
+
+    /**
+     * Loads the config.json file into the generalConfig object.
+     * @return true if a core key ("Radius") is found, false otherwise.
+     */
+    private boolean loadConfigFile() {
+        File configFile = new File(getDataFolder(), "config.json");
+        this.generalConfig = YamlConfiguration.loadConfiguration(configFile);
+
+        if (!this.generalConfig.contains("Radius")) {
+            getLogger().severe("config.json loaded but is missing the 'Radius' key. Check file structure.");
+            return false;
+        }
+
+        getLogger().info("Successfully loaded config.json.");
+        return true;
+    }
+
+    /**
+     * Loads the mineable.json file into the mineableConfig object.
+     * @return true if the root section ("Minable") is found, false otherwise.
+     */
+    private boolean loadMineableFile() {
+        File mineableFile = new File(getDataFolder(), "mineable.json");
+        this.mineableConfig = YamlConfiguration.loadConfiguration(mineableFile);
+
+        if (this.mineableConfig.getConfigurationSection("Minable") == null) {
+            getLogger().severe("mineable.json loaded but is missing the root 'Minable' key. Block mining rules will not apply.");
+            return false;
+        }
+
+        getLogger().info("Successfully loaded mineable.json.");
+        return true;
+    }
+
+    /**
+     * Loads the diggable.json file into the diggableConfig object.
+     * @return true if the root key ("Diggable") is found and not empty, false otherwise.
+     */
+    private boolean loadDiggableFile() {
+        File diggableFile = new File(getDataFolder(), "diggable.json");
+        this.diggableConfig = YamlConfiguration.loadConfiguration(diggableFile);
+
+        List<String> diggableList = this.diggableConfig.getStringList("Diggable");
+
+        if (diggableList == null) {
+            getLogger().severe("diggable.json loaded but is missing the 'Diggable' list key. Check file structure.");
+            return false;
+        }
+
+        if (diggableList.isEmpty()) {
+            getLogger().warning("diggable.json loaded but the 'Diggable' list is empty.");
+        }
+
+        getLogger().info("Successfully loaded diggable.json.");
+        return true;
+    }
+
+
+    // ====================================================================
+    //                        CONFIGURATION PROCESSING
+    // ====================================================================
+
+    /**
+     * Reads the recipes.json file, processes each recipe, and stores it in its respective HashMap.
+     */
+    private void processCraftingRecipes() {
+        boolean showDebugMessage = false;
+        ConfigurationSection recipesSection = this.recipesConfig.getConfigurationSection("Recipes");
+
+        // This check is redundant due to the load method, but kept for safety.
+        if (recipesSection == null) {
+            getLogger().severe("The 'Recipes' section is missing or invalid in recipes.json. Cannot load recipes.");
+            return;
+        }
+
+        for (String toolName : recipesSection.getKeys(false)) {
+            debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.BLUE + "Processing " + toolName + " recipe");
+            List<String> materialsList = recipesSection.getStringList(toolName);
+
+            if (materialsList.size() != 9) {
+                getLogger().warning("Recipe for tool '" + toolName + "' has an invalid size (" + materialsList.size() + "). Skipping.");
+                continue;
+            }
+
+            ItemStack[] craftingRecipe = new ItemStack[9];
+            int i = 0;
+            boolean failed = false;
+
+            for (String material : materialsList) {
+                if (i >= 9) break;
+
+                if (material.equals("EMPTY")) {
+                    craftingRecipe[i] = null;
+                    i++;
+                    continue;
+                }
+
+                int separator = material.indexOf('*');
+                if (separator == -1) {
+                    getLogger().severe("Invalid format for '" + material + "' in recipe " + toolName + ". Missing '*'. Skipping recipe.");
+                    failed = true;
+                    break;
+                }
+
+                String materialNameStr = material.substring(0, separator);
+                Material materialName = Material.getMaterial(materialNameStr);
+                String quantityStr = material.substring(separator + 1);
+                int quantity;
+
+                if (materialName == null) {
+                    getLogger().severe("Unknown material '" + materialNameStr + "' in recipe " + toolName + ". Skipping recipe.");
+                    failed = true;
+                    break;
+                }
+
+                try {
+                    quantity = Integer.parseInt(quantityStr);
+                } catch (NumberFormatException e) {
+                    getLogger().severe("Invalid quantity '" + quantityStr + "' for material " + materialNameStr + " in recipe " + toolName + ". Skipping recipe.");
+                    failed = true;
+                    break;
+                }
+
+                ItemStack itemStack = new ItemStack(materialName, quantity);
+
+                if (quantity > itemStack.getMaxStackSize()) {
+                    getLogger().severe("Recipe " + toolName + " is invalid: Quantity (" + quantity + ") exceeds max stack size (" + itemStack.getMaxStackSize() + ") for " + materialNameStr);
+                    failed = true;
+                    break;
+                }
+
+                craftingRecipe[i] = itemStack;
+                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.GOLD + "Material: " + material);
+                i++;
+            }
+
+            if (failed) {
+                getLogger().severe("Recipe " + toolName + " failed validation and was not stored.");
+                continue;
+            }
+
+            // 5. Store the processed recipe array in the correct Reference HashMap
+            if (Reference.HAMMERS.contains(toolName)) {
+                Reference.HAMMER_CRAFTING_RECIPES.put(toolName, craftingRecipe);
+                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
+            } else if (Reference.EXCAVATORS.contains(toolName)) {
+                Reference.EXCAVATOR_CRAFTING_RECIPES.put(toolName, craftingRecipe);
+                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
+            } else if (Reference.PLOWS.contains(toolName)) {
+                Reference.PLOW_CRAFTING_RECIPES.put(toolName, craftingRecipe);
+                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
+            } else {
+                getLogger().warning("Tool name '" + toolName + "' found in recipes.json but not defined in Reference constants. Recipe ignored.");
+            }
+        }
+    }
+
+
+    /**
+     * Reads the config.json, mineable.json, and diggable.json files and processes them.
+     */
+    public void processConfig() {
+        // ----------------------------------------------
+        // 1. PROCESS MINABLE BLOCKS (from mineable.json)
+        // ----------------------------------------------
+        try {
+            ConfigurationSection minableSection = this.mineableConfig.getConfigurationSection("Minable");
+
+            if (minableSection == null) return; // Already logged in loadMineableFile
+
+            for (String blockType : minableSection.getKeys(false)) {
+                if (blockType == null || blockType.isEmpty()) continue;
+
+                Material blockMaterial = Material.getMaterial(blockType);
+
+                if (blockMaterial == null || Reference.MINABLE.containsKey(blockMaterial)) continue;
+
+                List<String> requiredTools = minableSection.getStringList(blockType);
+
+                Reference.MINABLE.put(blockMaterial, new ArrayList<>());
+                ArrayList<Material> temp = Reference.MINABLE.get(blockMaterial);
+
+                if (requiredTools.contains("any")) {
+                    temp = null;
+                } else {
+                    for (String hammerType : requiredTools) {
+                        if (hammerType == null || hammerType.isEmpty()) continue;
+
+                        Material hammerMaterial = Material.getMaterial(hammerType);
+
+                        if (hammerMaterial == null || (temp != null && temp.contains(hammerMaterial))) continue;
+
+                        if (temp != null) temp.add(hammerMaterial);
+                    }
+                }
+                Reference.MINABLE.put(blockMaterial, temp);
+            }
+        } catch (Exception e) {
+            getLogger().severe("Error reading Minable list from mineable.json: " + e.getMessage());
+        }
+
+        // ----------------------------------------------
+        // 2. PROCESS DIGGABLE BLOCKS (from diggable.json)
+        // ----------------------------------------------
+        try {
+            List<String> diggableBlocks = this.diggableConfig.getStringList("Diggable");
+
+            // Empty check already logged in loadDiggableFile()
+
+            for (String blockType : diggableBlocks) {
+                if (blockType == null || blockType.isEmpty()) continue;
+
+                Material blockMaterial = Material.getMaterial(blockType);
+
+                if (blockMaterial != null && !Reference.DIGGABLE.contains(blockMaterial))
+                    Reference.DIGGABLE.add(blockMaterial);
+            }
+        } catch (Exception e) {
+            getLogger().severe("Error reading Diggable list from diggable.json: " + e.getMessage());
+        }
+
+        // ----------------------------------------------
+        // 3. PROCESS GENERAL SETTINGS (from config.json)
+        // ----------------------------------------------
+        try {
+            // Note: Since Reference.RADIUS is now a primitive int with a default,
+            // a config error here won't crash the plugin, but we log it anyway.
+            Reference.RADIUS = this.generalConfig.getInt("Radius");
+            Reference.DEEP = this.generalConfig.getInt("Deep");
+
+            // Log for verification
+            getLogger().info("Loaded Radius: " + Reference.RADIUS + ", Deep: " + Reference.DEEP);
+
+        } catch (Exception e) {
+            getLogger().severe("Error reading Radius/Deep from config.json: " + e.getMessage());
+            getLogger().info("Using default values (Radius=1, Deep=0).");
+        }
+    }
+
+
+    // ====================================================================
+    //                           UTILITY METHODS
+    // ====================================================================
 
     /**
      * Loads the dependencies that the plugin might require to properly function
@@ -161,8 +437,6 @@ public final class PowerMining extends JavaPlugin {
     private void processPermissions() {
 
         debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "[JodellePowerMining] - Setting up Permissions");
-        //Hashmap to store the permission
-        // WOODEN_PICKAXE -> powermining.craft.hammer.wooden
         generatePermission(Reference.HAMMERS, Reference.PICKAXES);
         generatePermission(Reference.EXCAVATORS, Reference.SHOVELS);
         generatePermission(Reference.PLOWS, Reference.HOES);
@@ -177,280 +451,27 @@ public final class PowerMining extends JavaPlugin {
 
     /**
      * Generates the permissions in form of a String
-     * @param powerToolNames Array containing the names of all the PowerTools
-     * @param items List of the items
      */
     protected void generatePermission(@Nonnull final ArrayList<String> powerToolNames, @Nonnull final ArrayList<Material> items) {
-
         int i = 0;
         for (String tool : powerToolNames) {
-            String craftPermission = "powermining.craft." + tool.substring(tool.indexOf("_") + 1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
-            String usePermission = "powermining.use." + tool.substring(tool.indexOf("_") + 1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
-            String enchantPermission = "powermining.enchant." + tool.substring(tool.indexOf("_") + 1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
+            String toolType = tool.substring(tool.indexOf("_") + 1).toLowerCase();
+            String toolMaterial = tool.substring(0, tool.indexOf("_")).toLowerCase();
+
+            String craftPermission = "powermining.craft." + toolType + "." + toolMaterial;
+            String usePermission = "powermining.use." + toolType + "." + toolMaterial;
+            String enchantPermission = "powermining.enchant." + toolType + "." + toolMaterial;
 
             Reference.CRAFT_PERMISSIONS.put(items.get(i), craftPermission);
             Reference.USE_PERMISSIONS.put(items.get(i), usePermission);
             Reference.ENCHANT_PERMISSIONS.put(items.get(i), enchantPermission);
-             i++;
-        }
-
-    }
-
-    /**
-     * Reads the recipes.json file, processes each recipe, and stores it in its respective HashMap.
-     * Assumes 'this.recipesConfig' has been successfully loaded from recipes.json.
-     */
-    private void processCraftingRecipes() {
-        boolean showDebugMessage = false;
-
-        // 1. Get the 'Recipes' section from the loaded JSON config.
-        // This section is a map/object containing all the individual recipes.
-        ConfigurationSection recipesSection = this.recipesConfig.getConfigurationSection("Recipes");
-
-        if (recipesSection == null) {
-            getLogger().severe("The 'Recipes' section is missing or invalid in recipes.json. Cannot load recipes.");
-            return;
-        }
-
-        // 2. Iterate over the keys (the tool names, e.g., "WOODEN_HAMMER")
-        // This replaces your old, failing loop: for (Object x : (ArrayList<?>) getConfig().getList("Recipes"))
-        for (String toolName : recipesSection.getKeys(false)) {
-            debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.BLUE + "Processing " + toolName + " recipe");
-
-            // 3. Get the list of material strings for the current tool (e.g., [ "EMPTY", "OAK_LOG*1", ... ])
-            List<String> materialsList = recipesSection.getStringList(toolName);
-
-            if (materialsList.size() != 9) {
-                getLogger().warning("Recipe for tool '" + toolName + "' has an invalid size (" + materialsList.size() + "). Recipes must have exactly 9 slots. Skipping.");
-                continue;
-            }
-
-            // This array is used to store all 9 ItemStacks used in the recipe
-            ItemStack[] craftingRecipe = new ItemStack[9];
-            int i = 0;
-
-            // 4. Iterate over the materials list to parse ItemStacks
-            for (String material : materialsList) {
-
-                // Should always be 9 due to the check above, but i < 9 is safe practice
-                if (i >= 9) break;
-
-                // EMPTY means that the slot is empty
-                if (material.equals("EMPTY")) {
-                    craftingRecipe[i] = null;
-                    i++;
-                    continue;
-                }
-
-                // The material and the quantity are separated by '*'
-                int separator = material.indexOf('*');
-
-                if (separator == -1) {
-                    getLogger().severe("Invalid format for '" + material + "' in recipe " + toolName + ". Missing '*'. Skipping recipe.");
-                    break; // Stop processing this recipe
-                }
-
-                // Parse Material Name and Quantity
-                String materialNameStr = material.substring(0, separator);
-                Material materialName = Material.getMaterial(materialNameStr);
-                String quantityStr = material.substring(separator + 1);
-                int quantity;
-
-                if (materialName == null) {
-                    getLogger().severe("Unknown material '" + materialNameStr + "' in recipe " + toolName + ". Skipping recipe.");
-                    break; // Stop processing this recipe
-                }
-
-                try {
-                    quantity = Integer.parseInt(quantityStr);
-                } catch (NumberFormatException e) {
-                    getLogger().severe("Invalid quantity '" + quantityStr + "' for material " + materialNameStr + " in recipe " + toolName + ". Skipping recipe.");
-                    break; // Stop processing this recipe
-                }
-
-                // Create the ItemStack and perform checks
-                ItemStack itemStack = new ItemStack(materialName, quantity);
-
-                if (quantity > itemStack.getMaxStackSize()) {
-                    getLogger().severe("Recipe " + toolName + " is invalid: Quantity (" + quantity + ") exceeds max stack size (" + itemStack.getMaxStackSize() + ") for " + materialNameStr);
-                    // Stop processing this recipe if an item is impossible to stack
-                    break;
-                }
-
-                craftingRecipe[i] = itemStack;
-                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.GOLD + "Material: " + material);
-                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.GOLD + "Max stack size: " + String.valueOf(craftingRecipe[i].getMaxStackSize()));
-                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.GOLD + "ConfigFile stack size: " + quantity);
-                i++;
-            }
-
-            // If the parsing was interrupted (due to a 'break' above), skip the storage step
-            if (i < 9 && i > 0) {
-                getLogger().severe("Recipe " + toolName + " failed validation and was not stored.");
-                continue;
-            }
-
-            // 5. Store the processed recipe array in the correct Reference HashMap
-            if (Reference.HAMMERS.contains(toolName)) {
-                Reference.HAMMER_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-                continue;
-            }
-            if (Reference.EXCAVATORS.contains(toolName)) {
-                Reference.EXCAVATOR_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-                continue;
-            }
-            if (Reference.PLOWS.contains(toolName)) {
-                Reference.PLOW_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-                continue;
-            }
-
-            getLogger().warning("Tool name '" + toolName + "' found in recipes.json but not defined in Reference constants. Recipe ignored.");
+            i++;
         }
     }
 
-
-//    /**
-//     * Reads the config file, processes each recipe and stores it on its respective HashMap
-//     */
-//    private void processCraftingRecipes() {
-//        boolean showDebugMessage = false;
-//        //This hashmap is used to store all the information about the recipe
-//        //The key is the name of the item, ex DIAMOND_HAMMER
-//        //The value is an array of materials where each position refers to the crafting table matrix
-//        // HashMap<String, ItemStack[]> craftingRecipes = new HashMap<>();
-//        // We start by getting the section recipes from the config file
-//        // Each element iterated is the name of the powertool, ex: POWER_HAMMER
-//        for (Object x : (ArrayList<?>) getConfig().getList("Recipes")) {
-//            // This HashMap contains all the names of the blocks of the recipe
-//            // as well as their quantities. Ex: DIAMOND*1
-//            LinkedHashMap<String, ArrayList> l = (LinkedHashMap<String, ArrayList>) x;
-//            for (String toolName : l.keySet()) {
-//                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.BLUE + "Processing " + toolName + " recipe");
-//                // This array is used to store all 9 itemstacks used in the recipe
-//                // When an element is null signifies an empty slot in the crafting table
-//                ItemStack[] craftingRecipe = new ItemStack[9];
-//                int i = 0;
-//                for (String material : (ArrayList<String>) l.get(toolName)) {
-//                    //console.sendMessage(ChatColor.AQUA + hammerType);
-//                    // EMPTY means that the slot is empty, obviously
-//                    if (material.equals("EMPTY")) {
-//                        craftingRecipe[i] = null;
-//                        i++;
-//                        continue;
-//                    }
-//                    // The material and the quantity are separated by '*'
-//                    int separator = material.indexOf('*');
-//                    Material materialName = Material.getMaterial(material.substring(0, separator));
-//
-//                    int quantity = Integer.parseInt(material.substring(separator + 1, material.length()));
-//                    if (quantity > 64) {
-//
-//                    }
-//                    ItemStack itemStack = new ItemStack(materialName, quantity);
-//                    if (quantity > itemStack.getMaxStackSize()){
-//                        throw new NumberFormatException("A full stack of " + material + " can only contain " + itemStack.getMaxStackSize());
-//                    }
-//                    craftingRecipe[i] = itemStack;
-//                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Material: " + material);
-//                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Max stack size: " + String.valueOf(craftingRecipe[i].getMaxStackSize()));
-//                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "ConfigFile stack size: " + quantity);
-//                    i++;
-//                }
-//                if (Reference.HAMMERS.contains(toolName)) {
-//                    Reference.HAMMER_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-//                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-//                    continue;
-//                }
-//                if (Reference.EXCAVATORS.contains(toolName)) {
-//                    Reference.EXCAVATOR_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-//                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-//                    continue;
-//                }
-//                if (Reference.PLOWS.contains(toolName)) {
-//                    Reference.PLOW_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-//                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-//                    continue;
-//                }
-//            }
-//
-//        }
-//
-//
-//        //console.sendMessage(ChatColor.AQUA + Integer.toString(Reference.EXCAVATOR_CRAFTING_RECIPES.size()));
-//
-//        //Add the craftingRecipes hashmap to the Reference, so it can be accessed globally
-//        //Reference.CRAFTING_RECIPES = craftingRecipes;
-//
-//    }
-
-    @Override
-    public void onDisable() {
-        getLogger().info("PowerMining plugin was disabled.");
-    }
-
-    /**
-     * Reads the config file and processes it
-     */
-    public void processConfig() {
-        try {
-            for (Object x : (ArrayList<?>) getConfig().getList("Minable")) {
-                LinkedHashMap<String, ArrayList> l = (LinkedHashMap<String, ArrayList>) x;
-
-                for (String blockType : l.keySet()) {
-                    if (blockType == null || blockType.isEmpty())
-                        continue;
-
-                    if (Material.getMaterial(blockType) == null || Reference.MINABLE.containsKey(Material.getMaterial(blockType)))
-                        continue;
-
-                    Reference.MINABLE.put(Material.getMaterial(blockType), new ArrayList<Material>());
-                    ArrayList<Material> temp = Reference.MINABLE.get(Material.getMaterial(blockType));
-
-                    for (String hammerType : (ArrayList<String>) l.get(blockType)) {
-                        if (hammerType == null || hammerType.isEmpty())
-                            continue;
-
-                        if (hammerType.equals("any"))
-                            temp = null;
-
-                        if (hammerType != null && (Material.getMaterial(hammerType) == null ||
-                                (temp != null && temp.contains(Material.getMaterial(hammerType)))))
-                            continue;
-
-                        if (temp != null)
-                            temp.add(Material.getMaterial(hammerType));
-                    }
-
-                    Reference.MINABLE.put(Material.getMaterial(blockType), temp);
-                }
-            }
-        } catch (NullPointerException e) {
-            getLogger().info("NPE when trying to read the Minable list from the config file, check if it's set correctly!");
-        }
-
-        try {
-            for (String blockType : getConfig().getStringList("Diggable")) {
-                if (blockType == null || blockType.isEmpty())
-                    continue;
-
-                if (Material.getMaterial(blockType) != null && !Reference.DIGGABLE.contains(Material.getMaterial(blockType)))
-                    Reference.DIGGABLE.add(Material.getMaterial(blockType));
-            }
-        } catch (NullPointerException e) {
-            getLogger().info("NPE when trying to read the Digable list from the config file, check if it's set correctly!");
-        }
-
-        //Register for tools
-        try {
-            Reference.RADIUS = getConfig().getInt("Radius");
-            Reference.DEEP = getConfig().getInt("Deep");
-        } catch (NullPointerException e) {
-            getLogger().info("HOE, check if hoes radius is currectly added.");
-        }
-    }
+    // ====================================================================
+    //                           GETTER METHODS
+    // ====================================================================
 
     public PlayerInteractHandler getPlayerInteractHandler() {
         return handlerPlayerInteract;
@@ -477,7 +498,7 @@ public final class PowerMining extends JavaPlugin {
     }
 
     public WorldGuardPlugin getWorldGuard() {
-        return (WorldGuardPlugin) worldguard;
+        return worldguard;
     }
 
     public DebuggingMessages getDebuggingMessages() {

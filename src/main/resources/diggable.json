@@ -1,0 +1,20 @@
+{
+  "Diggable": [
+    "GRASS_BLOCK",
+    "DIRT",
+    "SAND",
+    "GRAVEL",
+    "CLAY",
+    "SOUL_SOIL",
+    "SOUL_SAND",
+    "GRASS_PATH",
+    "SNOW_BLOW",
+    "SNOW",
+    "SNOW_BLOCK",
+    "MYCELIUM",
+    "RED_SAND",
+    "WARPED_WART_BLOCK",
+    "FARMLAND",
+    "GLOWSTONE"
+  ]
+}
