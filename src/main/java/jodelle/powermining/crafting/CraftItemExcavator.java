@@ -23,35 +23,42 @@ import java.util.Map;
 
 public class CraftItemExcavator extends CraftItem {
 
-	public static final String loreString = "POUND!";
+    // --- CONSOLIDATED LORE FOR ALL EXCAVATORS ---
+    // Line 1: Flavor Text (Gray, Italic)
+    public static final String LORE_FLAVOR = "§8§oThe relentless earthmover.§r";
+    // Line 2: Ability Description (Gold)
+    public static final String LORE_ABILITY = "§6Digs a 3x3 area.§r";
 
-	public CraftItemExcavator(@Nonnull PowerMining plugin) {
-		super(plugin);
+    public CraftItemExcavator(@Nonnull PowerMining plugin) {
+        super(plugin);
 
-		for(Map.Entry<String, ItemStack[]> tool : Reference.EXCAVATOR_CRAFTING_RECIPES.entrySet()){
+        for(Map.Entry<String, ItemStack[]> tool : Reference.EXCAVATOR_CRAFTING_RECIPES.entrySet()){
 
-			//key is the name of the powertool. Ex: DIAMOND_HAMMER
-			//value is an array containing the recipe
-			final String key = tool.getKey();
-			final ItemStack[] value = tool.getValue();
-			//console.sendMessage(ChatColor.AQUA + "Creating: " + key);
+            // key is the name of the powertool. Ex: DIAMOND_EXCAVATOR
+            // value is an array containing the recipe
+            final String key = tool.getKey();
+            final ItemStack[] value = tool.getValue();
 
-			//We start by finding the position of the name on the HAMMERS array
-			//With that position we can fetch the name of the minecraft item present in other array
-			int i = Reference.EXCAVATORS.indexOf(key);
+            // We start by finding the position of the name on the EXCAVATORS array
+            // With that position we can fetch the name of the minecraft item present in the SHOVELS array
+            int i = Reference.EXCAVATORS.indexOf(key);
 
-			//console.sendMessage(ChatColor.AQUA + String.valueOf(i));
-			final Material pickaxe = Reference.SHOVELS.get(i);
+            final Material shovel = Reference.SHOVELS.get(i);
 
-			final ItemStack powerTool = new ItemStack(pickaxe, 1);
-			//powerTools.add(powerTool);
+            final ItemStack powerTool = new ItemStack(shovel, 1);
 
-			modifyItemMeta(powerTool, loreString, key);
+            // --- APPLY BOTH LINES OF LORE ---
+            modifyItemMeta(powerTool, LORE_FLAVOR, LORE_ABILITY, key);
 
-			final ShapedRecipe recipe = createRecipe(powerTool, key, value);
+            final ShapedRecipe recipe = createRecipe(powerTool, key, value);
 
-			registerRecipes(recipe);
+            registerRecipes(recipe);
+        }
+    }
 
-		}
-	}
+    /*
+     * NOTE: This class assumes the base class 'CraftItem' has been updated
+     * to include a 'modifyItemMeta' method that accepts three String parameters
+     * for the two lines of lore (LORE_FLAVOR and LORE_ABILITY) plus the tool name (key).
+     */
 }

@@ -24,41 +24,41 @@ import java.util.Map;
 
 public class CraftItemHammer extends CraftItem{
 
-	public static final String loreString = "SMASH!";
+    // --- CONSOLIDATED LORE FOR ALL HAMMERS ---
+    // Line 1: Flavor Text (Gray, Italic)
+    public static final String LORE_FLAVOR = "§8§oForged to move mountains.§r";
+    // Line 2: Ability Description (Gold)
+    public static final String LORE_ABILITY = "§6Mines a 3x3 area.§r";
 
-	public CraftItemHammer(@Nonnull PowerMining plugin) {
-		super(plugin);
+    // NOTE: The original 'public static final String loreString = "SMASH!";' is now obsolete
+    // and can be removed, but we'll leave it for now and comment it out if you prefer.
+    // public static final String loreString = "SMASH!";
 
-		for(Map.Entry<String, ItemStack[]> tool : Reference.HAMMER_CRAFTING_RECIPES.entrySet()){
+    public CraftItemHammer(@Nonnull PowerMining plugin) {
+        super(plugin);
 
-			//key is the name of the powertool. Ex: DIAMOND_HAMMER
-			//value is an array containing the recipe
-			final String key = tool.getKey();
-			final ItemStack[] value = tool.getValue();
-			//console.sendMessage(ChatColor.AQUA + "Creating: " + key);
+        for(Map.Entry<String, ItemStack[]> tool : Reference.HAMMER_CRAFTING_RECIPES.entrySet()){
 
-			//We start by finding the position of the name on the HAMMERS array
-			//With that position we can fetch the name of the minecraft item present in other array
-			int i = Reference.HAMMERS.indexOf(key);
+            // key is the name of the powertool. Ex: DIAMOND_HAMMER
+            // value is an array containing the recipe
+            final String key = tool.getKey();
+            final ItemStack[] value = tool.getValue();
 
-			//console.sendMessage(ChatColor.AQUA + String.valueOf(i));
-			final Material pickaxe = Reference.PICKAXES.get(i);
+            // We start by finding the position of the name on the HAMMERS array
+            // With that position we can fetch the name of the minecraft item present in the PICKAXES array
+            int i = Reference.HAMMERS.indexOf(key);
 
-			final ItemStack powerTool = new ItemStack(pickaxe, 1);
-			//powerTools.add(powerTool);
+            final Material pickaxe = Reference.PICKAXES.get(i);
 
-			modifyItemMeta(powerTool, loreString, key);
+            final ItemStack powerTool = new ItemStack(pickaxe, 1);
 
-			final ShapedRecipe recipe = createRecipe(powerTool, key, value);
+            // --- APPLY BOTH LINES OF LORE ---
+            // Assuming modifyItemMeta is now: modifyItemMeta(ItemStack, String lore1, String lore2, String name)
+            modifyItemMeta(powerTool, LORE_FLAVOR, LORE_ABILITY, key);
 
-			registerRecipes(recipe);
-		}
+            final ShapedRecipe recipe = createRecipe(powerTool, key, value);
 
-	}
-
-
-
-
-
-
+            registerRecipes(recipe);
+        }
+    }
 }

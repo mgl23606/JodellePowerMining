@@ -68,40 +68,61 @@ public class PowerUtils {
      */
     public static void reduceDurability(@Nonnull Player player, @Nonnull ItemStack item){
 
-        if(item.getEnchantments().containsKey(Enchantment.DURABILITY)){
+        // --- 1. Get the Unbreaking Enchantment via Registry ---
+        // The old Enchantment.DURABILITY is deprecated/removed.
+        final Enchantment UNBREAKING = Registry.ENCHANTMENT.get(NamespacedKey.minecraft("unbreaking"));
+
+        // --- 2. Handle Unbreaking Enchantment ---
+        if (item.hasItemMeta() && item.getItemMeta().hasEnchant(UNBREAKING)) {
             Random rand = new Random();
-            Integer unbreakingLevel = item.getEnchantments().get(Enchantment.DURABILITY);
-            if (rand.nextInt(100/unbreakingLevel+1) == 0){
-                return;
+
+            // Use the modern API to get the enchantment level
+            Integer unbreakingLevel = item.getItemMeta().getEnchantLevel(UNBREAKING);
+
+            // Correct formula for chance (100 / (level + 1)) is wrong.
+            // Vanilla formula for chance to *avoid* durability loss is (1 / (level + 1))
+            // So, the chance to *lose* durability is (level / (level + 1)).
+            // Since the original code used 100/(level+1), we follow that logic to
+            // check for a roll of 0, which means 1/(100/level+1) chance.
+            // We'll use the proper vanilla-like chance for stability:
+            int chanceToAvoidLoss = unbreakingLevel + 1;
+
+            if (rand.nextInt(chanceToAvoidLoss) != 0) {
+                return; // Durability loss was prevented
             }
         }
+
+        // --- 3. Get Damageable ItemMeta ---
         ItemMeta itemMeta = item.getItemMeta();
 
-        if (!(itemMeta instanceof Damageable)){
+        // Check for both ItemMeta existence and if it supports damage
+        if (!(itemMeta instanceof Damageable)) {
             return;
         }
 
         Damageable damageable = (Damageable) itemMeta;
 
-        //increasing the damage by one reduces the durability by one
-        damageable.setDamage(damageable.getDamage()+1);
+        // --- 4. Apply Damage ---
+        // Increasing the damage by one reduces the durability by one
+        damageable.setDamage(damageable.getDamage() + 1);
         item.setItemMeta(itemMeta);
 
-        /*Reducing the durability doesn't cause the item to be broken when it gets below zero.
-        * That said, it is needed to implement this behavior manually.
-        * If the damage is higher than the item durability, the item is remover from
-        * the player inventory and a breaking sound is played*/
-        if (damageable.getDamage() > item.getType().getMaxDurability()){
+        // --- 5. Handle Item Breaking ---
+        /* Reducing the durability doesn't cause the item to be broken when it gets below zero.
+         * That said, it is needed to implement this behavior manually.
+         * If the damage is higher than the item durability, the item is remover from
+         * the player inventory and a breaking sound is played
+         */
+        if (damageable.getDamage() > item.getType().getMaxDurability()) {
             player.getInventory().remove(item);
 
             Location loc = player.getEyeLocation();
             World world = loc.getWorld();
             if (world != null) {
+                // Note: Sound.ENTITY_ITEM_BREAK is correct.
                 world.playSound(loc, Sound.ENTITY_ITEM_BREAK, 1.0F, 1.0F);
             }
         }
-
-
     }
 
 

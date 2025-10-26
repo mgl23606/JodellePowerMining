@@ -44,13 +44,14 @@ public class Reference {
 
 	public static ArrayList<Material> PATHABLE = new ArrayList<>(Collections.singletonList(
 			Material.GRASS_BLOCK
-	));
+    ));
 
 	public static ArrayList<Material> PICKAXES =  new ArrayList<>(Arrays.asList(
 		Material.WOODEN_PICKAXE,
 		Material.STONE_PICKAXE,
 		Material.IRON_PICKAXE,
 		Material.GOLDEN_PICKAXE,
+        Material.COPPER_PICKAXE,
 		Material.DIAMOND_PICKAXE,
 		Material.NETHERITE_PICKAXE
 	));
@@ -60,6 +61,7 @@ public class Reference {
 			Material.STONE_SHOVEL,
 			Material.IRON_SHOVEL,
 			Material.GOLDEN_SHOVEL,
+            Material.COPPER_SHOVEL,
 			Material.DIAMOND_SHOVEL,
 			Material.NETHERITE_SHOVEL
 	));
@@ -70,6 +72,7 @@ public class Reference {
 		Material.STONE_SHOVEL,
 		Material.IRON_SHOVEL,
 		Material.GOLDEN_SHOVEL,
+        Material.COPPER_SHOVEL,
 		Material.DIAMOND_SHOVEL,
 		Material.NETHERITE_SHOVEL
 	));
@@ -79,6 +82,7 @@ public class Reference {
 			Material.STONE_HOE,
 			Material.IRON_HOE,
 			Material.GOLDEN_HOE,
+            Material.COPPER_HOE,
 			Material.DIAMOND_HOE,
 			Material.NETHERITE_HOE
 	));
@@ -93,6 +97,7 @@ public class Reference {
 			 "STONE_HAMMER",
 			 "IRON_HAMMER",
 			 "GOLDEN_HAMMER",
+             "COPPER_HAMMER",
 			 "DIAMOND_HAMMER",
 			 "NETHERITE_HAMMER"
 	));
@@ -102,6 +107,7 @@ public class Reference {
 			"STONE_EXCAVATOR",
 			"IRON_EXCAVATOR",
 			"GOLDEN_EXCAVATOR",
+            "COPPER_EXCAVATOR",
 			"DIAMOND_EXCAVATOR",
 			"NETHERITE_EXCAVATOR"
 	));
@@ -111,6 +117,7 @@ public class Reference {
 			"STONE_PLOW",
 			"IRON_PLOW",
 			"GOLDEN_PLOW",
+            "COPPER_PLOW",
 			"DIAMOND_PLOW",
 			"NETHERITE_PLOW"
 	));

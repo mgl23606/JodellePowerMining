@@ -25,27 +25,47 @@ public class CraftItem {
     }
 
     /**
-     * Modifies the PowerTool meta
+     * Modifies the PowerTool meta, setting the custom name, the two-line lore,
+     * and the Persistent Data Tag to identify it as a power tool.
+     *
      * @param powerTool Item to be modified
-     * @param loreString Lore String
-     * @param name Name of the tool
+     * @param loreLine1 The first line of lore (Flavor Text).
+     * @param loreLine2 The second line of lore (Ability Description).
+     * @param name The internal name of the tool (e.g., "DIAMOND_HAMMER").
      */
-    protected void modifyItemMeta(@Nonnull final ItemStack powerTool, @Nonnull final String loreString, @Nonnull final String name){
+    protected void modifyItemMeta(@Nonnull final ItemStack powerTool, @Nonnull final String loreLine1, @Nonnull final String loreLine2, @Nonnull final String name){
         final ItemMeta powerToolMeta = powerTool.getItemMeta();
 
+        // 1. Set Persistent Data Container (PDC)
         final NamespacedKey isPowerTool = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
         assert powerToolMeta != null;
         powerToolMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.STRING, name);
 
-        final ArrayList<String> lore = new ArrayList<>();
-        lore.add(loreString);
+        // 2. Format Display Name - THIS IS THE CHANGE
+        // Replaces underscores and then converts to Title Case (e.g., "COPPER HAMMER")
+        String displayString = name.replace("_", " ").toLowerCase();
 
-        powerToolMeta.setDisplayName(name);
+        // Capitalize the first letter of each word
+        String[] words = displayString.split(" ");
+        StringBuilder prettyNameBuilder = new StringBuilder();
+        for (String word : words) {
+            if (word.length() > 0) {
+                prettyNameBuilder.append(Character.toUpperCase(word.charAt(0)));
+                prettyNameBuilder.append(word.substring(1)).append(" ");
+            }
+        }
+        String prettyName = ChatColor.AQUA + prettyNameBuilder.toString().trim();
+        powerToolMeta.setDisplayName(prettyName);
+
+        // 3. Set the Two-Line Lore
+        final ArrayList<String> lore = new ArrayList<>();
+        lore.add(loreLine1);
+        lore.add(loreLine2);
 
         powerToolMeta.setLore(lore);
 
+        // 4. Apply the Meta
         powerTool.setItemMeta(powerToolMeta);
-
     }
 
     protected ShapedRecipe createRecipe(@Nonnull final ItemStack powerTool, @Nonnull final String name, @Nonnull final ItemStack[] recipe){
