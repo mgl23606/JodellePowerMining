@@ -1,6 +1,5 @@
 package jodelle.powermining.crafting;
 
-
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.DebuggingMessages;
 import org.bukkit.ChatColor;
@@ -13,6 +12,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CraftItem {
 
@@ -21,78 +21,94 @@ public class CraftItem {
 
     public CraftItem(@Nonnull final PowerMining plugin) {
         this.plugin = plugin;
-        debuggingMessages = plugin.getDebuggingMessages();
+        this.debuggingMessages = plugin.getDebuggingMessages();
     }
 
     /**
-     * Modifies the PowerTool meta, setting the custom name, the two-line lore,
-     * and the Persistent Data Tag to identify it as a power tool.
+     * Modifies the PowerTool's meta — setting name, lore, and custom data tag.
      *
-     * @param powerTool Item to be modified
-     * @param loreLine1 The first line of lore (Flavor Text).
-     * @param loreLine2 The second line of lore (Ability Description).
-     * @param name The internal name of the tool (e.g., "DIAMOND_HAMMER").
+     * @param powerTool Item to modify.
+     * @param loreLine1 First line of lore (flavor text).
+     * @param loreLine2 Second line of lore (ability description).
+     * @param name Internal name of the tool (e.g. "DIAMOND_HAMMER").
      */
-    protected void modifyItemMeta(@Nonnull final ItemStack powerTool, @Nonnull final String loreLine1, @Nonnull final String loreLine2, @Nonnull final String name){
-        final ItemMeta powerToolMeta = powerTool.getItemMeta();
+    protected void modifyItemMeta(@Nonnull final ItemStack powerTool,
+                                  @Nonnull final String loreLine1,
+                                  @Nonnull final String loreLine2,
+                                  @Nonnull final String name) {
 
-        // 1. Set Persistent Data Container (PDC)
-        final NamespacedKey isPowerTool = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
-        assert powerToolMeta != null;
-        powerToolMeta.getPersistentDataContainer().set(isPowerTool, PersistentDataType.STRING, name);
+        ItemMeta meta = powerTool.getItemMeta();
+        if (meta == null) {
+            debuggingMessages.sendConsoleMessage(ChatColor.RED + "[PowerMining] Failed to get ItemMeta for " + name);
+            return;
+        }
 
-        // 2. Format Display Name - THIS IS THE CHANGE
-        // Replaces underscores and then converts to Title Case (e.g., "COPPER HAMMER")
-        String displayString = name.replace("_", " ").toLowerCase();
+        // Persistent Data Tag
+        NamespacedKey key = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
+        meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, name);
 
-        // Capitalize the first letter of each word
-        String[] words = displayString.split(" ");
-        StringBuilder prettyNameBuilder = new StringBuilder();
+        // Format display name to "Diamond Hammer"
+        String displayName = formatDisplayName(name);
+        meta.setDisplayName(ChatColor.AQUA + displayName);
+
+        // Two-line lore
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GRAY + loreLine1);
+        lore.add(ChatColor.DARK_GRAY + loreLine2);
+        meta.setLore(lore);
+
+        powerTool.setItemMeta(meta);
+    }
+
+    /**
+     * Converts internal tool names like "DIAMOND_HAMMER" to "Diamond Hammer"
+     */
+    private String formatDisplayName(String name) {
+        String[] words = name.toLowerCase().split("_");
+        StringBuilder sb = new StringBuilder();
         for (String word : words) {
-            if (word.length() > 0) {
-                prettyNameBuilder.append(Character.toUpperCase(word.charAt(0)));
-                prettyNameBuilder.append(word.substring(1)).append(" ");
+            if (!word.isEmpty()) {
+                sb.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1))
+                        .append(" ");
             }
         }
-        String prettyName = ChatColor.AQUA + prettyNameBuilder.toString().trim();
-        powerToolMeta.setDisplayName(prettyName);
-
-        // 3. Set the Two-Line Lore
-        final ArrayList<String> lore = new ArrayList<>();
-        lore.add(loreLine1);
-        lore.add(loreLine2);
-
-        powerToolMeta.setLore(lore);
-
-        // 4. Apply the Meta
-        powerTool.setItemMeta(powerToolMeta);
+        return sb.toString().trim();
     }
 
-    protected ShapedRecipe createRecipe(@Nonnull final ItemStack powerTool, @Nonnull final String name, @Nonnull final ItemStack[] recipe){
+    /**
+     * Creates a ShapedRecipe from a 3x3 ItemStack array.
+     */
+    protected ShapedRecipe createRecipe(@Nonnull final ItemStack powerTool,
+                                        @Nonnull final String name,
+                                        @Nonnull final ItemStack[] recipe) {
 
-        //Initialize the recipe
-        final ShapedRecipe toolRecipe = new ShapedRecipe(new NamespacedKey(plugin, name),powerTool);
-        //console.sendMessage(ChatColor.AQUA + "NameSpacedKey:" + name);
-        final char[] alphabet = new char[]{
-                'a','b','c','d','e','f','g','h','i'
-        };
+        NamespacedKey key = new NamespacedKey(plugin, name.toLowerCase());
+        ShapedRecipe shapedRecipe = new ShapedRecipe(key, powerTool);
 
+        shapedRecipe.shape("abc", "def", "ghi");
+        char[] grid = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'};
 
-        toolRecipe.shape("abc", "def", "ghi");
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < recipe.length && i < 9; i++) {
             if (recipe[i] != null) {
-                toolRecipe.setIngredient(alphabet[i], recipe[i].getType());
+                shapedRecipe.setIngredient(grid[i], recipe[i].getType());
             }
         }
 
-        return toolRecipe;
-
+        return shapedRecipe;
     }
 
+    /**
+     * Registers a recipe safely — ignores duplicates silently.
+     */
     protected void registerRecipes(@Nonnull final ShapedRecipe recipe) {
-
-        debuggingMessages.sendConsoleMessage(ChatColor.AQUA + "Adding Recipe:" + recipe.getKey().getKey());
-        plugin.getServer().addRecipe(recipe);
+        try {
+            plugin.getServer().addRecipe(recipe);
+            debuggingMessages.sendConsoleMessage(ChatColor.AQUA + "Registered recipe: " + recipe.getKey().getKey());
+        } catch (IllegalStateException ignored) {
+            debuggingMessages.sendConsoleMessage(ChatColor.YELLOW + "Skipped duplicate recipe: " + recipe.getKey().getKey());
+        } catch (Exception e) {
+            debuggingMessages.sendConsoleMessage(ChatColor.RED + "Failed to register recipe: " + e.getMessage());
+        }
     }
-
 }

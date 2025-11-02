@@ -3,13 +3,19 @@
  * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
  *
  * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
+ * Further information please refer to the included lgpl-3.0.txt
+ * or the GNU website (http://www.gnu.org/licenses/lgpl)
+ */
+
+/*
+ * Responsible for creating the Plow items and their respective crafting recipes.
  */
 
 package jodelle.powermining.crafting;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.Reference;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -19,41 +25,51 @@ import java.util.Map;
 
 public class CraftItemPlow extends CraftItem {
 
-    // --- CONSOLIDATED LORE FOR ALL PLOWS ---
-    // Line 1: Flavor Text (Gray, Italic)
-    public static final String LORE_FLAVOR = "§8§oCultivates a kingdom, quickly.§r";
-    // Line 2: Ability Description (Gold)
-    public static final String LORE_ABILITY = "§6Tills a 3x3 area.§r";
-
-    // NOTE: The original 'public static final String loreString = "PLOW!";' is now obsolete
-    // and can be removed.
-    // public static final String loreString = "PLOW!";
+    // --- LORE CONSTANTS ---
+    private static final String LORE_FLAVOR = ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Cultivates a kingdom, quickly.";
+    private static final String LORE_ABILITY = ChatColor.GOLD + "Tills a 3x3 area.";
 
     public CraftItemPlow(@Nonnull final PowerMining plugin) {
         super(plugin);
 
-        for(Map.Entry<String, ItemStack[]> tool : Reference.PLOW_CRAFTING_RECIPES.entrySet()){
+        if (Reference.PLOW_CRAFTING_RECIPES.isEmpty()) {
+            plugin.getLogger().warning("[PowerMining] No Plow recipes found in JSON configuration.");
+            return;
+        }
 
-            // key is the name of the powertool. Ex: DIAMOND_PLOW
-            // value is an array containing the recipe
-            final String key = tool.getKey();
-            final ItemStack[] value = tool.getValue();
+        for (Map.Entry<String, ItemStack[]> entry : Reference.PLOW_CRAFTING_RECIPES.entrySet()) {
+            String toolName = entry.getKey();
+            ItemStack[] recipeArray = entry.getValue();
 
-            // We start by finding the position of the name on the PLOWS array
-            // With that position we can fetch the name of the minecraft item (Hoe)
-            int i = Reference.PLOWS.indexOf(key);
+            // Validate index mapping
+            int index = Reference.PLOWS.indexOf(toolName);
+            if (index < 0 || index >= Reference.HOES.size()) {
+                plugin.getLogger().warning("[PowerMining] Invalid Plow mapping for tool: " + toolName);
+                continue;
+            }
 
-            final Material hoe = Reference.HOES.get(i);
+            Material hoeMat = Reference.HOES.get(index);
+            if (hoeMat == null) {
+                plugin.getLogger().warning("[PowerMining] Null hoe material for " + toolName);
+                continue;
+            }
 
-            final ItemStack powerTool = new ItemStack(hoe, 1);
+            // Create tool item
+            ItemStack plow = new ItemStack(hoeMat, 1);
+            modifyItemMeta(plow, LORE_FLAVOR, LORE_ABILITY, toolName);
 
-            // --- APPLY BOTH LINES OF LORE ---
-            // Requires modifyItemMeta(ItemStack, String lore1, String lore2, String name)
-            modifyItemMeta(powerTool, LORE_FLAVOR, LORE_ABILITY, key);
+            // Build and register the shaped recipe
+            ShapedRecipe shapedRecipe = createRecipe(plow, toolName, recipeArray);
+            registerRecipes(shapedRecipe);
 
-            final ShapedRecipe recipe = createRecipe(powerTool, key, value);
-
-            registerRecipes(recipe);
+            plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Plow: " + toolName);
         }
     }
+
+    /*
+     * NOTE:
+     * This class assumes the base class 'CraftItem' provides 'modifyItemMeta'
+     * with parameters (ItemStack, String, String, String),
+     * and that recipe data is loaded dynamically from JSON.
+     */
 }

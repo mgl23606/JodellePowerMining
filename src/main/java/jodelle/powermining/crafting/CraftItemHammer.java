@@ -3,18 +3,19 @@
  * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
  *
  * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
+ * Further information please refer to the included lgpl-3.0.txt
+ * or the GNU website (http://www.gnu.org/licenses/lgpl)
  */
 
 /*
- * This class is responsible for creating the Hammer items and their respective crafting recipes
+ * Responsible for creating the Hammer items and their respective crafting recipes.
  */
 
 package jodelle.powermining.crafting;
 
-
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.Reference;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -22,43 +23,53 @@ import org.bukkit.inventory.ShapedRecipe;
 import javax.annotation.Nonnull;
 import java.util.Map;
 
-public class CraftItemHammer extends CraftItem{
+public class CraftItemHammer extends CraftItem {
 
-    // --- CONSOLIDATED LORE FOR ALL HAMMERS ---
-    // Line 1: Flavor Text (Gray, Italic)
-    public static final String LORE_FLAVOR = "§8§oForged to move mountains.§r";
-    // Line 2: Ability Description (Gold)
-    public static final String LORE_ABILITY = "§6Mines a 3x3 area.§r";
-
-    // NOTE: The original 'public static final String loreString = "SMASH!";' is now obsolete
-    // and can be removed, but we'll leave it for now and comment it out if you prefer.
-    // public static final String loreString = "SMASH!";
+    // --- LORE CONSTANTS ---
+    private static final String LORE_FLAVOR = ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Forged to move mountains.";
+    private static final String LORE_ABILITY = ChatColor.GOLD + "Mines a 3x3 area.";
 
     public CraftItemHammer(@Nonnull PowerMining plugin) {
         super(plugin);
 
-        for(Map.Entry<String, ItemStack[]> tool : Reference.HAMMER_CRAFTING_RECIPES.entrySet()){
+        if (Reference.HAMMER_CRAFTING_RECIPES.isEmpty()) {
+            plugin.getLogger().warning("[PowerMining] No Hammer recipes found in JSON configuration.");
+            return;
+        }
 
-            // key is the name of the powertool. Ex: DIAMOND_HAMMER
-            // value is an array containing the recipe
-            final String key = tool.getKey();
-            final ItemStack[] value = tool.getValue();
+        for (Map.Entry<String, ItemStack[]> entry : Reference.HAMMER_CRAFTING_RECIPES.entrySet()) {
+            String toolName = entry.getKey();
+            ItemStack[] recipeArray = entry.getValue();
 
-            // We start by finding the position of the name on the HAMMERS array
-            // With that position we can fetch the name of the minecraft item present in the PICKAXES array
-            int i = Reference.HAMMERS.indexOf(key);
+            // Validate index mapping
+            int index = Reference.HAMMERS.indexOf(toolName);
+            if (index < 0 || index >= Reference.PICKAXES.size()) {
+                plugin.getLogger().warning("[PowerMining] Invalid Hammer mapping for tool: " + toolName);
+                continue;
+            }
 
-            final Material pickaxe = Reference.PICKAXES.get(i);
+            Material pickaxeMat = Reference.PICKAXES.get(index);
+            if (pickaxeMat == null) {
+                plugin.getLogger().warning("[PowerMining] Null pickaxe material for " + toolName);
+                continue;
+            }
 
-            final ItemStack powerTool = new ItemStack(pickaxe, 1);
+            // Create tool item
+            ItemStack hammer = new ItemStack(pickaxeMat, 1);
+            modifyItemMeta(hammer, LORE_FLAVOR, LORE_ABILITY, toolName);
 
-            // --- APPLY BOTH LINES OF LORE ---
-            // Assuming modifyItemMeta is now: modifyItemMeta(ItemStack, String lore1, String lore2, String name)
-            modifyItemMeta(powerTool, LORE_FLAVOR, LORE_ABILITY, key);
+            // Build and register the shaped recipe
+            ShapedRecipe shapedRecipe = createRecipe(hammer, toolName, recipeArray);
+            registerRecipes(shapedRecipe);
 
-            final ShapedRecipe recipe = createRecipe(powerTool, key, value);
-
-            registerRecipes(recipe);
+            plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Hammer: " + toolName);
         }
     }
+
+    /*
+     * NOTE:
+     * This class assumes that 'CraftItem' provides 'modifyItemMeta'
+     * with parameters (ItemStack, String, String, String),
+     * and that recipe data is loaded dynamically from JSON.
+     */
 }

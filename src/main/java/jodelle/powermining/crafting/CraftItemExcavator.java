@@ -3,17 +3,19 @@
  * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
  *
  * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
+ * Further information please refer to the included lgpl-3.0.txt
+ * or the GNU website (http://www.gnu.org/licenses/lgpl)
  */
 
 /*
- * This class is responsible for creating the Excavator items and their respective crafting recipes
+ * Responsible for creating the Excavator items and their respective crafting recipes.
  */
 
 package jodelle.powermining.crafting;
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.Reference;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
@@ -23,42 +25,52 @@ import java.util.Map;
 
 public class CraftItemExcavator extends CraftItem {
 
-    // --- CONSOLIDATED LORE FOR ALL EXCAVATORS ---
-    // Line 1: Flavor Text (Gray, Italic)
-    public static final String LORE_FLAVOR = "§8§oThe relentless earthmover.§r";
-    // Line 2: Ability Description (Gold)
-    public static final String LORE_ABILITY = "§6Digs a 3x3 area.§r";
+    // --- LORE CONSTANTS ---
+    private static final String LORE_FLAVOR = ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "The relentless earthmover.";
+    private static final String LORE_ABILITY = ChatColor.GOLD + "Digs a 3x3 area.";
 
     public CraftItemExcavator(@Nonnull PowerMining plugin) {
         super(plugin);
 
-        for(Map.Entry<String, ItemStack[]> tool : Reference.EXCAVATOR_CRAFTING_RECIPES.entrySet()){
+        if (Reference.EXCAVATOR_CRAFTING_RECIPES.isEmpty()) {
+            plugin.getLogger().warning("[PowerMining] No Excavator recipes found in JSON configuration.");
+            return;
+        }
 
-            // key is the name of the powertool. Ex: DIAMOND_EXCAVATOR
-            // value is an array containing the recipe
-            final String key = tool.getKey();
-            final ItemStack[] value = tool.getValue();
+        for (Map.Entry<String, ItemStack[]> entry : Reference.EXCAVATOR_CRAFTING_RECIPES.entrySet()) {
+            String toolName = entry.getKey();
+            ItemStack[] recipeArray = entry.getValue();
 
-            // We start by finding the position of the name on the EXCAVATORS array
-            // With that position we can fetch the name of the minecraft item present in the SHOVELS array
-            int i = Reference.EXCAVATORS.indexOf(key);
+            // Ensure we have a matching tool in Reference
+            int index = Reference.EXCAVATORS.indexOf(toolName);
+            if (index < 0 || index >= Reference.SHOVELS.size()) {
+                plugin.getLogger().warning("[PowerMining] Invalid Excavator mapping for tool: " + toolName);
+                continue;
+            }
 
-            final Material shovel = Reference.SHOVELS.get(i);
+            Material baseMaterial = Reference.SHOVELS.get(index);
+            if (baseMaterial == null) {
+                plugin.getLogger().warning("[PowerMining] Null base material for " + toolName);
+                continue;
+            }
 
-            final ItemStack powerTool = new ItemStack(shovel, 1);
+            // Create tool instance
+            ItemStack excavator = new ItemStack(baseMaterial, 1);
+            modifyItemMeta(excavator, LORE_FLAVOR, LORE_ABILITY, toolName);
 
-            // --- APPLY BOTH LINES OF LORE ---
-            modifyItemMeta(powerTool, LORE_FLAVOR, LORE_ABILITY, key);
+            // Create recipe safely
+            ShapedRecipe shapedRecipe = createRecipe(excavator, toolName, recipeArray);
+            registerRecipes(shapedRecipe);
 
-            final ShapedRecipe recipe = createRecipe(powerTool, key, value);
-
-            registerRecipes(recipe);
+            plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Excavator: " + toolName);
         }
     }
 
     /*
-     * NOTE: This class assumes the base class 'CraftItem' has been updated
-     * to include a 'modifyItemMeta' method that accepts three String parameters
-     * for the two lines of lore (LORE_FLAVOR and LORE_ABILITY) plus the tool name (key).
+     * NOTE:
+     * This class assumes the base class 'CraftItem' includes a 'modifyItemMeta'
+     * method accepting (ItemStack, String, String, String).
+     *
+     * The recipes themselves are loaded dynamically from JSON and registered here.
      */
 }
