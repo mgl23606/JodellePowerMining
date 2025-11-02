@@ -62,7 +62,7 @@ public class CraftItemHammer extends CraftItem {
             ShapedRecipe shapedRecipe = createRecipe(hammer, toolName, recipeArray);
             registerRecipes(shapedRecipe);
 
-            plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Hammer: " + toolName);
+            //plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Hammer: " + toolName);
         }
     }
 

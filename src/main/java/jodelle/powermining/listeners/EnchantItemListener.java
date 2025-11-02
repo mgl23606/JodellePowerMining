@@ -7,11 +7,11 @@
  */
 
 /*
- * This class is responsible for cancelling the enchanting in case the user does not have permission
+ * This class handles PowerTool enchanting.
+ * It cancels the enchantment if the player does not have permission.
  */
 
 package jodelle.powermining.listeners;
-
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.PowerUtils;
@@ -25,21 +25,30 @@ import javax.annotation.Nonnull;
 
 public class EnchantItemListener implements Listener {
 
-	public EnchantItemListener(@Nonnull PowerMining plugin) {
+    private final PowerMining plugin;
 
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
+    public EnchantItemListener(@Nonnull final PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void canEnchant(EnchantItemEvent event) {
-		final ItemStack item = event.getItem();
+    /**
+     * Prevents enchanting of PowerTools if the player lacks permission.
+     *
+     * @param event The enchantment event.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onEnchantItem(@Nonnull final EnchantItemEvent event) {
+        final ItemStack item = event.getItem();
 
-		if (!PowerUtils.isPowerTool(item)) {
-			return;
-		}
+        // Ignore if the item is not a PowerTool
+        if (!PowerUtils.isPowerTool(item)) {
+            return;
+        }
 
-		if (!PowerUtils.checkEnchantPermission(event.getEnchanter(), item.getType())) {
-			event.setCancelled(true);
-		}
-	}
+        // Check permission and cancel if not allowed
+        if (!PowerUtils.checkEnchantPermission(event.getEnchanter(), item.getType())) {
+            event.setCancelled(true);
+        }
+    }
 }

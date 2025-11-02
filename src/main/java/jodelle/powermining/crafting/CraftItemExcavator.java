@@ -62,7 +62,7 @@ public class CraftItemExcavator extends CraftItem {
             ShapedRecipe shapedRecipe = createRecipe(excavator, toolName, recipeArray);
             registerRecipes(shapedRecipe);
 
-            plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Excavator: " + toolName);
+            //plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Excavator: " + toolName);
         }
     }
 

@@ -7,12 +7,10 @@
  */
 
 /*
- * This class is responsible for getting the BlockFace from which the player is breaking the block
+ * Tracks the BlockFace a player interacts with, used to determine block-breaking direction.
  */
 
 package jodelle.powermining.listeners;
-
-import java.util.HashMap;
 
 import jodelle.powermining.PowerMining;
 import org.bukkit.block.BlockFace;
@@ -23,28 +21,43 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 import javax.annotation.Nonnull;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerInteractListener implements Listener {
-	private final PowerMining plugin;
-	private final HashMap<String, BlockFace> faces = new HashMap<>();
 
-	public PlayerInteractListener(@Nonnull PowerMining plugin) {
-		this.plugin = plugin;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
+    private final PowerMining plugin;
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void saveBlockFace(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		BlockFace bf = event.getBlockFace();
+    // Thread-safe since multiple players can interact concurrently
+    private final Map<String, BlockFace> faces = new ConcurrentHashMap<>();
 
-		String name = player.getName();
-		faces.put(name, bf);
-	}
+    public PlayerInteractListener(@Nonnull final PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
+    /**
+     * Stores the BlockFace of the last interacted block for each player.
+     *
+     * @param event Player interaction event
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onPlayerInteract(@Nonnull final PlayerInteractEvent event) {
+        final Player player = event.getPlayer();
+        final BlockFace face = event.getBlockFace();
 
+        if (face != null) {
+            faces.put(player.getName(), face);
+        }
+    }
 
-	public BlockFace getBlockFaceByPlayerName(@Nonnull final String name) {
-		return faces.get(name);
-	}
+    /**
+     * Gets the last recorded BlockFace for a player.
+     *
+     * @param playerName The name of the player
+     * @return The last BlockFace the player interacted with, or null if none recorded
+     */
+    public BlockFace getBlockFaceByPlayerName(@Nonnull final String playerName) {
+        return faces.get(playerName);
+    }
 }

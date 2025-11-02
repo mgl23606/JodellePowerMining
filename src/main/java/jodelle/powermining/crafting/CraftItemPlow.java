@@ -62,7 +62,7 @@ public class CraftItemPlow extends CraftItem {
             ShapedRecipe shapedRecipe = createRecipe(plow, toolName, recipeArray);
             registerRecipes(shapedRecipe);
 
-            plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Plow: " + toolName);
+            //plugin.getLogger().info(ChatColor.GREEN + "[PowerMining] Registered Plow: " + toolName);
         }
     }
 

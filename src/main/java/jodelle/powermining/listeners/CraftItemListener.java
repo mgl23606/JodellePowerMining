@@ -7,7 +7,9 @@
  */
 
 /*
- * This class is responsible for cancelling the crafting in case the user does not have permission
+ * This class is responsible for validating PowerTool crafting recipes
+ * and cancelling the crafting process if the player lacks permission or
+ * uses an invalid recipe.
  */
 
 package jodelle.powermining.listeners;
@@ -38,147 +40,150 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 public class CraftItemListener implements Listener {
-	private final PowerMining plugin;
-	private final DebuggingMessages debuggingMessages;
-	private final boolean debugging = true;
 
-	public CraftItemListener(@Nonnull final PowerMining plugin) {
-		this.plugin = plugin;
-		debuggingMessages = plugin.getDebuggingMessages();
+    private final PowerMining plugin;
+    private final DebuggingMessages debuggingMessages;
+    private static final boolean DEBUG = true;
 
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
+    public CraftItemListener(@Nonnull final PowerMining plugin) {
+        this.plugin = plugin;
+        this.debuggingMessages = plugin.getDebuggingMessages();
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
+    /**
+     * Handles the CraftItemEvent — validates recipe, permissions, and enchantment transfer.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onCraftItem(@Nonnull final CraftItemEvent event) {
+        final HumanEntity crafter = event.getWhoClicked();
+        final ItemStack result = event.getRecipe().getResult();
+        final ItemMeta meta = result.getItemMeta();
 
-	// This method checks if everything is ok when a player is crafting
-	// Because theres no way to set the amount of each item in the shaped recipe
-	// One option is to check the quantity while he is crafting
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void canCraft(CraftItemEvent event) {
-		final HumanEntity whoClicked = event.getWhoClicked();
-		final ItemStack resultItem = event.getRecipe().getResult();
-		final ItemMeta itemMeta = resultItem.getItemMeta();
+        if (meta == null || basicVerifications(event, result, meta)) {
+            debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Basic verifications failed.");
+            return;
+        }
 
-		if (basicVerifications(event, resultItem, itemMeta)){
-			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE+"Verifications not ok");
-			return;
-		}
+        final String powerToolName = getPowerToolName(meta);
+        final CraftingInventory inventory = event.getInventory();
+        final ItemStack[] matrix = inventory.getMatrix();
+        final ItemStack[] expectedRecipe = getExpectedRecipe(powerToolName);
 
-		// Get the name of the powertool stored in the persistentdatacontainer
-		final String powerToolName = getPowerToolName(itemMeta);
+        if (!checkCraftingMatrix(matrix, expectedRecipe, crafter)) {
+            debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Recipe validation failed.");
+            event.setCancelled(true);
+            return;
+        }
 
-		final CraftingInventory inventory = event.getInventory();
-		final ItemStack[] matrix = inventory.getMatrix();
+        // Update crafting grid & merge enchantments from input items
+        updateCraftingMatrix(inventory, matrix, expectedRecipe);
+    }
 
-		//First we get the expected recipe so we can compare it with the current recipe
-		final ItemStack[] expectedRecipe = getExpectedRecipe(powerToolName);
+    /**
+     * Reduces crafting material amounts and merges enchantments from ingredients into the result.
+     */
+    private void updateCraftingMatrix(@Nonnull final CraftingInventory inventory,
+                                      @Nonnull final ItemStack[] matrix,
+                                      @Nonnull final ItemStack[] expectedRecipe) {
 
-		// If the recipe is not ok, the player can't take the item out of the crafted slot
-		if (!checkCraftingMatrix(matrix, expectedRecipe, whoClicked)){
-			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE+"Recipe not ok");
-			event.setCancelled(true);
-			return;
-		}
+        final ItemStack result = inventory.getResult();
+        if (result == null) return;
 
-		// If everything is ok, we change crafting matrix amounts
-		// This is needed because when we take the item, it only removes 1 of each
-		// from the crafting table.
-		// Also checks if the item on the slot has some kind of enchantments and passes
-		// them to the result item upon crafting.
-		updateCraftingMatrix(inventory, matrix, expectedRecipe);
+        for (int i = 0; i < matrix.length; i++) {
+            final ItemStack input = matrix[i];
+            final ItemStack expected = expectedRecipe[i];
 
+            if (input == null || expected == null) continue;
 
-	}
+            int newAmount = input.getAmount() - (expected.getAmount() - 1);
+            input.setAmount(Math.max(newAmount, 0));
 
-	/**
-	 * Update the item amount on the crafting table. Also add the enchantments present
-	 * on the used items to the new PowerTool
-	 * @param inventory Inventory of the player
-	 * @param matrix Matrix of the crafting table
-	 * @param expectedRecipe Matrix of the expected recipe
-	 */
-	private void updateCraftingMatrix(@Nonnull final CraftingInventory inventory, @Nonnull final ItemStack[] matrix, @Nonnull final ItemStack[] expectedRecipe) {
-		for (int i = 0; i < matrix.length; i++) {
-			if (matrix[i] != null && expectedRecipe[i] != null){
-				matrix[i].setAmount(matrix[i].getAmount() - expectedRecipe[i].getAmount()+1);
-				Map<Enchantment, Integer> enchantments = matrix[i].getEnchantments();
-				ItemStack result = inventory.getResult();
-				if (result != null){
-					result.addEnchantments(enchantments);
-				}
-			}
-		}
-	}
+            // Merge enchantments from input items into result
+            for (Map.Entry<Enchantment, Integer> entry : input.getEnchantments().entrySet()) {
+                result.addUnsafeEnchantment(entry.getKey(), entry.getValue());
+            }
+        }
+    }
 
-	@NotNull
-	private ItemStack[] getExpectedRecipe(@Nonnull final String powerToolName){
-		ItemStack[] expectedRecipe = null;
+    /**
+     * Retrieves the expected recipe matrix for a PowerTool.
+     */
+    @NotNull
+    private ItemStack[] getExpectedRecipe(@Nonnull final String powerToolName) {
+        ItemStack[] expectedRecipe = null;
 
-		if (Reference.HAMMERS.contains(powerToolName)){
-			expectedRecipe = Reference.HAMMER_CRAFTING_RECIPES.get(powerToolName);
-		}else if(Reference.EXCAVATORS.contains(powerToolName)){
-			expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
-		}else if(Reference.PLOWS.contains(powerToolName)){
-			expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
-		}
+        if (Reference.HAMMERS.contains(powerToolName)) {
+            expectedRecipe = Reference.HAMMER_CRAFTING_RECIPES.get(powerToolName);
+        } else if (Reference.EXCAVATORS.contains(powerToolName)) {
+            expectedRecipe = Reference.EXCAVATOR_CRAFTING_RECIPES.get(powerToolName);
+        } else if (Reference.PLOWS.contains(powerToolName)) {
+            expectedRecipe = Reference.PLOW_CRAFTING_RECIPES.get(powerToolName);
+        }
 
-		Validate.notNull(expectedRecipe);
+        Validate.notNull(expectedRecipe, "Expected recipe not found for PowerTool: " + powerToolName);
+        return expectedRecipe;
+    }
 
-		return expectedRecipe;
-	}
+    /**
+     * Reads the PowerTool name from the PersistentDataContainer of the result item.
+     */
+    @NotNull
+    private String getPowerToolName(@Nonnull final ItemMeta meta) {
+        final PersistentDataContainer container = meta.getPersistentDataContainer();
+        final NamespacedKey key = new NamespacedKey(plugin, "isPowerTool");
+        final String name = container.get(key, PersistentDataType.STRING);
 
-	/**
-	 * Accesses the PersistantDataContainer of the item and gets the name of the PowerTool
-	 * @param itemMeta Meta of the item
-	 * @return Returns the name of the PowerTool
-	 */
-	@NotNull
-	private String getPowerToolName(@Nonnull ItemMeta itemMeta) {
-		PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-		NamespacedKey isPowerTool = new NamespacedKey(plugin, "isPowerTool");
-		String powerToolName = container.get(isPowerTool, PersistentDataType.STRING);
+        Validate.notNull(name, "PowerTool name missing from PersistentDataContainer");
+        return name;
+    }
 
-		Validate.notNull(powerToolName);
+    /**
+     * Verifies whether crafting should continue (permission and validity checks).
+     */
+    private boolean basicVerifications(@Nonnull final CraftItemEvent event,
+                                       @Nonnull final ItemStack resultItem,
+                                       @Nullable final ItemMeta meta) {
 
-		return powerToolName;
-	}
+        // Ignore non-PowerTool crafts
+        if (!PowerUtils.isPowerTool(resultItem)) {
+            debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Item is not a PowerTool.");
+            return true;
+        }
 
-	private boolean basicVerifications(@Nonnull CraftItemEvent event, @Nonnull ItemStack resultItem, @Nullable ItemMeta itemMeta) {
-		// Check if the item is a power tool
-		if (!PowerUtils.isPowerTool(resultItem)) {
-			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE + "The item is not a PowerTool.");
-			return true;
-		}
+        final Player player = (Player) event.getWhoClicked();
 
-		// Check if the player has crafting permission for this item type
-		if (!PowerUtils.checkCraftPermission((Player) event.getWhoClicked(), resultItem.getType())) {
-			debuggingMessages.sendConsoleMessage(debugging, ChatColor.BLUE + "The player doesn't have permissions");
-			event.setCancelled(true);
-		}
+        // Permission check
+        if (!PowerUtils.checkCraftPermission(player, resultItem.getType())) {
+            debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Player lacks crafting permission.");
+            player.sendMessage(ChatColor.RED + "[JodellePowerMining] You don't have permission to craft this PowerTool.");
+            event.setCancelled(true);
+            return true;
+        }
 
-		Validate.notNull(itemMeta);
+        Validate.notNull(meta, "ItemMeta must not be null for PowerTool crafting");
+        return false;
+    }
 
-		return false;
-	}
+    /**
+     * Verifies that the crafting grid matches the expected recipe and quantities.
+     */
+    private boolean checkCraftingMatrix(@Nonnull final ItemStack[] matrix,
+                                        @Nonnull final ItemStack[] expectedRecipe,
+                                        @Nonnull final HumanEntity crafter) {
 
-	/**
-	 * Checks the crafting recipe and item amounts
-	 * @param matrix Crafting table matrix
-	 * @param expectedRecipe Expected recipe matrix
-	 * @param whoClicked Player who is crafting
-	 * @return True if the recipe and its amounts are correct
-	 */
-	private boolean checkCraftingMatrix(@Nonnull final ItemStack[] matrix, @Nonnull final ItemStack[] expectedRecipe, @Nonnull final HumanEntity whoClicked) {
-		for (int i = 0; i < matrix.length; i++) {
-			if (matrix[i] != null && expectedRecipe[i] != null){
-				if (matrix[i].getAmount() < expectedRecipe[i].getAmount()){
-					debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "You didn't add enough" + expectedRecipe[i].getType());
-					whoClicked.sendMessage(ChatColor.RED + "[JodellePowerMining] - You didn't add enough " + expectedRecipe[i].getType());
-					//inventory.setResult(null);
-					return false;
-				}
-			}
-		}
-		return true;
-	}
+        for (int i = 0; i < matrix.length; i++) {
+            final ItemStack input = matrix[i];
+            final ItemStack expected = expectedRecipe[i];
+
+            if (input == null || expected == null) continue;
+
+            if (input.getAmount() < expected.getAmount()) {
+                crafter.sendMessage(ChatColor.RED + "[JodellePowerMining] Not enough " +
+                        expected.getType().name().toLowerCase().replace('_', ' ') + " in the recipe!");
+                return false;
+            }
+        }
+        return true;
+    }
 }
