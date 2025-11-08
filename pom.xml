@@ -6,7 +6,7 @@
 
     <groupId>jodelle.powermining</groupId>
     <artifactId>JodellePowerMining</artifactId>
-    <version>25-Alpha</version>
+    <version>25</version>
     <packaging>jar</packaging>
 
     <name>JodellePowerMining</name>
