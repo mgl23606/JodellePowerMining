@@ -1,0 +1,101 @@
+prefix: "&1[&2Jodelle&4Power&6Mining&1]"
+powermining-cmd-not-found: "&cDieser Befehl existiert nicht! Bitte benutze \"/powermining help\" für eine Liste aller Befehle."
+console-use-not-allowed: "&cDu kannst diesen Befehl nicht über die Konsole verwenden."
+powermining-help: 
+  - "&8------------ &1[&2Jodelle&4Power&6Mining&1]&8 ------------"
+  - " "
+  - "&e/powermining - &7Zeigt Informationen über dieses Plugin an"
+  - "&e/powermining help - &7Zeigt dieses Hilfemenü an"
+  - "&e/powermining admin - &7Admin-Optionen"
+  - "&e/powermining info - &7Gleiche Funktion wie /powermining"
+
+powermining-admin-help:
+  - "&8------------ &1[&2Jodelle&4Power&6Mining&1]&8 ------------"
+  - "&8---------------- &1[&7Admin Hilfe&1]&8 ----------------"
+  - " "
+  - "&e/powermining admin - &7Zeigt dieses Admin-Menü an"
+  - "&e/powermining admin reload - &7Lädt die Konfiguration neu"
+  - "&e/powermining admin language [language] - &7Ändert die Sprache des Plugins sofort"
+  - "&e/powermining admin debug - &7Aktiviert oder deaktiviert den Debug-Modus - Normalerweise nicht nötig und wird die Konsole zuspammen!"
+  - "&e/powermining admin help - &7Gleiche Funktion wie /powermining admin"
+
+improper-usage: "&cFalsche Nutzung! Siehe \"/powermining help\" für eine Liste aller Befehle."
+powertool-not-found: "&cPowertool nicht gefunden!"
+inventory-full: "&cDein Inventar ist voll!"
+power_tool_given: "&2%tool% wurde an Spieler \"%player%\" gegeben."
+not_enough_items: "Du hast nicht genug %item% hinzugefügt."
+no-craft-permission: "&cDu hast keine Berechtigung, dieses PowerTool zu craften!"
+no-use-permission: "&cDu hast keine Berechtigung, dieses PowerTool zu benutzen!"
+no-enchant-permission: "&cDu hast keine Berechtigung, dieses PowerTool zu verzaubern!"
+no-command-permission: "&cDu hast keine Berechtigung, diesen Befehl zu verwenden!"
+version: "&2Version: %version%"
+reloading-plugin: "&cJodellePowerMining wird neu geladen..."
+language-set: "&6Sprache erfolgreich geändert."
+language-not-exists: "&4Die angegebene Sprache existiert nicht im \"lang\"-Ordner des Plugins."
+language-usage: "&4Verwendung: /<command> language <language>"
+plugin-info: "&2Plugin ursprünglich von &6bloodyshade&2, neu erstellt von &6mgl23606&2, stark modifiziert und aktualisiert von &6Holt&2. Siehe \"&4/powermining help&2\" für eine Liste der Befehle."
+
+debug-mode-set: "Debug-Modus ist jetzt: "
+enabled: "aktiviert"
+disabled: "deaktiviert"
+
+items:
+  # Hämmer
+  WOODEN_HAMMER:
+    name: "&6Holzhammer"
+    lore: "&7Ein einfacher Hammer aus Holz."
+  STONE_HAMMER:
+    name: "&7Steinhammer"
+    lore: "&7Ein robusterer Hammer für härtere Felsen."
+  IRON_HAMMER:
+    name: "&fEisenhammer"
+    lore: "&7Stark und zuverlässig zum Minen."
+  GOLDEN_HAMMER:
+    name: "&eGoldhammer"
+    lore: "&7Glänzend, aber zerbrechlich!"
+  DIAMOND_HAMMER:
+    name: "&bDiamanthammer"
+    lore: "&7Ein leistungsstarkes Werkzeug für effizientes Minen."
+  NETHERITE_HAMMER:
+    name: "&8Netherit-Hammer"
+    lore: "&7Das ultimative Bergbauwerkzeug, fast unzerstörbar!"
+
+  # Schaufeln (Excavators)
+  WOODEN_EXCAVATOR:
+    name: "&6Holzbagger"
+    lore: "&7Grabt mühelos durch Erde."
+  STONE_EXCAVATOR:
+    name: "&7Steinbagger"
+    lore: "&7Ein starkes Werkzeug für weichen Boden."
+  IRON_EXCAVATOR:
+    name: "&fEisenbagger"
+    lore: "&7Perfekt für anspruchsvolle Grabearbeiten."
+  GOLDEN_EXCAVATOR:
+    name: "&eGoldbagger"
+    lore: "&7Schnell, aber zerbrechlich."
+  DIAMOND_EXCAVATOR:
+    name: "&bDiamantbagger"
+    lore: "&7Schnell und langlebig für tiefe Ausgrabungen."
+  NETHERITE_EXCAVATOR:
+    name: "&8Netherit-Bagger"
+    lore: "&7Der beste Bagger, hält ewig."
+
+  # Pflüge (Plows)
+  WOODEN_PLOW:
+    name: "&6Holzpflug"
+    lore: "&7Nützlich für einfache Landwirtschaft."
+  STONE_PLOW:
+    name: "&7Steinpflug"
+    lore: "&7Stärker, aber immer noch einfach."
+  IRON_PLOW:
+    name: "&fEisenpflug"
+    lore: "&7Ein effizientes Werkzeug für Ackerbau."
+  GOLDEN_PLOW:
+    name: "&eGoldpflug"
+    lore: "&7Glänzend, aber nicht ideal für die Landwirtschaft."
+  DIAMOND_PLOW:
+    name: "&bDiamantpflug"
+    lore: "&7Hält lange und arbeitet schnell."
+  NETHERITE_PLOW:
+    name: "&8Netherit-Pflug"
+    lore: "&7Fast unzerstörbar, das beste für die Landwirtschaft!"

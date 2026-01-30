@@ -1,0 +1,48 @@
+name: Publish Javadoc (GitHub Pages)
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build_javadoc:
+    runs-on: ubuntu-latest
+    container:
+      image: maven:3.9.12-eclipse-temurin-21-noble
+      options: -e MAVEN_OPTS=-Dmaven.repo.local=.m2/repository
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Maven Repository Directory
+        run: mkdir -p .m2/repository
+
+      - name: Generate Javadoc
+        run: mvn -B -DskipTests javadoc:javadoc
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/reports/apidocs
+
+  deploy:
+    needs: build_javadoc
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

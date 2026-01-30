@@ -1,0 +1,101 @@
+prefix: "&1[&2Jodelle&4Power&6Mining&1]"
+powermining-cmd-not-found: "&cThis command does not exist! Please use \"/powermining help\" for a list of subcommands."
+console-use-not-allowed: "&cYou can't use that command from console."
+powermining-help: 
+  - "&8------------ &1[&2Jodelle&4Power&6Mining&1]&8 ------------"
+  - " "
+  - "&e/powermining - &7Shows you information about this plugin"
+  - "&e/powermining help - &7Shows you this help menu"
+  - "&e/powermining admin - &7Admin options"
+  - "&e/powermining info - &7Same as /powermining"
+
+powermining-admin-help:
+  - "&8------------ &1[&2Jodelle&4Power&6Mining&1]&8 ------------"
+  - "&8---------------- &1[&7Admin Helppage&1]&8 ----------------"
+  - " "
+  - "&e/powermining admin - &7Shows you this admin menu"
+  - "&e/powermining admin reload - &7Reloads the config"
+  - "&e/powermining admin language [language] - &7Changes the language of the plug-in immediately"
+  - "&e/powermining admin debug - &7Activates or deactivates the debug mode - This is normally not needed and will spam your console!"
+  - "&e/powermining admin help - &7Same as /powermining admin"
+
+improper-usage: "&cImproper usage! See \"/powermining help\" for a list of subcommands."
+powertool-not-found: "&cPowertool not found!"
+inventory-full: "&cYour inventory is full!"
+power_tool_given: "&2%tool% given to Player \"%player%\""
+not_enough_items: "You didn't add enough %item%"
+no-craft-permission: "&cYou don't have permissions to craft this PowerTool!"
+no-use-permission: "&cYou don't have permissions to use this PowerTool!"
+no-enchant-permission: "&cYou don't have permissions to enchant this PowerTool!"
+no-command-permission: "&cYou do not have permission to use this command!"
+version: "&2Version: %version%"
+reloading-plugin: "&cReloading JodellePowerMining..."
+language-set: "&6Successfully set the language file."
+language-not-exists: "&4The provided language does not exist in the \"lang\" folder of the plugin."
+language-usage: "&4Usage: /<command> language <language>"
+plugin-info: "&2Plugin orginally made by &6bloodyshade&2, recreated by &6mgl23606&2, heavily modified and updated by &6Holt&2. See \"&4/powermining help&2\" for a list of subcommands."
+
+debug-mode-set: "Debug mode is now: "
+enabled: "enabled"
+disabled: "disabled"
+
+items:
+  # Hammers
+  WOODEN_HAMMER:
+    name: "&6Wooden Hammer"
+    lore: "&7A basic hammer made of wood."
+  STONE_HAMMER:
+    name: "&7Stone Hammer"
+    lore: "&7A sturdier hammer for tougher rocks."
+  IRON_HAMMER:
+    name: "&fIron Hammer"
+    lore: "&7Strong and reliable for mining."
+  GOLDEN_HAMMER:
+    name: "&eGolden Hammer"
+    lore: "&7Shiny but fragile!"
+  DIAMOND_HAMMER:
+    name: "&bDiamond Hammer"
+    lore: "&7A powerful tool for efficient mining."
+  NETHERITE_HAMMER:
+    name: "&8Netherite Hammer"
+    lore: "&7The ultimate mining tool, almost unbreakable!"
+
+  # Excavators
+  WOODEN_EXCAVATOR:
+    name: "&6Wooden Excavator"
+    lore: "&7Dig through soil effortlessly."
+  STONE_EXCAVATOR:
+    name: "&7Stone Excavator"
+    lore: "&7A strong tool for soft ground."
+  IRON_EXCAVATOR:
+    name: "&fIron Excavator"
+    lore: "&7Perfect for heavy-duty digging."
+  GOLDEN_EXCAVATOR:
+    name: "&eGolden Excavator"
+    lore: "&7Fast but fragile digging tool."
+  DIAMOND_EXCAVATOR:
+    name: "&bDiamond Excavator"
+    lore: "&7Quick and durable for deep digs."
+  NETHERITE_EXCAVATOR:
+    name: "&8Netherite Excavator"
+    lore: "&7The best excavator, lasts forever."
+
+  # Plows
+  WOODEN_PLOW:
+    name: "&6Wooden Plow"
+    lore: "&7Useful for basic farming."
+  STONE_PLOW:
+    name: "&7Stone Plow"
+    lore: "&7Stronger, but still simple."
+  IRON_PLOW:
+    name: "&fIron Plow"
+    lore: "&7An efficient tool for farmland."
+  GOLDEN_PLOW:
+    name: "&eGolden Plow"
+    lore: "&7Shiny, but not the best for farming."
+  DIAMOND_PLOW:
+    name: "&bDiamond Plow"
+    lore: "&7Lasts long and works fast."
+  NETHERITE_PLOW:
+    name: "&8Netherite Plow"
+    lore: "&7Almost Unbreakable, the best for farming!"
