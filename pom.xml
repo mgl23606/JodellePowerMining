@@ -6,13 +6,13 @@
 
     <groupId>jodelle.powermining</groupId>
     <artifactId>JodellePowerMining</artifactId>
-    <version>25</version>
+    <version>26</version>
     <packaging>jar</packaging>
 
     <name>JodellePowerMining</name>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>25</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <worldedit.version>7.2.13</worldedit.version>
     </properties>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.10-R0.1-SNAPSHOT</version>
+            <version>[26.3.build,)</version>
             <scope>provided</scope>
         </dependency>
 

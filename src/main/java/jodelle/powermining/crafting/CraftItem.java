@@ -1,3 +1,10 @@
+/*
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
+ */
+
 package jodelle.powermining.crafting;
 
 import jodelle.powermining.PowerMining;
@@ -9,8 +16,8 @@ import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,23 +26,19 @@ public class CraftItem {
     private final DebuggingMessages debuggingMessages;
     protected final JavaPlugin plugin;
 
-    public CraftItem(@Nonnull final PowerMining plugin) {
+    public CraftItem(@NotNull final PowerMining plugin) {
         this.plugin = plugin;
         this.debuggingMessages = plugin.getDebuggingMessages();
     }
 
     /**
-     * Modifies the PowerTool's meta — setting name, lore, and custom data tag.
-     *
-     * @param powerTool Item to modify.
-     * @param loreLine1 First line of lore (flavor text).
-     * @param loreLine2 Second line of lore (ability description).
-     * @param name Internal name of the tool (e.g. "DIAMOND_HAMMER").
+     * Modifies a power tool item's meta data, setting its custom persistent data tag, 
+     * formatted display name, and lore lines.
      */
-    protected void modifyItemMeta(@Nonnull final ItemStack powerTool,
-                                  @Nonnull final String loreLine1,
-                                  @Nonnull final String loreLine2,
-                                  @Nonnull final String name) {
+    protected void modifyItemMeta(@NotNull final ItemStack powerTool,
+                                  @NotNull final String loreLine1,
+                                  @NotNull final String loreLine2,
+                                  @NotNull final String name) {
 
         ItemMeta meta = powerTool.getItemMeta();
         if (meta == null) {
@@ -43,15 +46,15 @@ public class CraftItem {
             return;
         }
 
-        // Persistent Data Tag
+        // Store our unique marker in the persistent data container so the plugin recognizes it as a power tool
         NamespacedKey key = new NamespacedKey(PowerMining.getInstance(), "isPowerTool");
         meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, name);
 
-        // Format display name to "Diamond Hammer"
+        // Format internal names like "DIAMOND_HAMMER" into clean display names like "Diamond Hammer"
         String displayName = formatDisplayName(name);
         meta.setDisplayName(ChatColor.AQUA + displayName);
 
-        // Two-line lore
+        // Attach the two-line lore description
         List<String> lore = new ArrayList<>();
         lore.add(ChatColor.GRAY + loreLine1);
         lore.add(ChatColor.DARK_GRAY + loreLine2);
@@ -61,7 +64,7 @@ public class CraftItem {
     }
 
     /**
-     * Converts internal tool names like "DIAMOND_HAMMER" to "Diamond Hammer"
+     * Converts internal enum strings like "DIAMOND_HAMMER" into clean Title Case format.
      */
     private String formatDisplayName(String name) {
         String[] words = name.toLowerCase().split("_");
@@ -77,11 +80,11 @@ public class CraftItem {
     }
 
     /**
-     * Creates a ShapedRecipe from a 3x3 ItemStack array.
+     * Constructs a shaped 3x3 recipe for a custom power tool from an item array.
      */
-    protected ShapedRecipe createRecipe(@Nonnull final ItemStack powerTool,
-                                        @Nonnull final String name,
-                                        @Nonnull final ItemStack[] recipe) {
+    protected ShapedRecipe createRecipe(@NotNull final ItemStack powerTool,
+                                        @NotNull final String name,
+                                        @NotNull final ItemStack[] recipe) {
 
         NamespacedKey key = new NamespacedKey(plugin, name.toLowerCase());
         ShapedRecipe shapedRecipe = new ShapedRecipe(key, powerTool);
@@ -99,9 +102,9 @@ public class CraftItem {
     }
 
     /**
-     * Registers a recipe safely — ignores duplicates silently.
+     * Registers the custom recipe with the server safely, catching duplicate errors if they occur.
      */
-    protected void registerRecipes(@Nonnull final ShapedRecipe recipe) {
+    protected void registerRecipes(@NotNull final ShapedRecipe recipe) {
         try {
             plugin.getServer().addRecipe(recipe);
             debuggingMessages.sendConsoleMessage(ChatColor.AQUA + "Registered recipe: " + recipe.getKey().getKey());

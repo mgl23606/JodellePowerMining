@@ -1,9 +1,8 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining;
@@ -26,6 +25,7 @@ import java.util.*;
 
 public final class PowerMining extends JavaPlugin {
 
+    // Event handlers for player interactions, block breaks, crafting, and GUIs
     private PlayerInteractHandler handlerPlayerInteract;
     private BlockBreakHandler handlerBlockBreak;
     private CraftItemHandler handlerCraftItem;
@@ -35,10 +35,10 @@ public final class PowerMining extends JavaPlugin {
     private CommandHandler commandHandler;
     private DebuggingMessages debuggingMessages;
 
-    private WorldGuardPlugin worldguard; // Optional dependency
+    private WorldGuardPlugin worldguard; // Optional hook for region protection
     private static PowerMining instance;
 
-    // JSON config files
+    // JSON configuration holders loaded from the plugin folder
     private JsonObject recipesJson;
     private JsonObject configJson;
     private JsonObject mineableJson;
@@ -51,20 +51,25 @@ public final class PowerMining extends JavaPlugin {
         instance = this;
         debuggingMessages = new DebuggingMessages();
 
+        // Ensure all required JSON files are present in the data folder
         generateDefaultFiles();
 
+        // Load JSON configs and abort startup if anything is missing/invalid
         if (!loadJsonFiles()) {
             getLogger().severe("Failed to load JSON configuration. Disabling plugin.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
+        // Process configs, custom tool recipes, and dynamic permissions
         processConfig();
         processCraftingRecipes();
         processPermissions();
 
+        // Check and hook into optional plugins like WorldGuard
         loadDependencies();
 
+        // Initialize our event handlers and command processor
         handlerPlayerInteract = new PlayerInteractHandler();
         handlerBlockBreak = new BlockBreakHandler();
         handlerCraftItem = new CraftItemHandler();
@@ -73,6 +78,7 @@ public final class PowerMining extends JavaPlugin {
         handlerClickPlayer = new ClickPlayerHandler();
         commandHandler = new CommandHandler();
 
+        // Pass the plugin instance to each handler
         handlerPlayerInteract.Init(this);
         handlerBlockBreak.Init(this);
         handlerCraftItem.Init(this);
@@ -81,17 +87,19 @@ public final class PowerMining extends JavaPlugin {
         handlerClickPlayer.Init(this);
         commandHandler.Init(this);
 
-        getLogger().info("PowerMining plugin enabled successfully for Minecraft 1.21.10!");
+        getLogger().info("PowerMining enabled successfully for Minecraft 26.3!");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("PowerMining plugin was disabled.");
+        getLogger().info("PowerMining was disabled.");
     }
 
     // =========================================================
     // FILE GENERATION
     // =========================================================
+
+    // Checks if JSON files exist locally, otherwise pulls defaults out of the JAR
     private void generateDefaultFiles() {
         createFileIfMissing("recipes.json");
         createFileIfMissing("config.json");
@@ -99,6 +107,7 @@ public final class PowerMining extends JavaPlugin {
         createFileIfMissing("diggable.json");
     }
 
+    // Helper method to copy default config resources to the plugin data folder
     private void createFileIfMissing(String fileName) {
         File file = new File(getDataFolder(), fileName);
         if (file.exists()) return;
@@ -126,6 +135,8 @@ public final class PowerMining extends JavaPlugin {
     // =========================================================
     // JSON LOADING
     // =========================================================
+
+    // Loads all four JSON files into memory and checks for required root keys
     private boolean loadJsonFiles() {
         recipesJson = loadJson("recipes.json");
         configJson = loadJson("config.json");
@@ -141,6 +152,7 @@ public final class PowerMining extends JavaPlugin {
                 && diggableJson.has("Diggable");
     }
 
+    // Reads a specific JSON file from disk and parses it safely
     private JsonObject loadJson(String fileName) {
         File file = new File(getDataFolder(), fileName);
         if (!file.exists()) {
@@ -166,6 +178,8 @@ public final class PowerMining extends JavaPlugin {
     // =========================================================
     // CONFIG PARSING
     // =========================================================
+
+    // Parses mineable blocks, valid tools, diggable materials, and break radius/depth settings
     private void processConfig() {
         try {
             JsonObject minableSection = mineableJson.getAsJsonObject("Minable");
@@ -177,6 +191,7 @@ public final class PowerMining extends JavaPlugin {
                 List<String> toolList = new ArrayList<>();
                 for (JsonElement e : tools) toolList.add(e.getAsString());
 
+                // If 'any' is listed, any tool can mine it; otherwise filter allowed tool materials
                 if (toolList.contains("any")) {
                     Reference.MINABLE.put(blockMat, null);
                 } else {
@@ -204,12 +219,14 @@ public final class PowerMining extends JavaPlugin {
             getLogger().severe("Error processing diggable.json: " + e.getMessage());
         }
 
+        // Pull mining boundaries from config, falling back to defaults if missing
         Reference.RADIUS = configJson.has("Radius") ? configJson.get("Radius").getAsInt() : 1;
         Reference.DEEP = configJson.has("Deep") ? configJson.get("Deep").getAsInt() : 0;
 
         getLogger().info("Loaded config: Radius=" + Reference.RADIUS + ", Deep=" + Reference.DEEP);
     }
 
+    // Reads custom tool grid recipes from recipes.json and maps them into memory arrays
     private void processCraftingRecipes() {
         JsonObject recipes = recipesJson.getAsJsonObject("Recipes");
         for (String tool : recipes.keySet()) {
@@ -247,6 +264,7 @@ public final class PowerMining extends JavaPlugin {
 
             if (failed) continue;
 
+            // Sort recipe into its appropriate tool category
             if (Reference.HAMMERS.contains(tool))
                 Reference.HAMMER_CRAFTING_RECIPES.put(tool, recipe);
             else if (Reference.EXCAVATORS.contains(tool))
@@ -259,6 +277,8 @@ public final class PowerMining extends JavaPlugin {
     // =========================================================
     // DEPENDENCIES & PERMISSIONS
     // =========================================================
+
+    // Hooks into third-party protection plugins like WorldGuard if available
     private void loadDependencies() {
         debuggingMessages.sendConsoleMessage(true, ChatColor.YELLOW + "Checking dependencies...");
 
@@ -279,6 +299,7 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
+    // Safely tests if WorldGuard API is loaded on the server
     private boolean isWorldGuardAvailable() {
         try {
             return WorldGuard.getInstance() != null;
@@ -287,6 +308,7 @@ public final class PowerMining extends JavaPlugin {
         }
     }
 
+    // Automatically maps crafting, usage, and enchantment permissions for custom power tools
     private void processPermissions() {
         debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "[PowerMining] - Setting up Permissions");
         generatePermission(Reference.HAMMERS, Reference.PICKAXES);

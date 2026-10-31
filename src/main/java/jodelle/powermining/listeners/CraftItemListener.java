@@ -1,15 +1,8 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for validating PowerTool crafting recipes
- * and cancelling the crafting process if the player lacks permission or
- * uses an invalid recipe.
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining.listeners;
@@ -34,9 +27,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Map;
 
 public class CraftItemListener implements Listener {
@@ -45,47 +37,55 @@ public class CraftItemListener implements Listener {
     private final DebuggingMessages debuggingMessages;
     private static final boolean DEBUG = true;
 
-    public CraftItemListener(@Nonnull final PowerMining plugin) {
+    public CraftItemListener(@NotNull final PowerMining plugin) {
         this.plugin = plugin;
         this.debuggingMessages = plugin.getDebuggingMessages();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
     /**
-     * Handles the CraftItemEvent — validates recipe, permissions, and enchantment transfer.
+     * Intercepts crafting table events to make sure players are building custom
+     * power tools correctly, have the right permissions, and transfers ingredient enchants over.
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onCraftItem(@Nonnull final CraftItemEvent event) {
+    public void onCraftItem(@NotNull final CraftItemEvent event) {
         final HumanEntity crafter = event.getWhoClicked();
+
+        // Safety check: ensure there's actually a recipe and result item
+        if (event.getRecipe() == null) return;
         final ItemStack result = event.getRecipe().getResult();
         final ItemMeta meta = result.getItemMeta();
 
+        // Run basic sanity and permission checks
         if (meta == null || basicVerifications(event, result, meta)) {
             debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Basic verifications failed.");
             return;
         }
 
+        // Identify which custom power tool they are trying to craft
         final String powerToolName = getPowerToolName(meta);
         final CraftingInventory inventory = event.getInventory();
         final ItemStack[] matrix = inventory.getMatrix();
         final ItemStack[] expectedRecipe = getExpectedRecipe(powerToolName);
 
+        // Verify that the items placed in the crafting grid match the expected recipe layout
         if (!checkCraftingMatrix(matrix, expectedRecipe, crafter)) {
             debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Recipe validation failed.");
             event.setCancelled(true);
             return;
         }
 
-        // Update crafting grid & merge enchantments from input items
+        // Consume items correctly and carry over any enchantments from the ingredients
         updateCraftingMatrix(inventory, matrix, expectedRecipe);
     }
 
     /**
-     * Reduces crafting material amounts and merges enchantments from ingredients into the result.
+     * Handles custom ingredient consumption and merges any enchantments
+     * from the input materials directly into the final crafted tool.
      */
-    private void updateCraftingMatrix(@Nonnull final CraftingInventory inventory,
-                                      @Nonnull final ItemStack[] matrix,
-                                      @Nonnull final ItemStack[] expectedRecipe) {
+    private void updateCraftingMatrix(@NotNull final CraftingInventory inventory,
+                                      @NotNull final ItemStack[] matrix,
+                                      @NotNull final ItemStack[] expectedRecipe) {
 
         final ItemStack result = inventory.getResult();
         if (result == null) return;
@@ -99,7 +99,7 @@ public class CraftItemListener implements Listener {
             int newAmount = input.getAmount() - (expected.getAmount() - 1);
             input.setAmount(Math.max(newAmount, 0));
 
-            // Merge enchantments from input items into result
+            // Carry over any enchantments existing on the input items into the new tool
             for (Map.Entry<Enchantment, Integer> entry : input.getEnchantments().entrySet()) {
                 result.addUnsafeEnchantment(entry.getKey(), entry.getValue());
             }
@@ -107,10 +107,10 @@ public class CraftItemListener implements Listener {
     }
 
     /**
-     * Retrieves the expected recipe matrix for a PowerTool.
+     * Looks up the correct expected recipe grid array based on the power tool category.
      */
     @NotNull
-    private ItemStack[] getExpectedRecipe(@Nonnull final String powerToolName) {
+    private ItemStack[] getExpectedRecipe(@NotNull final String powerToolName) {
         ItemStack[] expectedRecipe = null;
 
         if (Reference.HAMMERS.contains(powerToolName)) {
@@ -126,10 +126,10 @@ public class CraftItemListener implements Listener {
     }
 
     /**
-     * Reads the PowerTool name from the PersistentDataContainer of the result item.
+     * Reads the unique power tool identifier stored in the item's PersistentDataContainer.
      */
     @NotNull
-    private String getPowerToolName(@Nonnull final ItemMeta meta) {
+    private String getPowerToolName(@NotNull final ItemMeta meta) {
         final PersistentDataContainer container = meta.getPersistentDataContainer();
         final NamespacedKey key = new NamespacedKey(plugin, "isPowerTool");
         final String name = container.get(key, PersistentDataType.STRING);
@@ -139,21 +139,24 @@ public class CraftItemListener implements Listener {
     }
 
     /**
-     * Verifies whether crafting should continue (permission and validity checks).
+     * Runs initial checks to see if the item is a power tool and whether the player has crafting rights.
      */
-    private boolean basicVerifications(@Nonnull final CraftItemEvent event,
-                                       @Nonnull final ItemStack resultItem,
+    private boolean basicVerifications(@NotNull final CraftItemEvent event,
+                                       @NotNull final ItemStack resultItem,
                                        @Nullable final ItemMeta meta) {
 
-        // Ignore non-PowerTool crafts
+        // Ignore standard vanilla items
         if (!PowerUtils.isPowerTool(resultItem)) {
             debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Item is not a PowerTool.");
             return true;
         }
 
-        final Player player = (Player) event.getWhoClicked();
+        // Ensure the person crafting is a player
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return true;
+        }
 
-        // Permission check
+        // Check if they have the specific crafting permission for this tool type
         if (!PowerUtils.checkCraftPermission(player, resultItem.getType())) {
             debuggingMessages.sendConsoleMessage(DEBUG, ChatColor.BLUE + "Player lacks crafting permission.");
             player.sendMessage(ChatColor.RED + "[JodellePowerMining] You don't have permission to craft this PowerTool.");
@@ -166,11 +169,11 @@ public class CraftItemListener implements Listener {
     }
 
     /**
-     * Verifies that the crafting grid matches the expected recipe and quantities.
+     * Compares the player's crafting grid against the required quantities in the recipe.
      */
-    private boolean checkCraftingMatrix(@Nonnull final ItemStack[] matrix,
-                                        @Nonnull final ItemStack[] expectedRecipe,
-                                        @Nonnull final HumanEntity crafter) {
+    private boolean checkCraftingMatrix(@NotNull final ItemStack[] matrix,
+                                        @NotNull final ItemStack[] expectedRecipe,
+                                        @NotNull final HumanEntity crafter) {
 
         for (int i = 0; i < matrix.length; i++) {
             final ItemStack input = matrix[i];

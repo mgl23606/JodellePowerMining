@@ -1,13 +1,8 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for handling the actual mining when using a Hammer or Excavator
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining.listeners;
@@ -27,8 +22,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockBreakListener implements Listener {
 
@@ -36,54 +30,49 @@ public class BlockBreakListener implements Listener {
     private final boolean useDurabilityPerBlock;
     private final DebuggingMessages debuggingMessages;
 
-    private Player player;
-    private ItemStack handItem;
-
-    public BlockBreakListener(@Nonnull PowerMining plugin) {
+    public BlockBreakListener(@NotNull PowerMining plugin) {
         this.plugin = plugin;
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
         this.debuggingMessages = plugin.getDebuggingMessages();
 
-        // JSON-based config still exposes getConfig() wrapper
         this.useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
     }
 
+    /**
+     * Listens for block breaks to trigger area mining when a player uses a hammer or excavator.
+     */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onBlockBreak(BlockBreakEvent event) {
-        this.player = event.getPlayer();
-        this.handItem = player.getInventory().getItemInMainHand();
+    public void onBlockBreak(@NotNull BlockBreakEvent event) {
+        final Player player = event.getPlayer();
+        final ItemStack handItem = player.getInventory().getItemInMainHand();
 
         boolean debugging = false;
         debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "Broke a block: " + event.getBlock().getType());
 
-        // Stop if the tool or situation fails checks
-        if (shouldCancelAction()) {
+        // Check if we should ignore this event (e.g. player is sneaking, item isn't a power tool)
+        if (shouldCancelAction(player, handItem)) {
             return;
         }
 
         final Block centerBlock = event.getBlock();
-        final String playerName = player.getName();
-
         final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
-        final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
+        final BlockFace blockFace = pil.getBlockFaceByPlayer(player.getUniqueId());
 
-        // Breaks surrounding blocks that match the corresponding tool
+        // Loop through surrounding blocks based on the radius and depth config settings
         for (Block block : PowerUtils.getSurroundingBlocks(blockFace, centerBlock, Reference.RADIUS, Reference.DEEP)) {
-            checkAndBreakBlock(block);
+            checkAndBreakBlock(player, handItem, block);
         }
 
-        // Reduce durability once if per-block damage is disabled
+        // If durability is configured to drop once per use rather than per block, apply it here
         if (!useDurabilityPerBlock && player.getGameMode() == GameMode.SURVIVAL) {
             PowerUtils.reduceDurability(player, handItem);
         }
     }
 
     /**
-     * Attempts to break a block if the player’s held PowerTool is valid for it.
-     *
-     * @param block The block being broken by the player
+     * Validates whether a surrounding block matches the tool type, checks protections, and breaks it.
      */
-    private void checkAndBreakBlock(@Nonnull Block block) {
+    private void checkAndBreakBlock(@NotNull Player player, @NotNull ItemStack handItem, @NotNull Block block) {
         Material blockMat = block.getType();
 
         boolean useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat);
@@ -93,12 +82,12 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        // Check if player has permission to break this block (WorldGuard, region plugins, etc.)
+        // Ensure the player is allowed to break this block (respects WorldGuard and land claims)
         if (!PowerUtils.canBreak(plugin, player, block)) {
             return;
         }
 
-        // Break block and handle tool durability
+        // Break the block naturally and take durability wear per block if enabled
         if (block.breakNaturally(handItem) && player.getGameMode() == GameMode.SURVIVAL) {
             if (useDurabilityPerBlock) {
                 PowerUtils.reduceDurability(player, handItem);
@@ -107,12 +96,10 @@ public class BlockBreakListener implements Listener {
     }
 
     /**
-     * Performs the basic verifications before executing PowerTool logic.
-     *
-     * @return true if the event should be cancelled (not a valid PowerTool action)
+     * Checks initial pre-conditions. Returns true if the event should be ignored.
      */
-    private boolean shouldCancelAction() {
-        // If the player is sneaking, act like a normal pickaxe/shovel
+    private boolean shouldCancelAction(@NotNull Player player, @NotNull ItemStack handItem) {
+        // Sneaking lets players mine single blocks normally without triggering area effects
         if (player.isSneaking()) {
             return true;
         }
@@ -122,12 +109,12 @@ public class BlockBreakListener implements Listener {
             return true;
         }
 
-        // Not a PowerTool? Do nothing special.
+        // Ignore standard vanilla items
         if (!PowerUtils.isPowerTool(handItem)) {
             return true;
         }
 
-        // Player lacks permission to use this PowerTool
+        // Verify the player has permission to use this specific tool type
         return !PowerUtils.checkUsePermission(player, handItemType);
     }
 }

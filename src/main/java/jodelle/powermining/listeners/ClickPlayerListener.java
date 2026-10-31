@@ -1,13 +1,8 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class handles PowerTool right-click actions — specifically for Plows and Path makers.
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining.listeners;
@@ -28,9 +23,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ClickPlayerListener implements Listener {
 
@@ -38,7 +32,7 @@ public class ClickPlayerListener implements Listener {
     private final boolean useDurabilityPerBlock;
     private final DebuggingMessages debuggingMessages;
 
-    public ClickPlayerListener(@Nonnull final PowerMining plugin) {
+    public ClickPlayerListener(@NotNull final PowerMining plugin) {
         this.plugin = plugin;
         this.debuggingMessages = plugin.getDebuggingMessages();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -46,59 +40,63 @@ public class ClickPlayerListener implements Listener {
         this.useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
     }
 
+    /**
+     * Handles right-click interactions when players use custom power hoes (Plows)
+     * or path-makers to till or flatten multiple blocks in an area at once.
+     */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onPlayerUse(PlayerInteractEvent event) {
+    public void onPlayerUse(@NotNull final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final ItemStack handItem = player.getInventory().getItemInMainHand();
         final Material handItemType = handItem.getType();
         final Block block = event.getClickedBlock();
         final Action action = event.getAction();
 
-        // Exit early if checks fail
+        // Run sanity checks to see if we should ignore this interaction
         if (shouldCancelAction(action, player, handItem, handItemType, block)) {
             return;
         }
 
-        final String playerName = player.getName();
+        // Look up the block face they clicked using their unique UUID
         final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
-        final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
+        final BlockFace blockFace = pil.getBlockFaceByPlayer(player.getUniqueId());
 
-        // Perform 3x3 tilling or path-making
+        // Loop through surrounding blocks to perform area tilling or path creation
         for (Block target : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.RADIUS)) {
             final Material targetType = target.getType();
 
-            // Skip if player cannot modify the block
+            // Skip blocks the player isn't allowed to modify (e.g., WorldGuard regions)
             if (!PowerUtils.canBreak(plugin, player, target)) {
                 continue;
             }
 
-            // Handle PowerPlow — turns dirt/grass into farmland
+            // PowerPlow logic: converts dirt/grass blocks into farmland
             if (PowerUtils.validatePlow(handItemType, targetType)) {
                 debuggingMessages.sendConsoleMessage(ChatColor.RED + "Tilling: " + targetType);
                 usePowerTool(player, handItem, target, Material.FARMLAND);
                 continue;
             }
 
-            // Handle PowerPath — turns grass/dirt into dirt path
+            // PowerPath logic: converts dirt/grass blocks into dirt paths
             if (PowerUtils.validatePath(handItemType, targetType)) {
                 usePowerTool(player, handItem, target, Material.DIRT_PATH);
             }
         }
 
-        // Reduce tool durability once if not using per-block mode
+        // If durability is set to drop once per use instead of per-block, apply it here
         if (!useDurabilityPerBlock && player.getGameMode() == GameMode.SURVIVAL) {
             PowerUtils.reduceDurability(player, handItem);
         }
     }
 
     /**
-     * Replaces the target block and optionally reduces tool durability.
+     * Replaces the target block with the new material and handles per-block durability wear if enabled.
      */
     private void usePowerTool(
-            @Nonnull final Player player,
-            @Nonnull final ItemStack handItem,
-            @Nonnull final Block block,
-            @Nonnull final Material newMaterial
+            @NotNull final Player player,
+            @NotNull final ItemStack handItem,
+            @NotNull final Block block,
+            @NotNull final Material newMaterial
     ) {
         block.setType(newMaterial);
         if (useDurabilityPerBlock && player.getGameMode() == GameMode.SURVIVAL) {
@@ -107,24 +105,24 @@ public class ClickPlayerListener implements Listener {
     }
 
     /**
-     * Performs all preconditions before activating PowerTool behavior.
-     *
-     * @return true if the event should be ignored
+     * Filters out unwanted actions (like left clicks, air clicks, sneaking, or empty hands).
+     * Returns true if the interaction event should be completely ignored.
      */
     private boolean shouldCancelAction(
-            @Nonnull final Action action,
-            @Nonnull final Player player,
-            @Nonnull final ItemStack handItem,
-            @Nonnull final Material handItemType,
+            @NotNull final Action action,
+            @NotNull final Player player,
+            @NotNull final ItemStack handItem,
+            @NotNull final Material handItemType,
             @Nullable final Block block
     ) {
-        // Ignore clicks that don’t target a block
+        // We only care about right-clicking physical blocks
         if (action == Action.LEFT_CLICK_BLOCK
                 || action == Action.LEFT_CLICK_AIR
                 || action == Action.RIGHT_CLICK_AIR) {
             return true;
         }
 
+        // Sneaking bypasses area tilling
         if (player.isSneaking()) {
             return true;
         }
@@ -137,14 +135,17 @@ public class ClickPlayerListener implements Listener {
             return true;
         }
 
+        // Ensure the block clicked is actually something we can till/path
         if (!PowerUtils.isTillable(block.getType())) {
             return true;
         }
 
+        // Ensure they are holding one of our custom power tools
         if (!PowerUtils.isPowerTool(handItem)) {
             return true;
         }
 
+        // Finally, make sure they have permission to use this tool type
         return !PowerUtils.checkUsePermission(player, handItemType);
     }
 }
