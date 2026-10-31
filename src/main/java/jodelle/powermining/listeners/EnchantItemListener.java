@@ -1,17 +1,11 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for cancelling the enchanting in case the user does not have permission
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining.listeners;
-
 
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.PowerUtils;
@@ -20,26 +14,33 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class EnchantItemListener implements Listener {
 
-	public EnchantItemListener(@Nonnull PowerMining plugin) {
+    private final PowerMining plugin;
 
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
+    public EnchantItemListener(@NotNull final PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void canEnchant(EnchantItemEvent event) {
-		final ItemStack item = event.getItem();
+    /**
+     * Intercepts enchanting table actions to make sure players
+     * aren't enchanting custom power tools if they lack permission.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onEnchantItem(@NotNull final EnchantItemEvent event) {
+        final ItemStack item = event.getItem();
 
-		if (!PowerUtils.isPowerTool(item)) {
-			return;
-		}
+        // If it's just a normal vanilla item, let it slide
+        if (!PowerUtils.isPowerTool(item)) {
+            return;
+        }
 
-		if (!PowerUtils.checkEnchantPermission(event.getEnchanter(), item.getType())) {
-			event.setCancelled(true);
-		}
-	}
+        // Check if they have the right permission for this specific tool; if not, cancel the enchant
+        if (!PowerUtils.checkEnchantPermission(event.getEnchanter(), item.getType())) {
+            event.setCancelled(true);
+        }
+    }
 }

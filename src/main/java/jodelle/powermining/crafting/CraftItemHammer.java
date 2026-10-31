@@ -1,64 +1,63 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for creating the Hammer items and their respective crafting recipes
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt
+- or the GNU website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining.crafting;
 
-
 import jodelle.powermining.PowerMining;
 import jodelle.powermining.lib.Reference;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
-public class CraftItemHammer extends CraftItem{
+public class CraftItemHammer extends CraftItem {
 
-	public static final String loreString = "SMASH!";
+    // Lore lines added to every custom hammer item
+    private static final String LORE_FLAVOR = ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "Forged to move mountains.";
+    private static final String LORE_ABILITY = ChatColor.GOLD + "Mines a 3x3 area.";
 
-	public CraftItemHammer(@Nonnull PowerMining plugin) {
-		super(plugin);
+    public CraftItemHammer(@NotNull PowerMining plugin) {
+        super(plugin);
 
-		for(Map.Entry<String, ItemStack[]> tool : Reference.HAMMER_CRAFTING_RECIPES.entrySet()){
+        // Make sure hammer recipes are actually loaded from JSON before trying to build them
+        if (Reference.HAMMER_CRAFTING_RECIPES.isEmpty()) {
+            plugin.getLogger().warning("[PowerMining] No Hammer recipes found in JSON configuration.");
+            return;
+        }
 
-			//key is the name of the powertool. Ex: DIAMOND_HAMMER
-			//value is an array containing the recipe
-			final String key = tool.getKey();
-			final ItemStack[] value = tool.getValue();
-			//console.sendMessage(ChatColor.AQUA + "Creating: " + key);
+        // Loop through each configured hammer recipe definition
+        for (Map.Entry<String, ItemStack[]> entry : Reference.HAMMER_CRAFTING_RECIPES.entrySet()) {
+            String toolName = entry.getKey();
+            ItemStack[] recipeArray = entry.getValue();
 
-			//We start by finding the position of the name on the HAMMERS array
-			//With that position we can fetch the name of the minecraft item present in other array
-			int i = Reference.HAMMERS.indexOf(key);
+            // Match the hammer name to its corresponding vanilla pickaxe tier in our reference lists
+            int index = Reference.HAMMERS.indexOf(toolName);
+            if (index < 0 || index >= Reference.PICKAXES.size()) {
+                plugin.getLogger().warning("[PowerMining] Invalid Hammer mapping for tool: " + toolName);
+                continue;
+            }
 
-			//console.sendMessage(ChatColor.AQUA + String.valueOf(i));
-			final Material pickaxe = Reference.PICKAXES.get(i);
+            Material pickaxeMat = Reference.PICKAXES.get(index);
+            if (pickaxeMat == null) {
+                plugin.getLogger().warning("[PowerMining] Null pickaxe material for " + toolName);
+                continue;
+            }
 
-			final ItemStack powerTool = new ItemStack(pickaxe, 1);
-			//powerTools.add(powerTool);
+            // Instantiate the item, apply custom meta, name, and lore tags
+            ItemStack hammer = new ItemStack(pickaxeMat, 1);
+            modifyItemMeta(hammer, LORE_FLAVOR, LORE_ABILITY, toolName);
 
-			modifyItemMeta(powerTool, loreString, key);
-
-			final ShapedRecipe recipe = createRecipe(powerTool, key, value);
-
-			registerRecipes(recipe);
-		}
-
-	}
-
-
-
-
-
-
+            // Build the shaped recipe and register it with the server
+            ShapedRecipe shapedRecipe = createRecipe(hammer, toolName, recipeArray);
+            registerRecipes(shapedRecipe);
+        }
+    }
 }

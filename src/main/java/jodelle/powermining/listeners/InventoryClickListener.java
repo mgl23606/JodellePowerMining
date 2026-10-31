@@ -1,13 +1,8 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for cancelling the enchanting through repair in case the user does not have permission
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining.listeners;
@@ -23,64 +18,65 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class InventoryClickListener implements Listener {
 
-	public InventoryClickListener(@Nonnull PowerMining plugin) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
+    private final PowerMining plugin;
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void canEnchant(InventoryClickEvent event) {
-		// Ignore the event in case this is not an Anvil
-		if (!(event.getInventory() instanceof AnvilInventory))
-			return;
+    public InventoryClickListener(@NotNull final PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+    }
 
-		// If the player is not trying to get the resulting item out of the anvil, ignore the event
-		if (event.getSlotType() != SlotType.RESULT)
-			return;
+    /**
+     * Blocks players from doing weird things with custom power tools in anvils,
+     * like adding illegal enchantments or bypassing permission checks.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onInventoryClick(@NotNull final InventoryClickEvent event) {
+        // Stop right here if this isn't an anvil result slot interaction
+        if (!(event.getInventory() instanceof AnvilInventory) || event.getSlotType() != SlotType.RESULT) {
+            return;
+        }
 
-		ItemStack item = event.getInventory().getItem(0);
-		ItemStack item2 = event.getInventory().getItem(1);
+        // Grab whatever is sitting in the two input slots of the anvil
+        final ItemStack item = event.getInventory().getItem(0);
+        final ItemStack item2 = event.getInventory().getItem(1);
 
-		if (item == null){
-			return;
-		}
-		if (item2 == null)
-			return;
+        if (item == null || item2 == null) {
+            return;
+        }
 
-		// Ignore event if the first item is not a power tool
-		if (!PowerUtils.isPowerTool(item))
-			return;
+        // Only care if the main item being worked on is one of our custom PowerTools
+        if (!PowerUtils.isPowerTool(item)) {
+            return;
+        }
 
-		// If this is not an enchanted book we need to check if it another power tool or allowed ingot
-		if (item2.getType() != Material.ENCHANTED_BOOK) {
-			// If the second item is an allowed ingot, let it repair
-			switch(item2.getType()) {
-			case IRON_INGOT:
-			case GOLD_INGOT:
-			case DIAMOND: 
-			case NETHERITE_INGOT:
-				return;
-			default:
-				break;
-			}
+        // Let players repair their tools normally using standard materials
+        switch (item2.getType()) {
+            case IRON_INGOT:
+            case GOLD_INGOT:
+            case DIAMOND:
+            case NETHERITE_INGOT:
+                return;
+            default:
+                break;
+        }
 
-			// Check if the second item is a power tool
-			if (PowerUtils.isPowerTool(item2)) {
-				// Second item is not enchanted, let it repair
-				if (item.getEnchantments().isEmpty())
-					return;
-			}
-			else {
-				event.setCancelled(true);
-				return;
-			}
-		}
+        // Allow combining with another clean PowerTool for repairs (as long as no custom enchants are involved)
+        if (PowerUtils.isPowerTool(item2) && item.getEnchantments().isEmpty()) {
+            return;
+        }
 
-		if (!PowerUtils.checkEnchantPermission((Player) event.getWhoClicked(), item.getType()))
-			event.setCancelled(true);
-	}
+        // Ensure the person clicking is actually a player
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        // Finally, check if they have permission to modify/enchant this specific tool type
+        if (!PowerUtils.checkEnchantPermission(player, item.getType())) {
+            event.setCancelled(true);
+        }
+    }
 }

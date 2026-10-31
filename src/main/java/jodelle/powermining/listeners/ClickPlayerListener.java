@@ -1,3 +1,10 @@
+/*
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
+ */
+
 package jodelle.powermining.listeners;
 
 import jodelle.powermining.PowerMining;
@@ -16,126 +23,129 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ClickPlayerListener implements Listener {
+
     private final PowerMining plugin;
     private final boolean useDurabilityPerBlock;
     private final DebuggingMessages debuggingMessages;
 
-
-    public ClickPlayerListener(@Nonnull final PowerMining plugin) {
+    public ClickPlayerListener(@NotNull final PowerMining plugin) {
         this.plugin = plugin;
-        debuggingMessages = plugin.getDebuggingMessages();
+        this.debuggingMessages = plugin.getDebuggingMessages();
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
 
-        useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
+        this.useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerUse(PlayerInteractEvent event) {
+    /**
+     * Handles right-click interactions when players use custom power hoes (Plows)
+     * or path-makers to till or flatten multiple blocks in an area at once.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlayerUse(@NotNull final PlayerInteractEvent event) {
         final Player player = event.getPlayer();
         final ItemStack handItem = player.getInventory().getItemInMainHand();
         final Material handItemType = handItem.getType();
         final Block block = event.getClickedBlock();
         final Action action = event.getAction();
 
-        if (basicVerifications(action, player, handItem, handItemType, block)){
+        // Run sanity checks to see if we should ignore this interaction
+        if (shouldCancelAction(action, player, handItem, handItemType, block)) {
             return;
         }
 
-
-        final String playerName = player.getName();
-
+        // Look up the block face they clicked using their unique UUID
         final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
-        final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
+        final BlockFace blockFace = pil.getBlockFaceByPlayer(player.getUniqueId());
 
-        /*
-        At this point intellij shows a warning about the possibility of the argument
-        block being null. This warning can be ignored because in the method basicVerifications()
-        we already make sure that the block is not null, and if it is indeed null this method
-        never reached this point of the code.
-         */
-        for (Block e : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.RADIUS)) {
-            final Material blockMat = e.getType();
+        // Loop through surrounding blocks to perform area tilling or path creation
+        for (Block target : PowerUtils.getSurroundingBlocksFarm(blockFace, block, Reference.RADIUS)) {
+            final Material targetType = target.getType();
 
-            // Check if player has permission to break the block
-            if (!PowerUtils.canBreak(plugin, player, e)) {
+            // Skip blocks the player isn't allowed to modify (e.g., WorldGuard regions)
+            if (!PowerUtils.canBreak(plugin, player, target)) {
                 continue;
             }
 
-            if (PowerUtils.validatePlow(handItem.getType(), blockMat)) {
-                debuggingMessages.sendConsoleMessage(ChatColor.RED + "Tilling: " + e.getType());
-                usePowerTool(player, handItem, e, Material.FARMLAND);
+            // PowerPlow logic: converts dirt/grass blocks into farmland
+            if (PowerUtils.validatePlow(handItemType, targetType)) {
+                debuggingMessages.sendConsoleMessage(ChatColor.RED + "Tilling: " + targetType);
+                usePowerTool(player, handItem, target, Material.FARMLAND);
                 continue;
             }
 
-            if (PowerUtils.validatePath(handItem.getType(), blockMat)) {
-                usePowerTool(player, handItem, e, Material.DIRT_PATH);
+            // PowerPath logic: converts dirt/grass blocks into dirt paths
+            if (PowerUtils.validatePath(handItemType, targetType)) {
+                usePowerTool(player, handItem, target, Material.DIRT_PATH);
             }
         }
 
-        if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)){
-            PowerUtils.reduceDurability(player, handItem);
-        }
-
-    }
-
-    /**
-     * Replaces the block and reduces the durability of the tool used
-     * @param player Player who used the PowerTool
-     * @param handItem Item used by the player
-     * @param block Target block
-     * @param material Material to replace the target block
-     */
-    private void usePowerTool(@Nonnull final Player player, @Nonnull final ItemStack handItem, @Nonnull final Block block, @Nonnull final Material material) {
-        block.setType(material);
-        // Reduce durability for each block
-        if (useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)) {
+        // If durability is set to drop once per use instead of per-block, apply it here
+        if (!useDurabilityPerBlock && player.getGameMode() == GameMode.SURVIVAL) {
             PowerUtils.reduceDurability(player, handItem);
         }
     }
 
     /**
-     * Performs the basic verifications
-     * @param action Action performed by the player
-     * @param player Player who performed the action
-     * @param handItem Item held by the player
-     * @param handItemType Type of the item held by the player
-     * @param block Block clicked by the player
-     * @return True if all verifications pass
+     * Replaces the target block with the new material and handles per-block durability wear if enabled.
      */
-    private boolean basicVerifications(@Nonnull final Action action, @Nonnull final Player player, @Nonnull final ItemStack handItem, @Nonnull final Material handItemType, @Nullable final Block block) {
-        if (action == Action.LEFT_CLICK_BLOCK) {
+    private void usePowerTool(
+            @NotNull final Player player,
+            @NotNull final ItemStack handItem,
+            @NotNull final Block block,
+            @NotNull final Material newMaterial
+    ) {
+        block.setType(newMaterial);
+        if (useDurabilityPerBlock && player.getGameMode() == GameMode.SURVIVAL) {
+            PowerUtils.reduceDurability(player, handItem);
+        }
+    }
+
+    /**
+     * Filters out unwanted actions (like left clicks, air clicks, sneaking, or empty hands).
+     * Returns true if the interaction event should be completely ignored.
+     */
+    private boolean shouldCancelAction(
+            @NotNull final Action action,
+            @NotNull final Player player,
+            @NotNull final ItemStack handItem,
+            @NotNull final Material handItemType,
+            @Nullable final Block block
+    ) {
+        // We only care about right-clicking physical blocks
+        if (action == Action.LEFT_CLICK_BLOCK
+                || action == Action.LEFT_CLICK_AIR
+                || action == Action.RIGHT_CLICK_AIR) {
             return true;
         }
-        if (action == Action.LEFT_CLICK_AIR) {
-            return true;
-        }
-        if (action == Action.RIGHT_CLICK_AIR) {
-            return true;
-        }
+
+        // Sneaking bypasses area tilling
         if (player.isSneaking()) {
             return true;
         }
-        if(handItem.getType().equals(Material.AIR)) {
-            return true;
-        }
-        if (block == null){
-            return true;
-        }
-        if (!PowerUtils.isTillable(block.getType())){
-            return true;
-        }
-        if (!PowerUtils.isPowerTool(handItem)) {
-            return true;
-        }
-        if (!PowerUtils.checkUsePermission(player, handItemType)) {
+
+        if (handItemType == Material.AIR) {
             return true;
         }
 
-        return false;
+        if (block == null) {
+            return true;
+        }
+
+        // Ensure the block clicked is actually something we can till/path
+        if (!PowerUtils.isTillable(block.getType())) {
+            return true;
+        }
+
+        // Ensure they are holding one of our custom power tools
+        if (!PowerUtils.isPowerTool(handItem)) {
+            return true;
+        }
+
+        // Finally, make sure they have permission to use this tool type
+        return !PowerUtils.checkUsePermission(player, handItemType);
     }
 }

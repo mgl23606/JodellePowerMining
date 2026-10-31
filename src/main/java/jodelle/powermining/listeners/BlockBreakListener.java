@@ -1,13 +1,8 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * This class is responsible for handling the actual mining when using a Hammer/Excavator
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining.listeners;
@@ -27,115 +22,99 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public class BlockBreakListener implements Listener {
-	public final PowerMining plugin;
-	public final boolean useDurabilityPerBlock;
-	public final DebuggingMessages debuggingMessages;
 
-	private Player player;
-	private ItemStack handItem;
+    private final PowerMining plugin;
+    private final boolean useDurabilityPerBlock;
+    private final DebuggingMessages debuggingMessages;
 
-	public BlockBreakListener(@Nonnull PowerMining plugin) {
+    public BlockBreakListener(@NotNull PowerMining plugin) {
+        this.plugin = plugin;
+        plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        this.debuggingMessages = plugin.getDebuggingMessages();
 
-		this.plugin = plugin;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        this.useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
+    }
 
-		debuggingMessages = plugin.getDebuggingMessages();
+    /**
+     * Listens for block breaks to trigger area mining when a player uses a hammer or excavator.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onBlockBreak(@NotNull BlockBreakEvent event) {
+        final Player player = event.getPlayer();
+        final ItemStack handItem = player.getInventory().getItemInMainHand();
 
-		useDurabilityPerBlock = plugin.getConfig().getBoolean("useDurabilityPerBlock");
-	}
+        boolean debugging = false;
+        debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "Broke a block: " + event.getBlock().getType());
 
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onBlockBreak(BlockBreakEvent event) {
-		boolean debugging = true;
+        // Check if we should ignore this event (e.g. player is sneaking, item isn't a power tool)
+        if (shouldCancelAction(player, handItem)) {
+            return;
+        }
 
-		player = event.getPlayer();
-		handItem = player.getInventory().getItemInMainHand();
+        final Block centerBlock = event.getBlock();
+        final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
+        final BlockFace blockFace = pil.getBlockFaceByPlayer(player.getUniqueId());
 
-		debuggingMessages.sendConsoleMessage(debugging, ChatColor.RED + "Broke a block: ");
+        // Loop through surrounding blocks based on the radius and depth config settings
+        for (Block block : PowerUtils.getSurroundingBlocks(blockFace, centerBlock, Reference.RADIUS, Reference.DEEP)) {
+            checkAndBreakBlock(player, handItem, block);
+        }
 
-		if (basicVerifications()){
-			return;
-		}
+        // If durability is configured to drop once per use rather than per block, apply it here
+        if (!useDurabilityPerBlock && player.getGameMode() == GameMode.SURVIVAL) {
+            PowerUtils.reduceDurability(player, handItem);
+        }
+    }
 
-		final Block centerBlock = event.getBlock();
-		final String playerName = player.getName();
+    /**
+     * Validates whether a surrounding block matches the tool type, checks protections, and breaks it.
+     */
+    private void checkAndBreakBlock(@NotNull Player player, @NotNull ItemStack handItem, @NotNull Block block) {
+        Material blockMat = block.getType();
 
-		final PlayerInteractListener pil = plugin.getPlayerInteractHandler().getListener();
-		final BlockFace blockFace = pil.getBlockFaceByPlayerName(playerName);
+        boolean useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat);
+        boolean useExcavator = !useHammer && PowerUtils.validateExcavator(handItem.getType(), blockMat);
 
-		// Breaks surrounding blocks as long as they match the corresponding tool
-		for (Block block: PowerUtils.getSurroundingBlocks(blockFace, centerBlock, Reference.RADIUS, Reference.DEEP)) {
-			checkAndBreakBlock(block);
-		}
+        if (!useHammer && !useExcavator) {
+            return;
+        }
 
-		if (!useDurabilityPerBlock && player.getGameMode().equals(GameMode.SURVIVAL)){
-			PowerUtils.reduceDurability(player, handItem);
-		}
-	}
+        // Ensure the player is allowed to break this block (respects WorldGuard and land claims)
+        if (!PowerUtils.canBreak(plugin, player, block)) {
+            return;
+        }
 
-	/**
-	 * Check and break the block if possible
-	 * @param block The block being broken by the player
-	 */
-	private void checkAndBreakBlock(@Nonnull Block block) {
-		Material blockMat = block.getType();
+        // Break the block naturally and take durability wear per block if enabled
+        if (block.breakNaturally(handItem) && player.getGameMode() == GameMode.SURVIVAL) {
+            if (useDurabilityPerBlock) {
+                PowerUtils.reduceDurability(player, handItem);
+            }
+        }
+    }
 
-		boolean useHammer;
-		boolean useExcavator = false;
+    /**
+     * Checks initial pre-conditions. Returns true if the event should be ignored.
+     */
+    private boolean shouldCancelAction(@NotNull Player player, @NotNull ItemStack handItem) {
+        // Sneaking lets players mine single blocks normally without triggering area effects
+        if (player.isSneaking()) {
+            return true;
+        }
 
-		// This bit is necessary to guarantee we only get one or the other as true, otherwise it might break blocks with the wrong tool
-		if (useHammer = PowerUtils.validateHammer(handItem.getType(), blockMat));
-		else if (useExcavator = PowerUtils.validateExcavator(handItem.getType(), blockMat));
+        Material handItemType = handItem.getType();
+        if (handItemType == Material.AIR) {
+            return true;
+        }
 
-		if (useHammer || useExcavator) {
+        // Ignore standard vanilla items
+        if (!PowerUtils.isPowerTool(handItem)) {
+            return true;
+        }
 
-			// Check if player has permission to break the block
-			if (!PowerUtils.canBreak(plugin, player, block)) {
-				return;
-			}
-
-			//When using breakNaturally the block is broken but the durability of the tool stays the same
-			//so it's necessary to update the damage manually
-			if(block.breakNaturally(handItem) && player.getGameMode().equals(GameMode.SURVIVAL)){
-				if (useDurabilityPerBlock) {
-					PowerUtils.reduceDurability(player, handItem);
-				}
-			}
-
-		}
-	}
-
-	/**
-	 * Perform the basic verifications
-	 * @return True if the PowerTool is ready to use
-	 */
-	private boolean basicVerifications() {
-		// If the player is sneaking, we want the tool to act like a normal pickaxe/shovel
-		if (player.isSneaking()) {
-			return true;
-		}
-
-		Material handItemType = handItem.getType();
-
-		if(handItemType.equals(Material.AIR)) {
-			return true;
-		}
-
-
-		// If this is not a power tool, acts like a normal pickaxe
-		if (!PowerUtils.isPowerTool(handItem)) {
-			return true;
-		}
-
-		// If the player does not have permission to use the tool, acts like a normal pickaxe/shovel
-
-		if (!PowerUtils.checkUsePermission(player, handItemType)) {
-			return true;
-		}
-		return false;
-	}
+        // Verify the player has permission to use this specific tool type
+        return !PowerUtils.checkUsePermission(player, handItemType);
+    }
 }

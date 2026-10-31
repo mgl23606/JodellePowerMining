@@ -1,17 +1,14 @@
 /*
- * This piece of software is part of the PowerMining Bukkit Plugin
- * Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
- *
- * Licensed under the LGPL v3
- * Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
- */
-
-/*
- * Main Plugin class, responsible for initializing the plugin and it's respective systems, also keeps a reference to the handlers
+- This piece of software is part of the PowerMining Bukkit Plugin
+- Author: BloodyShade (dev.bukkit.org/profiles/bloodyshade)
+- Licensed under the LGPL v3
+- Further information please refer to the included lgpl-3.0.txt or the gnu website (http://www.gnu.org/licenses/lgpl)
  */
 
 package jodelle.powermining;
 
+import com.google.gson.*;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import jodelle.powermining.handlers.*;
 import jodelle.powermining.lib.DebuggingMessages;
@@ -22,13 +19,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 public final class PowerMining extends JavaPlugin {
-    public JavaPlugin plugin;
+
+    // Event handlers for player interactions, block breaks, crafting, and GUIs
     private PlayerInteractHandler handlerPlayerInteract;
     private BlockBreakHandler handlerBlockBreak;
     private CraftItemHandler handlerCraftItem;
@@ -38,25 +35,41 @@ public final class PowerMining extends JavaPlugin {
     private CommandHandler commandHandler;
     private DebuggingMessages debuggingMessages;
 
-    private WorldGuardPlugin worldguard;
-
+    private WorldGuardPlugin worldguard; // Optional hook for region protection
     private static PowerMining instance;
+
+    // JSON configuration holders loaded from the plugin folder
+    private JsonObject recipesJson;
+    private JsonObject configJson;
+    private JsonObject mineableJson;
+    private JsonObject diggableJson;
+
+    private final Gson gson = new Gson();
 
     @Override
     public void onEnable() {
-
         instance = this;
-
         debuggingMessages = new DebuggingMessages();
 
-        this.saveDefaultConfig();
+        // Ensure all required JSON files are present in the data folder
+        generateDefaultFiles();
+
+        // Load JSON configs and abort startup if anything is missing/invalid
+        if (!loadJsonFiles()) {
+            getLogger().severe("Failed to load JSON configuration. Disabling plugin.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+
+        // Process configs, custom tool recipes, and dynamic permissions
         processConfig();
         processCraftingRecipes();
         processPermissions();
-        getLogger().info("Finished processing config file.");
+
+        // Check and hook into optional plugins like WorldGuard
         loadDependencies();
 
-
+        // Initialize our event handlers and command processor
         handlerPlayerInteract = new PlayerInteractHandler();
         handlerBlockBreak = new BlockBreakHandler();
         handlerCraftItem = new CraftItemHandler();
@@ -65,6 +78,7 @@ public final class PowerMining extends JavaPlugin {
         handlerClickPlayer = new ClickPlayerHandler();
         commandHandler = new CommandHandler();
 
+        // Pass the plugin instance to each handler
         handlerPlayerInteract.Init(this);
         handlerBlockBreak.Init(this);
         handlerCraftItem.Init(this);
@@ -73,243 +87,265 @@ public final class PowerMining extends JavaPlugin {
         handlerClickPlayer.Init(this);
         commandHandler.Init(this);
 
-
-        getLogger().info("JodellePowerMining plugin was enabled.");
-
-
-    }
-
-    /**
-     * Loads the dependencies that the plugin might require to properly function
-     */
-    private void loadDependencies() {
-        boolean debugging = true;
-
-        debuggingMessages.sendConsoleMessage(debugging, ChatColor.YELLOW + "Loading dependencies...");
-
-        for (String pluginName : Reference.dependencies) {
-            Plugin plugin = getServer().getPluginManager().getPlugin(pluginName);
-            if (plugin instanceof WorldGuardPlugin){
-                debuggingMessages.sendConsoleMessage(debugging, ChatColor.YELLOW + pluginName + " Found!");
-                worldguard = (WorldGuardPlugin) plugin;
-            }
-        }
-    }
-
-    /**
-     * Fills the permissions HashMaps with the available permissions.
-     */
-    private void processPermissions() {
-
-        debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "[JodellePowerMining] - Setting up Permissions");
-        //Hashmap to store the permission
-        // WOODEN_PICKAXE -> powermining.craft.hammer.wooden
-        generatePermission(Reference.HAMMERS, Reference.PICKAXES);
-        generatePermission(Reference.EXCAVATORS, Reference.SHOVELS);
-        generatePermission(Reference.PLOWS, Reference.HOES);
-
-        debuggingMessages.sendConsoleMessage(String.valueOf(Reference.CRAFT_PERMISSIONS.size()));
-
-        for (Map.Entry<Material, String> materialStringEntry : Reference.USE_PERMISSIONS.entrySet()) {
-            debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "Material: " + materialStringEntry.getKey().toString() + " - Permission " + materialStringEntry.getValue());
-        }
-
-    }
-
-    /**
-     * Generates the permissions in form of a String
-     * @param powerToolNames Array containing the names of all the PowerTools
-     * @param items List of the items
-     */
-    protected void generatePermission(@Nonnull final ArrayList<String> powerToolNames, @Nonnull final ArrayList<Material> items) {
-
-        int i = 0;
-        for (String tool : powerToolNames) {
-            String craftPermission = "powermining.craft." + tool.substring(tool.indexOf("_") + 1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
-            String usePermission = "powermining.use." + tool.substring(tool.indexOf("_") + 1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
-            String enchantPermission = "powermining.enchant." + tool.substring(tool.indexOf("_") + 1).toLowerCase() + "." + tool.substring(0, tool.indexOf("_")).toLowerCase();
-
-            Reference.CRAFT_PERMISSIONS.put(items.get(i), craftPermission);
-            Reference.USE_PERMISSIONS.put(items.get(i), usePermission);
-            Reference.ENCHANT_PERMISSIONS.put(items.get(i), enchantPermission);
-             i++;
-        }
-
-    }
-
-    /**
-     * Reads the config file, processes each recipe and stores it on its respective HashMap
-     */
-    private void processCraftingRecipes() {
-        boolean showDebugMessage = false;
-        //This hashmap is used to store all the information about the recipe
-        //The key is the name of the item, ex DIAMOND_HAMMER
-        //The value is an array of materials where each position refers to the crafting table matrix
-       // HashMap<String, ItemStack[]> craftingRecipes = new HashMap<>();
-        // We start by getting the section recipes from the config file
-        // Each element iterated is the name of the powertool, ex: POWER_HAMMER
-        for (Object x : (ArrayList<?>) getConfig().getList("Recipes")) {
-            // This HashMap contains all the names of the blocks of the recipe
-            // as well as their quantities. Ex: DIAMOND*1
-            LinkedHashMap<String, ArrayList> l = (LinkedHashMap<String, ArrayList>) x;
-            for (String toolName : l.keySet()) {
-                debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.BLUE + "Processing " + toolName + " recipe");
-                // This array is used to store all 9 itemstacks used in the recipe
-                // When an element is null signifies an empty slot in the crafting table
-                ItemStack[] craftingRecipe = new ItemStack[9];
-                int i = 0;
-                for (String material : (ArrayList<String>) l.get(toolName)) {
-                    //console.sendMessage(ChatColor.AQUA + hammerType);
-                    // EMPTY means that the slot is empty, obviously
-                    if (material.equals("EMPTY")) {
-                        craftingRecipe[i] = null;
-                        i++;
-                        continue;
-                    }
-                    // The material and the quantity are separated by '*'
-                    int separator = material.indexOf('*');
-                    Material materialName = Material.getMaterial(material.substring(0, separator));
-
-                    int quantity = Integer.parseInt(material.substring(separator + 1, material.length()));
-                    if (quantity > 64) {
-
-                    }
-                    ItemStack itemStack = new ItemStack(materialName, quantity);
-                    if (quantity > itemStack.getMaxStackSize()){
-                        throw new NumberFormatException("A full stack of " + material + " can only contain " + itemStack.getMaxStackSize());
-                    }
-                    craftingRecipe[i] = itemStack;
-                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Material: " + material);
-                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "Max stack size: " + String.valueOf(craftingRecipe[i].getMaxStackSize()));
-                    debuggingMessages.sendConsoleMessage(showDebugMessage,ChatColor.GOLD + "ConfigFile stack size: " + quantity);
-                    i++;
-                }
-                if (Reference.HAMMERS.contains(toolName)) {
-                    Reference.HAMMER_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-                    continue;
-                }
-                if (Reference.EXCAVATORS.contains(toolName)) {
-                    Reference.EXCAVATOR_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-                    continue;
-                }
-                if (Reference.PLOWS.contains(toolName)) {
-                    Reference.PLOW_CRAFTING_RECIPES.put(toolName, craftingRecipe);
-                    debuggingMessages.sendConsoleMessage(showDebugMessage, ChatColor.RED + toolName + " recipe processed successfully");
-                    continue;
-                }
-            }
-
-        }
-
-
-        //console.sendMessage(ChatColor.AQUA + Integer.toString(Reference.EXCAVATOR_CRAFTING_RECIPES.size()));
-
-        //Add the craftingRecipes hashmap to the Reference, so it can be accessed globally
-        //Reference.CRAFTING_RECIPES = craftingRecipes;
-
+        getLogger().info("PowerMining enabled successfully for Minecraft 26.3!");
     }
 
     @Override
     public void onDisable() {
-        getLogger().info("PowerMining plugin was disabled.");
+        getLogger().info("PowerMining was disabled.");
     }
 
-    /**
-     * Reads the config file and processes it
-     */
-    public void processConfig() {
-        try {
-            for (Object x : (ArrayList<?>) getConfig().getList("Minable")) {
-                LinkedHashMap<String, ArrayList> l = (LinkedHashMap<String, ArrayList>) x;
+    // =========================================================
+    // FILE GENERATION
+    // =========================================================
 
-                for (String blockType : l.keySet()) {
-                    if (blockType == null || blockType.isEmpty())
-                        continue;
+    // Checks if JSON files exist locally, otherwise pulls defaults out of the JAR
+    private void generateDefaultFiles() {
+        createFileIfMissing("recipes.json");
+        createFileIfMissing("config.json");
+        createFileIfMissing("mineable.json");
+        createFileIfMissing("diggable.json");
+    }
 
-                    if (Material.getMaterial(blockType) == null || Reference.MINABLE.containsKey(Material.getMaterial(blockType)))
-                        continue;
+    // Helper method to copy default config resources to the plugin data folder
+    private void createFileIfMissing(String fileName) {
+        File file = new File(getDataFolder(), fileName);
+        if (file.exists()) return;
 
-                    Reference.MINABLE.put(Material.getMaterial(blockType), new ArrayList<Material>());
-                    ArrayList<Material> temp = Reference.MINABLE.get(Material.getMaterial(blockType));
-
-                    for (String hammerType : (ArrayList<String>) l.get(blockType)) {
-                        if (hammerType == null || hammerType.isEmpty())
-                            continue;
-
-                        if (hammerType.equals("any"))
-                            temp = null;
-
-                        if (hammerType != null && (Material.getMaterial(hammerType) == null ||
-                                (temp != null && temp.contains(Material.getMaterial(hammerType)))))
-                            continue;
-
-                        if (temp != null)
-                            temp.add(Material.getMaterial(hammerType));
+        getDataFolder().mkdirs();
+        try (InputStream in = getResource(fileName)) {
+            if (in != null) {
+                try (OutputStream out = new FileOutputStream(file)) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, length);
                     }
+                }
+                getLogger().info("Created default " + fileName);
+            } else {
+                file.createNewFile();
+                getLogger().warning(fileName + " not found in JAR; created empty file.");
+            }
+        } catch (IOException e) {
+            getLogger().severe("Error creating " + fileName + ": " + e.getMessage());
+        }
+    }
 
-                    Reference.MINABLE.put(Material.getMaterial(blockType), temp);
+    // =========================================================
+    // JSON LOADING
+    // =========================================================
+
+    // Loads all four JSON files into memory and checks for required root keys
+    private boolean loadJsonFiles() {
+        recipesJson = loadJson("recipes.json");
+        configJson = loadJson("config.json");
+        mineableJson = loadJson("mineable.json");
+        diggableJson = loadJson("diggable.json");
+
+        if (recipesJson == null || configJson == null || mineableJson == null || diggableJson == null)
+            return false;
+
+        return recipesJson.has("Recipes")
+                && configJson.has("Radius")
+                && mineableJson.has("Minable")
+                && diggableJson.has("Diggable");
+    }
+
+    // Reads a specific JSON file from disk and parses it safely
+    private JsonObject loadJson(String fileName) {
+        File file = new File(getDataFolder(), fileName);
+        if (!file.exists()) {
+            getLogger().warning(fileName + " not found, creating empty object.");
+            return new JsonObject();
+        }
+
+        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+            JsonElement element = JsonParser.parseReader(reader);
+            if (element.isJsonObject()) {
+                getLogger().info("Loaded " + fileName);
+                return element.getAsJsonObject();
+            } else {
+                getLogger().severe(fileName + " is not a valid JSON object!");
+                return null;
+            }
+        } catch (Exception e) {
+            getLogger().severe("Failed to load " + fileName + ": " + e.getMessage());
+            return null;
+        }
+    }
+
+    // =========================================================
+    // CONFIG PARSING
+    // =========================================================
+
+    // Parses mineable blocks, valid tools, diggable materials, and break radius/depth settings
+    private void processConfig() {
+        try {
+            JsonObject minableSection = mineableJson.getAsJsonObject("Minable");
+            for (String block : minableSection.keySet()) {
+                Material blockMat = Material.matchMaterial(block, false);
+                if (blockMat == null) continue;
+
+                JsonArray tools = minableSection.getAsJsonArray(block);
+                List<String> toolList = new ArrayList<>();
+                for (JsonElement e : tools) toolList.add(e.getAsString());
+
+                // If 'any' is listed, any tool can mine it; otherwise filter allowed tool materials
+                if (toolList.contains("any")) {
+                    Reference.MINABLE.put(blockMat, null);
+                } else {
+                    ArrayList<Material> list = new ArrayList<>();
+                    for (String tool : toolList) {
+                        Material toolMat = Material.matchMaterial(tool, false);
+                        if (toolMat != null) list.add(toolMat);
+                    }
+                    Reference.MINABLE.put(blockMat, list);
                 }
             }
-        } catch (NullPointerException e) {
-            getLogger().info("NPE when trying to read the Minable list from the config file, check if it's set correctly!");
+        } catch (Exception e) {
+            getLogger().severe("Error processing mineable.json: " + e.getMessage());
         }
 
         try {
-            for (String blockType : getConfig().getStringList("Diggable")) {
-                if (blockType == null || blockType.isEmpty())
-                    continue;
-
-                if (Material.getMaterial(blockType) != null && !Reference.DIGGABLE.contains(Material.getMaterial(blockType)))
-                    Reference.DIGGABLE.add(Material.getMaterial(blockType));
+            JsonArray diggableArray = diggableJson.getAsJsonArray("Diggable");
+            for (JsonElement element : diggableArray) {
+                String block = element.getAsString();
+                Material mat = Material.matchMaterial(block, false);
+                if (mat != null && !Reference.DIGGABLE.contains(mat))
+                    Reference.DIGGABLE.add(mat);
             }
-        } catch (NullPointerException e) {
-            getLogger().info("NPE when trying to read the Digable list from the config file, check if it's set correctly!");
+        } catch (Exception e) {
+            getLogger().severe("Error processing diggable.json: " + e.getMessage());
         }
 
-        //Register for tools
+        // Pull mining boundaries from config, falling back to defaults if missing
+        Reference.RADIUS = configJson.has("Radius") ? configJson.get("Radius").getAsInt() : 1;
+        Reference.DEEP = configJson.has("Deep") ? configJson.get("Deep").getAsInt() : 0;
+
+        getLogger().info("Loaded config: Radius=" + Reference.RADIUS + ", Deep=" + Reference.DEEP);
+    }
+
+    // Reads custom tool grid recipes from recipes.json and maps them into memory arrays
+    private void processCraftingRecipes() {
+        JsonObject recipes = recipesJson.getAsJsonObject("Recipes");
+        for (String tool : recipes.keySet()) {
+            JsonArray mats = recipes.getAsJsonArray(tool);
+            if (mats.size() != 9) {
+                getLogger().warning("Invalid recipe for " + tool);
+                continue;
+            }
+
+            ItemStack[] recipe = new ItemStack[9];
+            boolean failed = false;
+
+            for (int i = 0; i < 9; i++) {
+                String entry = mats.get(i).getAsString();
+                if (entry.equalsIgnoreCase("EMPTY")) continue;
+
+                int sep = entry.indexOf('*');
+                if (sep == -1) {
+                    getLogger().severe("Invalid recipe entry '" + entry + "' in " + tool);
+                    failed = true;
+                    break;
+                }
+
+                String matName = entry.substring(0, sep);
+                Material mat = Material.matchMaterial(matName, false);
+                if (mat == null) {
+                    getLogger().severe("Unknown material " + matName + " in " + tool);
+                    failed = true;
+                    break;
+                }
+
+                int qty = Integer.parseInt(entry.substring(sep + 1));
+                recipe[i] = new ItemStack(mat, Math.min(qty, mat.getMaxStackSize()));
+            }
+
+            if (failed) continue;
+
+            // Sort recipe into its appropriate tool category
+            if (Reference.HAMMERS.contains(tool))
+                Reference.HAMMER_CRAFTING_RECIPES.put(tool, recipe);
+            else if (Reference.EXCAVATORS.contains(tool))
+                Reference.EXCAVATOR_CRAFTING_RECIPES.put(tool, recipe);
+            else if (Reference.PLOWS.contains(tool))
+                Reference.PLOW_CRAFTING_RECIPES.put(tool, recipe);
+        }
+    }
+
+    // =========================================================
+    // DEPENDENCIES & PERMISSIONS
+    // =========================================================
+
+    // Hooks into third-party protection plugins like WorldGuard if available
+    private void loadDependencies() {
+        debuggingMessages.sendConsoleMessage(true, ChatColor.YELLOW + "Checking dependencies...");
+
         try {
-            Reference.RADIUS = getConfig().getInt("Radius");
-            Reference.DEEP = getConfig().getInt("Deep");
-        } catch (NullPointerException e) {
-            getLogger().info("HOE, check if hoes radius is currectly added.");
+            Plugin wg = getServer().getPluginManager().getPlugin("WorldGuard");
+            if (wg != null && wg.isEnabled() && wg instanceof WorldGuardPlugin) {
+                worldguard = (WorldGuardPlugin) wg;
+                debuggingMessages.sendConsoleMessage(true, ChatColor.GREEN + "WorldGuard plugin found and hooked.");
+            } else if (isWorldGuardAvailable()) {
+                debuggingMessages.sendConsoleMessage(true, ChatColor.GREEN + "WorldGuard API detected via WorldGuard.getInstance().");
+            } else {
+                worldguard = null;
+                getLogger().warning("WorldGuard not found; continuing without region protection.");
+            }
+        } catch (Throwable t) {
+            worldguard = null;
+            getLogger().warning("WorldGuard not installed or inaccessible; region features disabled.");
         }
     }
 
-    public PlayerInteractHandler getPlayerInteractHandler() {
-        return handlerPlayerInteract;
+    // Safely tests if WorldGuard API is loaded on the server
+    private boolean isWorldGuardAvailable() {
+        try {
+            return WorldGuard.getInstance() != null;
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
-    public BlockBreakHandler getBlockBreakHandler() {
-        return handlerBlockBreak;
+    // Automatically maps crafting, usage, and enchantment permissions for custom power tools
+    private void processPermissions() {
+        debuggingMessages.sendConsoleMessage(ChatColor.GOLD + "[PowerMining] - Setting up Permissions");
+        generatePermission(Reference.HAMMERS, Reference.PICKAXES);
+        generatePermission(Reference.EXCAVATORS, Reference.SHOVELS);
+        generatePermission(Reference.PLOWS, Reference.HOES);
     }
 
-    public ClickPlayerHandler getHandlerClickPlayer() {
-        return handlerClickPlayer;
+    protected void generatePermission(List<String> powerToolNames, List<Material> materials) {
+        for (int i = 0; i < powerToolNames.size() && i < materials.size(); i++) {
+            String tool = powerToolNames.get(i);
+            String type = tool.substring(tool.indexOf("_") + 1).toLowerCase();
+            String material = tool.substring(0, tool.indexOf("_")).toLowerCase();
+
+            String craft = "powermining.craft." + type + "." + material;
+            String use = "powermining.use." + type + "." + material;
+            String enchant = "powermining.enchant." + type + "." + material;
+
+            Material item = materials.get(i);
+            Reference.CRAFT_PERMISSIONS.put(item, craft);
+            Reference.USE_PERMISSIONS.put(item, use);
+            Reference.ENCHANT_PERMISSIONS.put(item, enchant);
+        }
     }
 
-    public CraftItemHandler getCraftItemHandler() {
-        return handlerCraftItem;
-    }
+    // =========================================================
+    // GETTERS
+    // =========================================================
+    public PlayerInteractHandler getPlayerInteractHandler() { return handlerPlayerInteract; }
+    public BlockBreakHandler getBlockBreakHandler() { return handlerBlockBreak; }
+    public ClickPlayerHandler getHandlerClickPlayer() { return handlerClickPlayer; }
+    public CraftItemHandler getCraftItemHandler() { return handlerCraftItem; }
+    public EnchantItemHandler getEnchantItemHandler() { return handlerEnchantItem; }
+    public InventoryClickHandler getInventoryClickHandler() { return handlerInventoryClick; }
 
-    public EnchantItemHandler getEnchantItemHandler() {
-        return handlerEnchantItem;
-    }
+    public WorldGuardPlugin getWorldGuard() { return worldguard; }
+    public boolean hasWorldGuard() { return worldguard != null && worldguard.isEnabled(); }
 
-    public InventoryClickHandler getInventoryClickHandler() {
-        return handlerInventoryClick;
-    }
-
-    public WorldGuardPlugin getWorldGuard() {
-        return (WorldGuardPlugin) worldguard;
-    }
-
-    public DebuggingMessages getDebuggingMessages() {
-        return debuggingMessages;
-    }
-
-    public static PowerMining getInstance() {
-        return instance;
-    }
+    public DebuggingMessages getDebuggingMessages() { return debuggingMessages; }
+    public static PowerMining getInstance() { return instance; }
 }
