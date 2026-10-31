@@ -1,85 +1,58 @@
-# ⚡ Jodelle Power Mining
+# Jodelle Power Mining
 
-[![Spigot](https://img.shields.io/badge/Spigot-1.21%2B-orange?style=flat-square)](https://www.spigotmc.org/)
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg?style=flat-square)](https://www.gnu.org/licenses/lgpl-3.0.html)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)]()
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-success?style=flat-square)]()
+Spigot 1.26+ | License: LGPL v3
 
-A powerful, modernized **PowerTools plugin** for **Spigot** and **Paper** servers — rebuilt for Minecraft **1.21+**.  
-Supercharge your mining, digging, and farming experience with configurable **Hammers**, **Excavators**, and **Plows**.
+A modernized PowerTools plugin for Spigot and Paper servers updated for Minecraft 26.3. Adds configurable Hammers, Excavators, and Plows for area mining, digging, and farming.
 
----
+## Overview
 
-## 🪓 Overview
+Jodelle Power Mining is a updated version of the original PowerMining plugin written by bloodyshade back in 2013.
 
-**Jodelle Power Mining** is a revived and enhanced version of the classic *PowerMining* plugin by [bloodyshade (2013)](https://dev.bukkit.org/profiles/bloodyshade).  
-The project was completely rewritten and modernized to bring new life to this powerful tool system — now with JSON configuration, smoother performance, and full WorldGuard compatibility.
+The code was recently refactored to clean up the listeners, fix concurrency bugs, support modern Paper/Spigot APIs, and add native support for new 26.3 features like copper tools.
 
-💥 **Mine faster.**  
-💡 **Dig smarter.**  
-⚙️ **Customize everything.**
+Features:
+* Hammers, Excavators, and Plows with 3x3 area mining/digging/tilling
+* Adjustable recipes via JSON
+* Configurable radius and depth
+* Permission nodes for crafting, using, and enchanting
+* WorldGuard protection support (optional)
+* Enchantments carry over from ingredients when crafting tools
+* JSON configs instead of standard YAML
+* Updated for Minecraft 26.3
 
-If you enjoy the plugin, consider **starring the repo ⭐** or donating to support continued updates!
+## Installation
 
----
+1. Grab the jar from the Releases page.
+2. Put it into your server's plugins folder.
+3. Restart the server.
+4. Config files auto generate inside /plugins/JodellePowerMining/
 
-## ✨ Features
+## Configuration
 
-✔ **Power Tools** – Hammers, Excavators, and Plows with configurable 3×3 area mining & digging.  
-✔ **Customizable Recipes** – Fully adjustable crafting recipes using simple JSON files.  
-✔ **Configurable Radius & Depth** – Control how large each tool’s effect area is.  
-✔ **Permission System** – Fine-grained permissions for crafting, using, and enchanting PowerTools.  
-✔ **WorldGuard Support** – Optional integration; region protection is automatically respected.  
-✔ **Enchantments Transfer** – Enchanted ingredients pass enchantments to crafted PowerTools.  
-✔ **JSON Config System** – No YAML required! Human-readable and easy to modify.  
-✔ **Minecraft 1.21+ Compatible** – Built and tested for the latest Spigot & Paper APIs.
+Files are created inside `/plugins/JodellePowerMining/`
 
----
+* `config.json`: Main settings (radius, depth, durability handling)
+* `recipes.json`: Defines custom crafting patterns
+* `mineable.json`: Defines blocks mineable by hammers
+* `diggable.json`: Defines blocks diggable by excavators
 
-## 📥 Installation
-
-1. Download the latest `.jar` from the [Releases](https://github.com/mgl23606/JodellePowerMining/releases) page.  
-2. Drop it into your server’s `/plugins` folder.  
-3. Restart the server.  
-4. Configuration files will be automatically generated in `/plugins/JodellePowerMining/`.
-
----
-
-## ⚙️ Configuration
-
-All configuration files are located in:
-
-```
-/plugins/JodellePowerMining/
-```
-
-### 📁 Files
-
-| File | Description |
-|------|--------------|
-| `config.json` | General settings such as mining radius and depth |
-| `recipes.json` | Defines PowerTool crafting recipes |
-| `mineable.json` | Lists which blocks can be mined by PowerTools |
-| `diggable.json` | Lists which blocks can be dug by Excavators |
-
----
-
-### 🧩 Example – `config.json`
+### Example config.json
 
 ```json
 {
   "Radius": 1,
-  "Deep": 0
+  "Deep": 0,
+  "useDurabilityPerBlock": false
 }
 ```
 
-### 🧱 Example – `recipes.json`
+### Example recipes.json
 
 ```json
 {
   "Recipes": {
-    "IRON_HAMMER": [
-      "IRON_BLOCK*1", "IRON_BLOCK*1", "IRON_BLOCK*1",
+    "COPPER_HAMMER": [
+      "COPPER_BLOCK*1", "COPPER_BLOCK*1", "COPPER_BLOCK*1",
       "EMPTY", "STICK*1", "EMPTY",
       "EMPTY", "STICK*1", "EMPTY"
     ]
@@ -87,27 +60,22 @@ All configuration files are located in:
 }
 ```
 
-Each slot represents a 3×3 crafting grid (left-to-right, top-to-bottom).  
-Use `"EMPTY"` for blank slots. Quantity is specified using `MATERIAL*AMOUNT`.
+Each entry represents a 3x3 grid from top left to bottom right. Use `EMPTY` for blank slots. Format is `MATERIAL*AMOUNT`.
 
----
-
-### 🪨 Example – `mineable.json`
+### Example mineable.json
 
 ```json
 {
   "Minable": {
     "STONE": ["any"],
-    "IRON_ORE": ["IRON_HAMMER", "DIAMOND_HAMMER"]
+    "IRON_ORE": ["IRON_HAMMER", "COPPER_HAMMER", "DIAMOND_HAMMER"]
   }
 }
 ```
 
-`"any"` means all hammers can mine that block.
+Setting `any` allows all hammer tiers to mine that block.
 
----
-
-### 🪣 Example – `diggable.json`
+### Example diggable.json
 
 ```json
 {
@@ -119,93 +87,42 @@ Use `"EMPTY"` for blank slots. Quantity is specified using `MATERIAL*AMOUNT`.
 }
 ```
 
-### 🧾 PowerTool Recipes
+### Recipes layout
 
-Here's a visual guide to the crafting recipes for PowerTools:
+Visual recipe reference for crafting:
 
 ![PowerTool Recipes](src/main/resources/Recipes.png)
 
----
+## Commands
 
-## 🔧 Commands
+* `/jpm version`: Shows active plugin version
+* `/jpm give <toolname>`: Spawns a tool into inventory (e.g. `/jpm give DIAMOND_HAMMER`)
 
-| Command | Description |
-|----------|-------------|
-| `/jpm version` | Displays the current plugin version. |
-| `/jpm give <player> <tool>` | Gives a player a PowerTool (e.g., `IRON_HAMMER`). |
+Note: Give command targets the player running the command.
 
-Example:
-```
-/jpm give Notch DIAMOND_EXCAVATOR
-```
+## Permissions
 
----
+* `powermining.use.<type>.<material>`: Permission to use tool (e.g. `powermining.use.hammer.copper`)
+* `powermining.craft.<type>.<material>`: Permission to craft tool
+* `powermining.enchant.<type>.<material>`: Permission to enchant tool
+* `powermining.give`: Access to `/jpm give`
 
-## 🔒 Permissions
+Examples:
+* `powermining.craft.hammer.diamond`
+* `powermining.use.excavator.netherite`
+* `powermining.enchant.plow.copper`
 
-| Permission | Description |
-|-------------|--------------|
-| `powermining.use.<type>.<material>` | Allows using a PowerTool (e.g., `powermining.use.hammer.iron`) |
-| `powermining.craft.<type>.<material>` | Allows crafting a PowerTool |
-| `powermining.enchant.<type>.<material>` | Allows enchanting a PowerTool |
-| `jpm.give` | Allows using `/jpm give` |
+## WorldGuard Integration
 
-**Examples:**
-```
-powermining.craft.hammer.diamond
-powermining.use.excavator.netherite
-powermining.enchant.plow.iron
-```
+If WorldGuard is present, the plugin checks build/break flags before breaking surrounding blocks. If WorldGuard is not installed, it skips the check automatically.
 
----
+## Notes & Changelog
 
-## 🌍 WorldGuard Integration
+2026 Updates:
+* Updated listener implementations for Spigot/Paper 26.3
+* Fixed thread safety issue in BlockBreakListener (removed stored instance variables)
+* Switched to UUIDs for player tracking in listeners
+* Added support for copper tool variants (Copper Hammer, Excavator, Plow)
+* Replaced deprecated enchantment API calls with modern Registry lookups
 
-If **WorldGuard** is installed, PowerMining automatically checks region permissions before breaking blocks.  
-If WorldGuard is **not installed**, the plugin continues seamlessly — no errors, no dependency requirements.
-
----
-
-## 🧠 Technical Notes
-
-- Built for **Spigot/Paper 1.21+** using modern API conventions.  
-- Configuration files are **UTF-8 encoded JSON** for better cross-platform compatibility.  
-- Plugin gracefully handles missing configs or invalid entries with detailed console logging.  
-- Uses **Gson** for configuration and optional integration with **WorldGuard** (v7+).  
-
----
-
-## 🆕 Changelog
-
-### 📅 November 2025
-- 🔄 **Complete Rewrite:** Plugin restructured with modern Java and Spigot 1.21 API.  
-- 📦 **New JSON Config System:** Replaces legacy YAML with lightweight JSON.  
-- ⚙️ **Optional WorldGuard Support:** Works with or without WG installed.  
-- 🪓 **Improved Recipe Parsing:** Handles malformed entries gracefully.  
-- 🧰 **Enhanced Permissions:** Automatic generation for all tool/material types.  
-- 🧩 **Better Error Logging:** Clear console feedback for missing or invalid configs.  
-
-### 📅 June 2021
-- 🛠 Fixed Plow permissions and usage issues.  
-- 🔊 Added tool break sounds.  
-- 💎 Tools now inherit enchantments when crafted.  
-- ✨ Added `/jpm give` and `/jpm version` commands.  
-
----
-
-## 📜 License
-
-This project is licensed under the **GNU LGPL v3 License**, in accordance with the original plugin by *bloodyshade*.  
-See [`LICENSE`](LICENSE) for details.
-
----
-
-## 💬 Support & Contributions
-
-🐛 **Found a bug?** Open an [issue](https://github.com/mgl23606/JodellePowerMining/issues).  
-🔧 **Want to contribute?** Fork the repo, make your changes, and submit a pull request.  
-💬 **Need help?** Join our discussions or community Discord (if available).  
-
----
-
-> ⚡ **Jodelle Power Mining** — Supercharge your mining experience with customizable PowerTools for Spigot & Paper servers!
+Original license remains LGPL v3 under bloodyshade's original terms.
