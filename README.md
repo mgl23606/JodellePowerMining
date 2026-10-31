@@ -119,6 +119,12 @@ Use `"EMPTY"` for blank slots. Quantity is specified using `MATERIAL*AMOUNT`.
 }
 ```
 
+### 🧾 PowerTool Recipes
+
+Here's a visual guide to the crafting recipes for PowerTools:
+
+![PowerTool Recipes](src/main/resources/Recipes.png)
+
 ---
 
 ## 🔧 Commands
